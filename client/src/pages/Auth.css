@@ -1,0 +1,68 @@
+.auth {
+  max-width: 420px;
+  margin: var(--space-6) auto;
+  padding: var(--space-5);
+}
+
+.auth h2 {
+  font-size: 2rem;
+  margin-bottom: var(--space-1);
+}
+
+.auth > p {
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-5);
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-ink-soft);
+}
+
+.field input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: #fff;
+  transition: border-color var(--transition);
+}
+
+.field input:focus {
+  border-color: var(--color-accent);
+  outline: none;
+}
+
+.auth-error {
+  color: #C0392B;
+  font-size: 0.875rem;
+}
+
+.auth-switch {
+  margin-top: var(--space-4);
+  font-size: 0.9375rem;
+  color: var(--color-ink-soft);
+}
+
+.auth-switch a {
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.btn--block {
+  width: 100%;
+  padding: var(--space-3);
+}

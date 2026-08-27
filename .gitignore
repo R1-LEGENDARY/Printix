@@ -1,0 +1,14 @@
+node_modules/
+client/dist/
+server/uploads/*
+server/uploads/.gitkeep
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+Thumbs.db
+
+# Prisma local database files
+*.db
+*.db-journal

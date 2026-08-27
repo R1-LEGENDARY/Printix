@@ -1,0 +1,140 @@
+.cart {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
+
+.cart h2 {
+  font-size: 2rem;
+  margin-bottom: var(--space-4);
+}
+
+.cart-status {
+  padding: var(--space-6) var(--space-5);
+  color: var(--color-ink-soft);
+}
+
+.cart--empty {
+  text-align: center;
+  padding-top: var(--space-6);
+}
+
+.cart--empty p {
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-4);
+}
+
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 80px 1fr auto auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #fff;
+}
+
+.cart-item__image {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--color-accent-soft);
+}
+
+.cart-item__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cart-item__info h3 {
+  font-size: 1rem;
+}
+
+.cart-item__variant {
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+  margin: var(--space-1) 0;
+}
+
+.cart-item__price {
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+}
+
+.cart-item__qty {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.cart-item__qty button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.cart-item__qty button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cart-item__total {
+  font-weight: 600;
+}
+
+.cart-item__remove {
+  background: none;
+  border: none;
+  color: var(--color-ink-soft);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.cart-item__remove:hover {
+  color: #C0392B;
+}
+
+.cart-summary {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.cart-summary__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: var(--space-1);
+}
+
+.cart-summary__note {
+  color: var(--color-ink-soft);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-3);
+}
+
+@media (max-width: 640px) {
+  .cart-item {
+    grid-template-columns: 60px 1fr;
+    grid-template-areas:
+      "image info"
+      "image qty"
+      "image total"
+      "image remove";
+  }
+}
