@@ -1,0 +1,79 @@
+.od h1 {
+  margin-bottom: var(--space-1);
+}
+
+.od > .status-pill {
+  margin-bottom: var(--space-4);
+  display: inline-block;
+}
+
+.od-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.od-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  background: #fff;
+  margin-bottom: var(--space-4);
+}
+
+.od-card h2 {
+  font-size: 1rem;
+  margin-bottom: var(--space-2);
+}
+
+.od-card p {
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+  margin-bottom: 4px;
+}
+
+.od-total {
+  text-align: right;
+  font-weight: 700;
+  margin-top: var(--space-2);
+}
+
+.od-status-form {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.od-status-form select,
+.od-status-form input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.od-history {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.od-history li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.od-history__date {
+  color: var(--color-ink-soft);
+  font-size: 0.8125rem;
+}
+
+.od-history__note {
+  color: var(--color-ink-soft);
+  font-style: italic;
+}

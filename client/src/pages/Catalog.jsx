@@ -38,7 +38,14 @@ function Catalog() {
             >
               <div className="catalog-card__image">
                 {product.primaryImage && (
-                  <img src={product.primaryImage} alt={product.name} />
+                  <img
+                    src={
+                      product.primaryImage.startsWith("http")
+                        ? product.primaryImage
+                        : `http://localhost:5000${product.primaryImage}`
+                    }
+                    alt={product.name}
+                  />
                 )}
               </div>
               <div className="catalog-card__body">

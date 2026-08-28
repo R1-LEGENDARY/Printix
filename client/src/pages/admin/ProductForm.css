@@ -1,0 +1,154 @@
+.pf h1 {
+  margin-bottom: var(--space-4);
+}
+
+.pf-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 500px;
+  margin-bottom: var(--space-6);
+}
+
+.pf-form label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+}
+
+.pf-form input,
+.pf-form textarea {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  color: var(--color-ink);
+}
+
+.pf-variants h2,
+.pf-images h2 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-3);
+}
+
+.pf-hint {
+  font-size: 0.8125rem;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-3);
+}
+
+.pf-stock-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pf-stock-control button {
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.pf-stock-control button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pf-stock-restock {
+  width: auto !important;
+  padding: 0 var(--space-2);
+  font-size: 0.75rem !important;
+  color: var(--color-accent);
+}
+
+.pf-images {
+  margin-bottom: var(--space-6);
+}
+
+.pf-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.pf-image-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fff;
+}
+
+.pf-image-item--primary {
+  border-color: var(--color-accent);
+}
+
+.pf-image-item img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+}
+
+.pf-image-item__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  font-size: 0.75rem;
+}
+
+.pf-image-item__actions button {
+  background: none;
+  border: none;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0;
+}
+
+.pf-image-item__actions button:hover {
+  color: var(--color-accent);
+}
+
+.pf-image-item__badge {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.pf-upload-btn {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+.pf-upload-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.pf-variant-form {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.pf-variant-form input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  width: 120px;
+}

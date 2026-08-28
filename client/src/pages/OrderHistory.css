@@ -1,0 +1,129 @@
+.oh {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5);
+}
+
+.oh-status {
+  padding: var(--space-6) var(--space-5);
+  color: var(--color-ink-soft);
+}
+
+.oh h2 {
+  font-size: 2rem;
+  margin-bottom: var(--space-5);
+}
+
+.oh-empty {
+  text-align: center;
+  padding: var(--space-6) 0;
+  color: var(--color-ink-soft);
+}
+
+.oh-empty a {
+  display: inline-block;
+  margin-top: var(--space-2);
+  color: var(--color-accent);
+  font-weight: 500;
+}
+
+.oh-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.oh-card {
+  display: block;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  background: #fff;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.oh-card:hover {
+  box-shadow: 0 8px 24px rgba(22, 24, 29, 0.08);
+  transform: translateY(-2px);
+}
+
+.oh-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
+}
+
+.oh-card__number {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.oh-card__date {
+  font-size: 0.8125rem;
+  color: var(--color-ink-soft);
+  margin-top: 2px;
+}
+
+.oh-card__status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+.oh-card__status--pending {
+  background: #FFF4E5;
+  color: #B8720A;
+}
+
+.oh-card__status--paid,
+.oh-card__status--processing {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.oh-card__status--printing,
+.oh-card__status--shipped {
+  background: #E5F3FF;
+  color: #0B6DBA;
+}
+
+.oh-card__status--delivered {
+  background: #E5F7EA;
+  color: #1E8E3E;
+}
+
+.oh-card__status--cancelled,
+.oh-card__status--refunded {
+  background: #FBEAEA;
+  color: #C0392B;
+}
+
+.oh-card__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-3);
+}
+
+.oh-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+.oh-card__total {
+  font-weight: 700;
+  font-size: 1.0625rem;
+  color: var(--color-ink);
+}

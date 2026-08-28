@@ -78,7 +78,14 @@ function ProductDetail() {
     <div className="pd">
       <div className="pd__gallery">
         {primaryImage ? (
-          <img src={primaryImage.imageUrl} alt={product.name} />
+          <img
+            src={
+              primaryImage.imageUrl.startsWith("http")
+                ? primaryImage.imageUrl
+                : `http://localhost:5000${primaryImage.imageUrl}`
+            }
+            alt={product.name}
+          />
         ) : (
           <div className="pd__gallery-empty" />
         )}

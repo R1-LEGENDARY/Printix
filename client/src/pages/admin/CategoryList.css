@@ -1,0 +1,34 @@
+.cat-form {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  max-width: 400px;
+}
+
+.cat-form input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+}
+
+.cat-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.cat-actions button {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+}
+
+.cat-actions button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

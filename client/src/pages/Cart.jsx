@@ -29,7 +29,14 @@ function Cart() {
           <div className="cart-item" key={item.id}>
             <div className="cart-item__image">
               {item.variant.product.image && (
-                <img src={item.variant.product.image} alt={item.variant.product.name} />
+                <img
+                  src={
+                    item.variant.product.image.startsWith("http")
+                      ? item.variant.product.image
+                      : `http://localhost:5000${item.variant.product.image}`
+                  }
+                  alt={item.variant.product.name}
+                />
               )}
             </div>
 
