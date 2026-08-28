@@ -8,6 +8,8 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const addressRoutes = require("./routes/addressRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
+const { handleWebhook } = require("./controllers/paymentController");
 
 const path = require("path");
 const uploadRoutes = require("./routes/uploadRoutes");
@@ -18,12 +20,20 @@ const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
+
+app.post(
+  "/api/payments/webhook",
+  express.raw({ type: "application/json" }),
+  handleWebhook
+);
+
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/cart", cartRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/designs", designRoutes);
 

@@ -45,5 +45,25 @@
   justify-content: space-between;
   font-weight: 700;
   font-size: 1.125rem;
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.oc__payment {
+  margin-bottom: var(--space-4);
+}
+
+.oc__payment-note {
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-2);
+}
+
+.oc__payment-note--warn {
+  color: #C0392B;
+}
+
+.oc__payment-note--success {
+  color: #1E8E3E;
+  font-weight: 500;
+  margin-bottom: var(--space-4);
 }
