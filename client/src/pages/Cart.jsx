@@ -73,9 +73,11 @@ function Cart() {
           <span>${cart.subtotal}</span>
         </div>
         <p className="cart-summary__note">Shipping and taxes calculated at checkout.</p>
-        <Button variant="primary" className="btn--block">
-          Proceed to checkout
-        </Button>
+        <Link to="/checkout">
+          <Button variant="primary" className="btn--block">
+            Proceed to checkout
+          </Button>
+        </Link>
       </div>
     </div>
   );
