@@ -1,0 +1,84 @@
+.mpm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 24, 29, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: var(--space-4);
+}
+
+.mpm-panel {
+  background: #fff;
+  border-radius: var(--radius);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mpm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.mpm-header h3 {
+  font-size: 1.0625rem;
+}
+
+.mpm-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+  line-height: 1;
+}
+
+.mpm-close:hover {
+  color: var(--color-ink);
+}
+
+.mpm-image-wrap {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-canvas);
+  padding: var(--space-4);
+}
+
+.mpm-image-wrap img {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  cursor: zoom-in;
+  border-radius: 8px;
+}
+
+.mpm-image-wrap--zoomed {
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.mpm-image-wrap--zoomed img {
+  max-width: none;
+  max-height: none;
+  width: 1600px;
+  cursor: zoom-out;
+}
+
+.mpm-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+}

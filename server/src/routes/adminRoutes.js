@@ -23,6 +23,9 @@ const {
   setPrimaryImage,
   upsertPrintableArea,
   adjustStock,
+  uploadMockupTemplate,
+  savePerspectiveConfig,
+  uploadDisplacementMap,
 } = require("../controllers/adminProductController");
 
 const router = express.Router();
@@ -39,6 +42,17 @@ router.patch("/products/:id/toggle-active", toggleActive);
 router.post("/products/:id/variants", upsertVariant);
 router.post("/products/:id/printable-areas", upsertPrintableArea);
 router.patch("/variants/:variantId/stock", adjustStock);
+router.post(
+  "/printable-areas/:areaId/mockup-template",
+  require("../middleware/upload").upload.single("file"),
+  uploadMockupTemplate
+);
+router.put("/printable-areas/:areaId/perspective", savePerspectiveConfig);
+router.post(
+  "/printable-areas/:areaId/displacement-map",
+  require("../middleware/upload").upload.single("file"),
+  uploadDisplacementMap
+);
 
 router.post("/products/:id/images", require("../middleware/upload").upload.single("file"), addProductImage);
 router.delete("/products/:productId/images/:imageId", deleteProductImage);

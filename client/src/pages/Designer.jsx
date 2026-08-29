@@ -1,21 +1,85 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import {
-  Image as KonvaImage,
+  Stage,
   Layer,
   Rect,
-  Stage,
+  Line,
+  Image as KonvaImage,
   Text as KonvaText,
   Transformer,
 } from "react-konva";
 import api from "../api/axios";
 import { createDesign, saveDesign, uploadImage } from "../api/design";
+import { applyDisplacement, applyFabricLighting, generateDisplacementFromPhoto } from "../utils/displacementMap";
 import { useHistory } from "../hooks/useHistory";
 import Button from "../components/Button";
 import { useCart } from "../context/CartContext";
+import MockupPreviewModal from "../components/MockupPreviewModal";
 import "./Designer.css";
 
 let tempIdCounter = -1;
+
+const MAX_EDIT_DIMENSION = 640;
+
+function MockupBackground({ area, onSize }) {
+  const mockupUrl = area.mockupTemplate?.baseImageUrl;
+  const [img, setImg] = useState(null);
+  const [displaySize, setDisplaySize] = useState(null);
+
+  useEffect(() => {
+    if (!mockupUrl) {
+      setImg(null);
+      onSize(null);
+      return undefined;
+    }
+
+    let cancelled = false;
+    const image = new window.Image();
+    image.crossOrigin = "anonymous";
+    image.onload = () => {
+      if (cancelled) return;
+      const ratio = Math.min(1, MAX_EDIT_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight));
+      const size = { width: Math.round(image.naturalWidth * ratio), height: Math.round(image.naturalHeight * ratio) };
+      setImg(image);
+      setDisplaySize(size);
+      onSize({ ...size, naturalWidth: image.naturalWidth, naturalHeight: image.naturalHeight, scale: ratio });
+    };
+    image.onerror = () => {
+      setImg(null);
+      onSize(null);
+    };
+    image.src = `http://localhost:5000${mockupUrl}`;
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mockupUrl]);
+
+  if (!img || !displaySize) {
+    return <Rect x={0} y={0} width={area.width} height={area.height} fill="#ffffff" stroke="#E4E2DC" />;
+  }
+
+  return <KonvaImage image={img} x={0} y={0} width={displaySize.width} height={displaySize.height} listening={false} />;
+}
+
+// Dashed outline showing the customer where the print will actually
+// land — purely visual, never clips or moves their artwork while editing.
+function PrintAreaOutline({ points }) {
+  if (!points || points.length < 3) return null;
+  const flat = points.flatMap((p) => [p.x, p.y]);
+  return (
+    <Line
+      points={[...flat, points[0].x, points[0].y]}
+      stroke="#3D3FE0"
+      strokeWidth={2}
+      dash={[8, 6]}
+      closed={false}
+      listening={false}
+    />
+  );
+}
 
 function DesignImage({ el, isSelected, onSelect, onChange }) {
   const imageUrl = el.image?.fileUrl
@@ -31,6 +95,7 @@ function DesignImage({ el, isSelected, onSelect, onChange }) {
     }
 
     const image = new window.Image();
+    image.crossOrigin = "anonymous";
     image.onload = () => setImg(image);
     image.onerror = () => setImg(null);
     image.src = imageUrl;
@@ -157,6 +222,7 @@ function Designer() {
   const variantId = searchParams.get("variant");
   const navigate = useNavigate();
   const { add } = useCart();
+
   const [product, setProduct] = useState(null);
   const [design, setDesign] = useState(null);
   const [activeArea, setActiveArea] = useState(null);
@@ -164,8 +230,15 @@ function Designer() {
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [generatingPreview, setGeneratingPreview] = useState(false);
+  const [canvasSize, setCanvasSize] = useState(null);
+
   const fileInputRef = useRef();
   const layerRef = useRef();
+  const stageRef = useRef();
+  const elementsLayerRef = useRef();
+
   const { state: elements, set: setElements, undo, redo, canUndo, canRedo } = useHistory([]);
 
   useEffect(() => {
@@ -228,6 +301,71 @@ function Designer() {
   }
 
   const activeVariant = product.variants.find((v) => v.id === variantId);
+
+  async function handleGeneratePreview() {
+    const mockup = activeArea.mockupTemplate;
+    if (!mockup?.baseImageUrl) {
+      alert("This product has no mockup photo yet — ask an admin to upload one.");
+      return;
+    }
+
+    setGeneratingPreview(true);
+    try {
+      setSelectedId(null);
+      await new Promise((r) => setTimeout(r, 50));
+
+      const designDataUrl = elementsLayerRef.current.toDataURL({ pixelRatio: 1 });
+      const designImg = new window.Image();
+      await new Promise((resolve, reject) => {
+        designImg.onload = resolve;
+        designImg.onerror = reject;
+        designImg.src = designDataUrl;
+      });
+
+      const mockupImg = new window.Image();
+      mockupImg.crossOrigin = "anonymous";
+      await new Promise((resolve, reject) => {
+        mockupImg.onload = resolve;
+        mockupImg.onerror = reject;
+        mockupImg.src = `http://localhost:5000${mockup.baseImageUrl}`;
+      });
+
+      const finalCanvas = document.createElement("canvas");
+      finalCanvas.width = mockupImg.naturalWidth;
+      finalCanvas.height = mockupImg.naturalHeight;
+      const finalCtx = finalCanvas.getContext("2d");
+      finalCtx.drawImage(mockupImg, 0, 0);
+
+      const flatCanvas = document.createElement("canvas");
+      flatCanvas.width = mockupImg.naturalWidth;
+      flatCanvas.height = mockupImg.naturalHeight;
+      flatCanvas.getContext("2d").drawImage(designImg, 0, 0, mockupImg.naturalWidth, mockupImg.naturalHeight);
+
+      const dispCanvas = generateDisplacementFromPhoto(mockupImg);
+      const displacedDesign = applyDisplacement(flatCanvas, dispCanvas, 10);
+      const designSource = applyFabricLighting(displacedDesign, mockupImg);
+
+      const points = mockup.perspectiveConfig?.points;
+      if (points && points.length >= 3) {
+        finalCtx.save();
+        finalCtx.beginPath();
+        finalCtx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) finalCtx.lineTo(points[i].x, points[i].y);
+        finalCtx.closePath();
+        finalCtx.clip();
+        finalCtx.drawImage(designSource, 0, 0);
+        finalCtx.restore();
+      } else {
+        finalCtx.drawImage(designSource, 0, 0);
+      }
+
+      setPreviewUrl(finalCanvas.toDataURL("image/png"));
+    } catch (err) {
+      alert(`Failed to generate preview: ${err.message}`);
+    } finally {
+      setGeneratingPreview(false);
+    }
+  }
 
   const visibleElements = (elements || []).filter(
     (element) => String(element.printableAreaId) === String(activeArea.id)
@@ -319,7 +457,10 @@ function Designer() {
             <button
               key={area.id}
               className={`designer__area-tab ${activeArea.id === area.id ? "designer__area-tab--active" : ""}`}
-              onClick={() => setActiveArea(area)}
+              onClick={() => {
+                setCanvasSize(null);
+                setActiveArea(area);
+              }}
             >
               {area.name}
             </button>
@@ -337,15 +478,18 @@ function Designer() {
       <div className="designer__body">
         <div className="designer__canvas-wrap">
           <Stage
-            width={activeArea.width}
-            height={activeArea.height}
+            ref={stageRef}
+            width={canvasSize?.width || activeArea.width}
+            height={canvasSize?.height || activeArea.height}
             className="designer__canvas"
             onMouseDown={(event) => {
               if (event.target === event.target.getStage()) setSelectedId(null);
             }}
           >
             <Layer ref={layerRef}>
-              <Rect x={0} y={0} width={activeArea.width} height={activeArea.height} fill="#ffffff" stroke="#E4E2DC" />
+              <MockupBackground area={activeArea} onSize={setCanvasSize} />
+            </Layer>
+            <Layer ref={elementsLayerRef}>
               {[...visibleElements].sort((a, b) => a.layerOrder - b.layerOrder).map((element) =>
                 element.type === "image" ? (
                   <DesignImage key={element.id} el={element} isSelected={selectedId === element.id} onSelect={() => setSelectedId(element.id)} onChange={updateElement} />
@@ -377,6 +521,15 @@ function Designer() {
               </div>
             </div>
           )}
+
+          <Button variant="secondary" className="btn--block" onClick={handleGeneratePreview} disabled={generatingPreview}>
+            {generatingPreview ? "Generating..." : "Preview mockup"}
+          </Button>
+
+          {previewUrl && (
+            <MockupPreviewModal imageUrl={previewUrl} onClose={() => setPreviewUrl(null)} />
+          )}
+
           <Button variant="secondary" className="btn--block" onClick={handleSave} disabled={saving}>
             {saving ? "Saving..." : "Save design"}
           </Button>

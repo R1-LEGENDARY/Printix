@@ -11,13 +11,17 @@ import {
   setPrimaryImage,
   upsertPrintableArea,
   adjustStock,
+  uploadMockupTemplate,
+  savePerspectiveConfig,
+  uploadDisplacementMap,
 } from "../../api/admin";
 import Button from "../../components/Button";
+import PerspectiveEditor from "../../components/PerspectiveEditor";
 import "./ProductForm.css";
 
 const emptyProduct = { name: "", categoryId: "", description: "", basePrice: "" };
 const emptyVariant = { color: "", size: "", sku: "", stockQuantity: 0, priceOverride: "" };
-const emptyArea = { name: "", width: 300, height: 400, x: 0, y: 0 };
+const emptyArea = { name: "" };
 
 function ProductForm() {
   const { id } = useParams();
@@ -31,6 +35,7 @@ function ProductForm() {
   const [images, setImages] = useState([]);
   const [printableAreas, setPrintableAreas] = useState([]);
   const [areaForm, setAreaForm] = useState(emptyArea);
+  const [editingPerspectiveFor, setEditingPerspectiveFor] = useState(null);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -124,17 +129,64 @@ function ProductForm() {
     }
   }
 
+  async function handleMockupUpload(areaId, e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setError(null);
+    try {
+      const result = await uploadMockupTemplate(areaId, file);
+      setPrintableAreas((prev) =>
+        prev.map((a) => (a.id === areaId ? { ...a, mockupTemplate: { baseImageUrl: result.baseImageUrl } } : a))
+      );
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to upload mockup template.");
+    } finally {
+      e.target.value = "";
+    }
+  }
+
+  async function handleDisplacementUpload(areaId, e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setError(null);
+    try {
+      const result = await uploadDisplacementMap(areaId, file);
+      setPrintableAreas((prev) =>
+        prev.map((a) =>
+          a.id === areaId
+            ? { ...a, mockupTemplate: { ...a.mockupTemplate, displacementMapUrl: result.displacementMapUrl } }
+            : a
+        )
+      );
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to upload displacement map.");
+    } finally {
+      e.target.value = "";
+    }
+  }
+
+  async function handleSavePerspective(points) {
+    setError(null);
+    try {
+      const areaId = editingPerspectiveFor.id;
+      const { perspectiveConfig } = await savePerspectiveConfig(areaId, points);
+      setPrintableAreas((prev) =>
+        prev.map((a) =>
+          a.id === areaId ? { ...a, mockupTemplate: { ...a.mockupTemplate, perspectiveConfig } } : a
+        )
+      );
+      setEditingPerspectiveFor(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to save perspective corners.");
+    }
+  }
+
   async function handleAddArea(e) {
     e.preventDefault();
     setError(null);
     try {
-      const updated = await upsertPrintableArea(id, {
-        ...areaForm,
-        width: Number(areaForm.width),
-        height: Number(areaForm.height),
-        x: Number(areaForm.x),
-        y: Number(areaForm.y),
-      });
+
+      const updated = await upsertPrintableArea(id, { ...areaForm, width: 1000, height: 1000, x: 0, y: 0 });
       setPrintableAreas(updated.printableAreas);
       setAreaForm(emptyArea);
     } catch (err) {
@@ -239,19 +291,44 @@ function ProductForm() {
       {!isNew && (
         <div className="pf-variants">
           <h2>Printable areas</h2>
-          <p className="pf-hint">These define where customers can place designs (e.g. Front, Back). A product needs at least one before it can be customized.</p>
+          <p className="pf-hint">
+            These define where customers can place designs (e.g. Front, Back). Give it a name, then upload a
+            mockup photo and trace the print area shape on it — the designer uses the photo's real size.
+          </p>
 
           {printableAreas.length > 0 && (
             <table className="dash-table">
               <thead>
-                <tr><th>Name</th><th>Width</th><th>Height</th></tr>
+                <tr><th>Name</th><th>Mockup photo</th></tr>
               </thead>
               <tbody>
                 {printableAreas.map((a) => (
                   <tr key={a.id}>
                     <td>{a.name}</td>
-                    <td>{a.width}px</td>
-                    <td>{a.height}px</td>
+                    <td>
+                      {a.mockupTemplate ? (
+                        <span className="pf-mockup-status">Uploaded ✓</span>
+                      ) : (
+                        <span className="pf-mockup-status pf-mockup-status--missing">None — using blank canvas</span>
+                      )}
+                      <label className="pf-upload-btn pf-upload-btn--small">
+                        {a.mockupTemplate ? "Replace" : "Upload"}
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          style={{ display: "none" }}
+                          onChange={(e) => handleMockupUpload(a.id, e)}
+                        />
+                      </label>
+                      {a.mockupTemplate && (
+                        <button
+                          className="pf-upload-btn pf-upload-btn--small"
+                          onClick={() => setEditingPerspectiveFor(a)}
+                        >
+                          {a.mockupTemplate.perspectiveConfig ? "Edit print area" : "Set print area"}
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -263,20 +340,6 @@ function ProductForm() {
               placeholder="Name (e.g. Front)"
               value={areaForm.name}
               onChange={(e) => setAreaForm({ ...areaForm, name: e.target.value })}
-              required
-            />
-            <input
-              type="number"
-              placeholder="Width"
-              value={areaForm.width}
-              onChange={(e) => setAreaForm({ ...areaForm, width: e.target.value })}
-              required
-            />
-            <input
-              type="number"
-              placeholder="Height"
-              value={areaForm.height}
-              onChange={(e) => setAreaForm({ ...areaForm, height: e.target.value })}
               required
             />
             <Button type="submit" variant="secondary">Add area</Button>
@@ -334,6 +397,14 @@ function ProductForm() {
             <Button type="submit" variant="secondary">Add variant</Button>
           </form>
         </div>
+      )}
+      {editingPerspectiveFor && (
+        <PerspectiveEditor
+          imageUrl={`http://localhost:5000${editingPerspectiveFor.mockupTemplate.baseImageUrl}`}
+          initialPoints={editingPerspectiveFor.mockupTemplate.perspectiveConfig?.points}
+          onSave={handleSavePerspective}
+          onCancel={() => setEditingPerspectiveFor(null)}
+        />
       )}
     </div>
   );

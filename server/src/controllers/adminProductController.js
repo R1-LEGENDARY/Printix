@@ -26,6 +26,13 @@ function serializeProduct(p) {
       y: pa.y,
       width: pa.width,
       height: pa.height,
+      mockupTemplate: pa.mockupTemplates?.[0]
+        ? {
+            baseImageUrl: pa.mockupTemplates[0].baseImageUrl,
+            perspectiveConfig: pa.mockupTemplates[0].perspectiveConfig,
+            displacementMapUrl: pa.mockupTemplates[0].displacementMapUrl,
+          }
+        : null,
     })),
   };
 }
@@ -34,7 +41,7 @@ const include = {
   category: true,
   images: true,
   variants: true,
-  printableAreas: true,
+  printableAreas: { include: { mockupTemplates: true } },
 };
 
 async function listAllProducts(req, res) {
@@ -179,7 +186,7 @@ async function addProductImage(req, res) {
       data: {
         productId,
         imageUrl: `/uploads/${req.file.filename}`,
-        isPrimary: existingCount === 0, // first image for a product becomes primary automatically
+        isPrimary: existingCount === 0, 
         sortOrder: existingCount,
       },
     });
@@ -201,7 +208,6 @@ async function deleteProductImage(req, res) {
 
     await prisma.productImage.delete({ where: { id: image.id } });
 
-    // If we deleted the primary image, promote the next remaining one, if any.
     if (image.isPrimary) {
       const next = await prisma.productImage.findFirst({
         where: { productId: BigInt(productId) },
@@ -300,6 +306,72 @@ async function adjustStock(req, res) {
   }
 }
 
+async function uploadMockupTemplate(req, res) {
+  try {
+    const printableAreaId = BigInt(req.params.areaId);
+    if (!req.file) return res.status(400).json({ message: "No file uploaded." });
+
+    const area = await prisma.printableArea.findUnique({ where: { id: printableAreaId } });
+    if (!area) return res.status(404).json({ message: "Printable area not found." });
+
+    const existing = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId } });
+    const baseImageUrl = `/uploads/${req.file.filename}`;
+
+    const template = existing
+      ? await prisma.productMockupTemplate.update({ where: { id: existing.id }, data: { baseImageUrl } })
+      : await prisma.productMockupTemplate.create({
+          data: { productId: area.productId, printableAreaId, baseImageUrl },
+        });
+
+    res.status(201).json({ id: template.id.toString(), baseImageUrl: template.baseImageUrl });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to upload mockup template.", error: error.message });
+  }
+}
+
+async function savePerspectiveConfig(req, res) {
+  try {
+    const areaId = BigInt(req.params.areaId);
+    const { points } = req.body;
+
+    const valid = Array.isArray(points) && points.length >= 3 && points.every((p) => typeof p.x === "number" && typeof p.y === "number");
+    if (!valid) {
+      return res.status(400).json({ message: "points must be an array of at least 3 {x, y} coordinates." });
+    }
+
+    const template = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId: areaId } });
+    if (!template) return res.status(404).json({ message: "Upload a mockup photo for this area first." });
+
+    const updated = await prisma.productMockupTemplate.update({
+      where: { id: template.id },
+      data: { perspectiveConfig: { points } },
+    });
+
+    res.json({ id: updated.id.toString(), perspectiveConfig: updated.perspectiveConfig });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to save print area shape.", error: error.message });
+  }
+}
+
+async function uploadDisplacementMap(req, res) {
+  try {
+    const areaId = BigInt(req.params.areaId);
+    if (!req.file) return res.status(400).json({ message: "No file uploaded." });
+
+    const template = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId: areaId } });
+    if (!template) return res.status(404).json({ message: "Upload a mockup photo for this area first." });
+
+    const updated = await prisma.productMockupTemplate.update({
+      where: { id: template.id },
+      data: { displacementMapUrl: `/uploads/${req.file.filename}` },
+    });
+
+    res.status(201).json({ id: updated.id.toString(), displacementMapUrl: updated.displacementMapUrl });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to upload displacement map.", error: error.message });
+  }
+}
+
 module.exports = {
   listAllProducts,
   getProductForAdmin,
@@ -312,4 +384,7 @@ module.exports = {
   setPrimaryImage,
   upsertPrintableArea,
   adjustStock,
+  uploadMockupTemplate,
+  savePerspectiveConfig,
+  uploadDisplacementMap,
 };

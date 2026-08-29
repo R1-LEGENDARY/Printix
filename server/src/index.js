@@ -29,7 +29,12 @@ app.post(
 );
 
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "../uploads"), {
+    setHeaders: (res) => res.setHeader("Access-Control-Allow-Origin", "*"),
+  })
+);
 
 app.use("/api/cart", cartRoutes);
 app.use("/api/addresses", addressRoutes);

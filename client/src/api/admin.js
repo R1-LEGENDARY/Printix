@@ -16,6 +16,29 @@ export const upsertPrintableArea = (productId, data) => api.post(`/admin/product
 export const adjustStock = (variantId, changeQty, reason) =>
   api.patch(`/admin/variants/${variantId}/stock`, { changeQty, reason }, { headers: authHeaders() }).then((r) => r.data);
 
+export const savePerspectiveConfig = (areaId, points) =>
+  api.put(`/admin/printable-areas/${areaId}/perspective`, { points }, { headers: authHeaders() }).then((r) => r.data);
+
+export const uploadDisplacementMap = (areaId, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return api
+    .post(`/admin/printable-areas/${areaId}/displacement-map`, formData, {
+      headers: { ...authHeaders(), "Content-Type": "multipart/form-data" },
+    })
+    .then((r) => r.data);
+};
+
+export const uploadMockupTemplate = (areaId, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return api
+    .post(`/admin/printable-areas/${areaId}/mockup-template`, formData, {
+      headers: { ...authHeaders(), "Content-Type": "multipart/form-data" },
+    })
+    .then((r) => r.data);
+};
+
 export const listCategories = () => api.get("/admin/categories", { headers: authHeaders() }).then((r) => r.data);
 export const createCategory = (data) => api.post("/admin/categories", data, { headers: authHeaders() }).then((r) => r.data);
 export const updateCategory = (id, data) => api.put(`/admin/categories/${id}`, data, { headers: authHeaders() }).then((r) => r.data);

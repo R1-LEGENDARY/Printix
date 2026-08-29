@@ -133,6 +133,21 @@
   color: var(--color-ink);
 }
 
+.pf-upload-btn--small {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  margin-left: var(--space-2);
+}
+
+.pf-mockup-status {
+  font-size: 0.8125rem;
+  color: #1E8E3E;
+}
+
+.pf-mockup-status--missing {
+  color: var(--color-ink-soft);
+}
+
 .pf-upload-btn:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);

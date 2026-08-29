@@ -38,7 +38,7 @@ async function getProductBySlug(req, res) {
         category: true,
         images: true,
         variants: true,
-        printableAreas: true,
+        printableAreas: { include: { mockupTemplates: true } },
       },
     });
 
@@ -78,6 +78,13 @@ async function getProductBySlug(req, res) {
         y: pa.y,
         width: pa.width,
         height: pa.height,
+        mockupTemplate: pa.mockupTemplates?.[0]
+          ? {
+              baseImageUrl: pa.mockupTemplates[0].baseImageUrl,
+              perspectiveConfig: pa.mockupTemplates[0].perspectiveConfig,
+              displacementMapUrl: pa.mockupTemplates[0].displacementMapUrl,
+            }
+          : null,
       })),
     };
 
