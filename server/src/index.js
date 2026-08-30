@@ -10,6 +10,7 @@ const addressRoutes = require("./routes/addressRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
 const { handleWebhook } = require("./controllers/paymentController");
 
 const path = require("path");
@@ -28,7 +29,7 @@ app.post(
   handleWebhook
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "25mb" }));
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "../uploads"), {
@@ -41,6 +42,7 @@ app.use("/api/addresses", addressRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/designs", designRoutes);
 

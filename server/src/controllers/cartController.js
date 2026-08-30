@@ -1,7 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Finds the user's cart, or the guest cart by cartId header, or creates one.
 async function resolveCart(req) {
   const userId = req.user?.userId ? BigInt(req.user.userId) : null;
   const guestCartId = req.headers["x-cart-id"];
@@ -28,6 +27,7 @@ function serializeCart(cart) {
     quantity: item.quantity,
     unitPrice: item.unitPrice,
     lineTotal: (Number(item.unitPrice) * item.quantity).toFixed(2),
+    mockupUrl: item.design?.snapshots?.[0]?.mockupImageUrl || null,
     variant: {
       id: item.variant.id.toString(),
       color: item.variant.color,
@@ -60,6 +60,9 @@ const cartInclude = {
         include: {
           product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
         },
+      },
+      design: {
+        include: { snapshots: { orderBy: { createdAt: "desc" }, take: 1 } },
       },
     },
   },

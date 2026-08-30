@@ -7,6 +7,7 @@ function serializeDesign(design) {
     name: design.name,
     status: design.status,
     productId: design.productId.toString(),
+    latestMockupUrl: design.snapshots?.[0]?.mockupImageUrl || null,
     elements: design.elements.map((el) => ({
       id: el.id.toString(),
       printableAreaId: el.printableAreaId.toString(),
@@ -37,9 +38,9 @@ function serializeDesign(design) {
 
 const designInclude = {
   elements: { include: { image: true, text: true } },
+  snapshots: { orderBy: { createdAt: "desc" }, take: 1 },
 };
 
-// Creates a fresh draft design for a product (or returns the existing draft, if one exists).
 async function createDesign(req, res) {
   try {
     const { productId } = req.body;
@@ -85,12 +86,10 @@ async function getDesign(req, res) {
   }
 }
 
-// Replaces all elements for the design with the incoming set — simplest correct
-// approach for a canvas-editor save (client always sends full current state).
 async function saveDesign(req, res) {
   try {
     const { id } = req.params;
-    const { name, elements } = req.body;
+    const { name, elements, mockupImageDataUrl, printableAreaId } = req.body;
 
     const design = await prisma.design.findUnique({ where: { id: BigInt(id) } });
     if (!design) return res.status(404).json({ message: "Design not found." });
@@ -163,6 +162,26 @@ async function saveDesign(req, res) {
         }
       }
     });
+
+    if (mockupImageDataUrl && printableAreaId) {
+      const fs = require("fs");
+      const path = require("path");
+      const base64 = mockupImageDataUrl.replace(/^data:image\/png;base64,/, "");
+      const filename = `mockup-${design.id}-${Date.now()}.png`;
+      const filepath = path.join(__dirname, "../../uploads", filename);
+      fs.writeFileSync(filepath, Buffer.from(base64, "base64"));
+
+      await prisma.designSnapshot.create({
+        data: {
+          designId: design.id,
+          printableAreaId: BigInt(printableAreaId),
+          mockupImageUrl: `/uploads/${filename}`,
+          elementsJson: JSON.parse(
+            JSON.stringify(elements, (k, v) => (typeof v === "bigint" ? v.toString() : v))
+          ),
+        },
+      });
+    }
 
     const updated = await prisma.design.findUnique({ where: { id: design.id }, include: designInclude });
     res.json(serializeDesign(updated));

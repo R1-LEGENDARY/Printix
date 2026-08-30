@@ -14,17 +14,14 @@
   margin-bottom: var(--space-5);
 }
 
-.oh-empty {
+.oh--empty {
   text-align: center;
-  padding: var(--space-6) 0;
-  color: var(--color-ink-soft);
+  padding-top: var(--space-6);
 }
 
-.oh-empty a {
-  display: inline-block;
-  margin-top: var(--space-2);
-  color: var(--color-accent);
-  font-weight: 500;
+.oh--empty p {
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-4);
 }
 
 .oh-list {

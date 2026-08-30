@@ -15,8 +15,12 @@ export async function getDesign(id) {
   return res.data;
 }
 
-export async function saveDesign(id, name, elements) {
-  const res = await api.put(`/designs/${id}`, { name, elements }, { headers: authHeaders() });
+export async function saveDesign(id, name, elements, mockupImageDataUrl, printableAreaId) {
+  const res = await api.put(
+    `/designs/${id}`,
+    { name, elements, mockupImageDataUrl, printableAreaId },
+    { headers: authHeaders() }
+  );
   return res.data;
 }
 

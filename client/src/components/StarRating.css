@@ -1,0 +1,23 @@
+.star-rating {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.star-rating__star {
+  color: var(--color-border);
+  line-height: 1;
+}
+
+.star-rating__star--filled {
+  color: #F0B429;
+}
+
+.star-rating__star--interactive {
+  cursor: pointer;
+  padding: 2px;
+  transition: transform 100ms ease;
+}
+
+.star-rating__star--interactive:hover {
+  transform: scale(1.15);
+}

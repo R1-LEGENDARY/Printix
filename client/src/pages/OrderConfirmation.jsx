@@ -8,7 +8,7 @@ import "./OrderConfirmation.css";
 function OrderConfirmation() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const paymentResult = searchParams.get("payment"); // "success" | "cancelled" | null
+  const paymentResult = searchParams.get("payment"); 
   const [order, setOrder] = useState(null);
   const [payingNow, setPayingNow] = useState(false);
 
@@ -62,7 +62,12 @@ function OrderConfirmation() {
       <div className="oc__items">
         {order.items.map((item) => (
           <div className="oc__item" key={item.id}>
-            <span>{item.productName} ({item.variantLabel}) × {item.quantity}</span>
+            <div className="oc__item-info">
+              {item.mockupUrl && (
+                <img className="oc__item-thumb" src={`http://localhost:5000${item.mockupUrl}`} alt="" />
+              )}
+              <span>{item.productName} ({item.variantLabel}) × {item.quantity}</span>
+            </div>
             <span>${item.lineTotal}</span>
           </div>
         ))}

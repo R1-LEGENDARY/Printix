@@ -2,8 +2,9 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/axios";
 import Button from "../components/Button";
-import { useCart } from "../context/CartContext";
+import ProductReviews from "../components/ProductReviews";
 import "./ProductDetail.css";
+import { useCart } from "../context/CartContext";
 
 function ProductDetail() {
   const { slug } = useParams();
@@ -186,6 +187,8 @@ function ProductDetail() {
           </Button>
         </div>
       </div>
+
+      <ProductReviews productId={product.id} />
     </div>
   );
 }

@@ -54,7 +54,7 @@ function MockupBackground({ area, onSize }) {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [mockupUrl]);
 
   if (!img || !displaySize) {
@@ -64,8 +64,6 @@ function MockupBackground({ area, onSize }) {
   return <KonvaImage image={img} x={0} y={0} width={displaySize.width} height={displaySize.height} listening={false} />;
 }
 
-// Dashed outline showing the customer where the print will actually
-// land — purely visual, never clips or moves their artwork while editing.
 function PrintAreaOutline({ points }) {
   if (!points || points.length < 3) return null;
   const flat = points.flatMap((p) => [p.x, p.y]);
@@ -231,6 +229,7 @@ function Designer() {
   const [loadError, setLoadError] = useState(null);
   const [addingToCart, setAddingToCart] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewAreaId, setPreviewAreaId] = useState(null);
   const [generatingPreview, setGeneratingPreview] = useState(false);
   const [canvasSize, setCanvasSize] = useState(null);
 
@@ -256,7 +255,7 @@ function Designer() {
     }
 
     init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [slug]);
 
   useEffect(() => {
@@ -284,13 +283,38 @@ function Designer() {
         image: element.image || null,
         text: element.text || null,
       }));
-      const saved = await saveDesign(design.id, design.name, payload);
+
+      let mockupToAttach = previewUrl && previewAreaId === activeArea.id ? previewUrl : null;
+      if (!mockupToAttach && activeArea.mockupTemplate?.baseImageUrl) {
+        try {
+          mockupToAttach = await generateMockupDataUrl();
+        } catch {
+          mockupToAttach = null;
+        }
+      }
+
+      let saved;
+      try {
+        saved = await saveDesign(
+          design.id,
+          design.name,
+          payload,
+          mockupToAttach || undefined,
+          mockupToAttach ? activeArea.id : undefined
+        );
+      } catch (err) {
+        if (mockupToAttach) {
+          saved = await saveDesign(design.id, design.name, payload, undefined, undefined);
+        } else {
+          throw err;
+        }
+      }
       setDesign(saved);
       setElements(saved.elements || []);
     } finally {
       setSaving(false);
     }
-  }, [design, elements, setElements]);
+  }, [design, elements, setElements, previewUrl, previewAreaId, activeArea]);
 
   if (loadError) {
     return <p className="designer-status">{loadError}</p>;
@@ -302,15 +326,9 @@ function Designer() {
 
   const activeVariant = product.variants.find((v) => v.id === variantId);
 
-  async function handleGeneratePreview() {
+  async function generateMockupDataUrl() {
     const mockup = activeArea.mockupTemplate;
-    if (!mockup?.baseImageUrl) {
-      alert("This product has no mockup photo yet — ask an admin to upload one.");
-      return;
-    }
-
-    setGeneratingPreview(true);
-    try {
+    if (!mockup?.baseImageUrl) return null;
       setSelectedId(null);
       await new Promise((r) => setTimeout(r, 50));
 
@@ -359,7 +377,19 @@ function Designer() {
         finalCtx.drawImage(designSource, 0, 0);
       }
 
-      setPreviewUrl(finalCanvas.toDataURL("image/png"));
+    return finalCanvas.toDataURL("image/png");
+  }
+
+  async function handleGeneratePreview() {
+    if (!activeArea.mockupTemplate?.baseImageUrl) {
+      alert("This product has no mockup photo yet — ask an admin to upload one.");
+      return;
+    }
+    setGeneratingPreview(true);
+    try {
+      const dataUrl = await generateMockupDataUrl();
+      setPreviewUrl(dataUrl);
+      setPreviewAreaId(activeArea.id);
     } catch (err) {
       alert(`Failed to generate preview: ${err.message}`);
     } finally {
@@ -525,6 +555,11 @@ function Designer() {
           <Button variant="secondary" className="btn--block" onClick={handleGeneratePreview} disabled={generatingPreview}>
             {generatingPreview ? "Generating..." : "Preview mockup"}
           </Button>
+          {!previewUrl && (
+            <p className="designer-status designer-status--inline">
+              Tip: generate a preview before saving so your cart and order show the real mockup.
+            </p>
+          )}
 
           {previewUrl && (
             <MockupPreviewModal imageUrl={previewUrl} onClose={() => setPreviewUrl(null)} />

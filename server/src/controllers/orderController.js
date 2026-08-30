@@ -24,11 +24,11 @@ function serializeOrder(order) {
       quantity: item.quantity,
       unitPrice: item.unitPrice,
       lineTotal: item.lineTotal,
+      mockupUrl: item.designSnapshot?.mockupImageUrl || null,
     })),
   };
 }
 
-// Flat shipping rate for now — no shipping provider integrated yet.
 const FLAT_SHIPPING = 5.0;
 
 async function createOrder(req, res) {
@@ -64,7 +64,6 @@ async function createOrder(req, res) {
       return res.status(400).json({ message: "Your cart is empty." });
     }
 
-    // Verify stock before committing.
     for (const item of cart.items) {
       if (item.variant.stockQuantity < item.quantity) {
         return res.status(409).json({ message: `Not enough stock for ${item.variant.product.name}.` });
@@ -93,8 +92,6 @@ async function createOrder(req, res) {
       });
 
       for (const item of cart.items) {
-        // If the item has a design, snapshot it now so the order is immutable
-        // even if the live design is edited/deleted later.
         let designSnapshotId = null;
         if (item.design) {
           const snapshot = item.design.snapshots[0];
@@ -161,7 +158,10 @@ async function createOrder(req, res) {
 
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
 
-      return tx.order.findUnique({ where: { id: created.id }, include: { items: true } });
+      return tx.order.findUnique({
+        where: { id: created.id },
+        include: { items: { include: { designSnapshot: true } } },
+      });
     });
 
     res.status(201).json(serializeOrder(order));
@@ -174,7 +174,7 @@ async function listMyOrders(req, res) {
   try {
     const orders = await prisma.order.findMany({
       where: { userId: BigInt(req.user.userId) },
-      include: { items: true },
+      include: { items: { include: { designSnapshot: true } } },
       orderBy: { createdAt: "desc" },
     });
     res.json(orders.map(serializeOrder));

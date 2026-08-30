@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
+import Button from "../components/Button";
 import "./OrderHistory.css";
 
 const statusLabels = {
@@ -31,16 +32,23 @@ function OrderHistory() {
   if (loading) return <p className="oh-status">Loading your orders...</p>;
   if (error) return <p className="oh-status">Error: {error}</p>;
 
+  if (orders.length === 0) {
+    return (
+      <div className="oh oh--empty">
+        <h2>You haven't placed any orders yet</h2>
+        <p>Find something you'd like to customize.</p>
+        <Link to="/catalog">
+          <Button variant="primary">Browse products</Button>
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="oh">
       <h2>Your orders</h2>
 
-      {orders.length === 0 ? (
-        <div className="oh-empty">
-          <p>You haven't placed any orders yet.</p>
-          <Link to="/catalog">Browse products</Link>
-        </div>
-      ) : (
+      {orders.length === 0 ? null : (
         <div className="oh-list">
           {orders.map((order) => (
             <Link to={`/orders/${order.id}`} key={order.id} className="oh-card">
