@@ -59,7 +59,7 @@ function ProductList() {
               <tr key={p.id}>
                 <td><Link to={`/admin/products/${p.id}`}>{p.name}</Link></td>
                 <td>{p.category.name}</td>
-                <td>${p.basePrice}</td>
+                <td>₱{p.basePrice}</td>
                 <td>{p.variants.length}</td>
                 <td>
                   <span className={`status-pill ${p.isActive ? "status-pill--delivered" : "status-pill--cancelled"}`}>

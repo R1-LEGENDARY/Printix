@@ -52,7 +52,7 @@ function OrderList() {
                 <td><Link to={`/admin/orders/${o.id}`}>{o.orderNumber}</Link></td>
                 <td>{o.customer.name}</td>
                 <td><span className={`status-pill status-pill--${o.status}`}>{o.status}</span></td>
-                <td>${o.grandTotal}</td>
+                <td>₱{o.grandTotal}</td>
                 <td>{new Date(o.placedAt).toLocaleDateString()}</td>
               </tr>
             ))}

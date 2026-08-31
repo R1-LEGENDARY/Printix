@@ -50,7 +50,7 @@ function Cart() {
                 {item.variant.color} / {item.variant.size}
                 {item.designId && " — Custom design"}
               </p>
-              <p className="cart-item__price">${item.unitPrice}</p>
+              <p className="cart-item__price">₱{item.unitPrice}</p>
             </div>
 
             <div className="cart-item__qty">
@@ -69,7 +69,7 @@ function Cart() {
               </button>
             </div>
 
-            <p className="cart-item__total">${item.lineTotal}</p>
+            <p className="cart-item__total">₱{item.lineTotal}</p>
 
             <button className="cart-item__remove" onClick={() => remove(item.id)}>
               Remove
@@ -81,7 +81,7 @@ function Cart() {
       <div className="cart-summary">
         <div className="cart-summary__row">
           <span>Subtotal</span>
-          <span>${cart.subtotal}</span>
+          <span>₱{cart.subtotal}</span>
         </div>
         <p className="cart-summary__note">Shipping and taxes calculated at checkout.</p>
         <Link to="/checkout">

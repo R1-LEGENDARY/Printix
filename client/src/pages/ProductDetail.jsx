@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/axios";
 import Button from "../components/Button";
+import WishlistButton from "../components/WishlistButton";
 import ProductReviews from "../components/ProductReviews";
 import "./ProductDetail.css";
 import { useCart } from "../context/CartContext";
@@ -99,7 +100,10 @@ function ProductDetail() {
 
         <h1>{product.name}</h1>
 
-        <p className="pd__price">${product.basePrice}</p>
+        <div className="pd__price-row">
+          <p className="pd__price">₱{product.basePrice}</p>
+          <WishlistButton variantId={activeVariant?.id} />
+        </div>
 
         <p className="pd__description">
           {product.description}

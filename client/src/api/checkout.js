@@ -14,10 +14,15 @@ export async function createAddress(data) {
   return res.data;
 }
 
-export async function placeOrder(shippingAddressId, billingAddressId) {
+export async function previewCoupon(code, subtotal) {
+  const res = await api.post("/coupons/preview", { code, subtotal }, { headers: authHeaders() });
+  return res.data;
+}
+
+export async function placeOrder(shippingAddressId, billingAddressId, couponCode) {
   const res = await api.post(
     "/orders",
-    { shippingAddressId, billingAddressId },
+    { shippingAddressId, billingAddressId, couponCode },
     { headers: authHeaders() }
   );
   return res.data;

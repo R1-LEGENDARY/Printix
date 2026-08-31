@@ -68,14 +68,21 @@ function OrderConfirmation() {
               )}
               <span>{item.productName} ({item.variantLabel}) × {item.quantity}</span>
             </div>
-            <span>${item.lineTotal}</span>
+            <span>₱{item.lineTotal}</span>
           </div>
         ))}
       </div>
 
+      {Number(order.discountTotal) > 0 && (
+        <div className="oc__item">
+          <span>Discount</span>
+          <span>−₱{order.discountTotal}</span>
+        </div>
+      )}
+
       <div className="oc__total">
         <span>Total</span>
-        <span>${order.grandTotal}</span>
+        <span>₱{order.grandTotal}</span>
       </div>
 
       {order.status === "pending" && (

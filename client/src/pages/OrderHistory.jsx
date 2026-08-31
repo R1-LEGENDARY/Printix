@@ -81,7 +81,7 @@ function OrderHistory() {
 
               <div className="oh-card__footer">
                 <span>{order.items.length} item{order.items.length !== 1 ? "s" : ""}</span>
-                <span className="oh-card__total">${order.grandTotal}</span>
+                <span className="oh-card__total">₱{order.grandTotal}</span>
               </div>
             </Link>
           ))}

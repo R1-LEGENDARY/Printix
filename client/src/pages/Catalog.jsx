@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
+import WishlistButton from "../components/WishlistButton";
+import StarRating from "../components/StarRating";
 import "./Catalog.css";
 
 function Catalog() {
@@ -31,29 +33,36 @@ function Catalog() {
       ) : (
         <div className="catalog-grid">
           {products.map((product) => (
-            <Link
-              to={`/products/${product.slug}`}
-              key={product.id}
-              className="catalog-card"
-            >
-              <div className="catalog-card__image">
-                {product.primaryImage && (
-                  <img
-                    src={
-                      product.primaryImage.startsWith("http")
-                        ? product.primaryImage
-                        : `http://localhost:5000${product.primaryImage}`
-                    }
-                    alt={product.name}
-                  />
-                )}
-              </div>
-              <div className="catalog-card__body">
-                <span className="catalog-card__category">{product.category}</span>
-                <h3>{product.name}</h3>
-                <p>${product.basePrice}</p>
-              </div>
-            </Link>
+            <div key={product.id} className="catalog-card">
+              <Link to={`/products/${product.slug}`}>
+                <div className="catalog-card__image">
+                  {product.primaryImage && (
+                    <img
+                      src={
+                        product.primaryImage.startsWith("http")
+                          ? product.primaryImage
+                          : `http://localhost:5000${product.primaryImage}`
+                      }
+                      alt={product.name}
+                    />
+                  )}
+                  <div className="catalog-card__wishlist">
+                    <WishlistButton variantId={product.defaultVariantId} />
+                  </div>
+                </div>
+                <div className="catalog-card__body">
+                  <span className="catalog-card__category">{product.category}</span>
+                  <h3>{product.name}</h3>
+                  {product.reviewCount > 0 && (
+                    <div className="catalog-card__rating">
+                      <StarRating value={product.averageRating} size="0.8125rem" />
+                      <span>({product.reviewCount})</span>
+                    </div>
+                  )}
+                  <p>₱{product.basePrice}</p>
+                </div>
+              </Link>
+            </div>
           ))}
         </div>
       )}

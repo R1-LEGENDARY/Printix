@@ -18,6 +18,10 @@ import ProductForm from "./pages/admin/ProductForm";
 import OrderList from "./pages/admin/OrderList";
 import OrderDetail from "./pages/admin/OrderDetail";
 import CategoryList from "./pages/admin/CategoryList";
+import ReviewModeration from "./pages/admin/ReviewModeration";
+import CouponList from "./pages/admin/CouponList";
+import Analytics from "./pages/admin/Analytics";
+import Wishlist from "./pages/Wishlist";
 import Designer from "./pages/Designer";
 
 function App() {
@@ -36,6 +40,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Cart />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wishlist"
+            element={
+              <ProtectedRoute>
+                <Wishlist />
               </ProtectedRoute>
             }
           />
@@ -76,6 +88,9 @@ function App() {
             <Route path="products/new" element={<ProductForm />} />
             <Route path="products/:id" element={<ProductForm />} />
             <Route path="categories" element={<CategoryList />} />
+            <Route path="reviews" element={<ReviewModeration />} />
+            <Route path="coupons" element={<CouponList />} />
+            <Route path="analytics" element={<Analytics />} />
             <Route path="orders" element={<OrderList />} />
             <Route path="orders/:id" element={<OrderDetail />} />
           </Route>

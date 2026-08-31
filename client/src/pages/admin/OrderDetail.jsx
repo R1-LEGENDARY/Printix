@@ -73,7 +73,7 @@ function OrderDetail() {
           ) : (
             order.payments.map((p) => (
               <p key={p.id}>
-                {p.gateway} — <span className={`status-pill status-pill--${p.status === "succeeded" ? "delivered" : p.status === "failed" ? "cancelled" : "pending"}`}>{p.status}</span> — ${p.amount}
+                {p.gateway} — <span className={`status-pill status-pill--${p.status === "succeeded" ? "delivered" : p.status === "failed" ? "cancelled" : "pending"}`}>{p.status}</span> — ₱{p.amount}
               </p>
             ))
           )}
@@ -92,14 +92,14 @@ function OrderDetail() {
                 <td>{item.productName}</td>
                 <td>{item.variantLabel}</td>
                 <td>{item.quantity}</td>
-                <td>${item.unitPrice}</td>
-                <td>${item.lineTotal}</td>
+                <td>₱{item.unitPrice}</td>
+                <td>₱{item.lineTotal}</td>
                 <td>{item.hasDesign ? "Custom" : "—"}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <p className="od-total">Grand total: ${order.grandTotal}</p>
+        <p className="od-total">Grand total: ₱{order.grandTotal}</p>
       </section>
 
       <section className="od-card">

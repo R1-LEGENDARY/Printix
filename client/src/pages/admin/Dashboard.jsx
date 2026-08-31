@@ -21,7 +21,7 @@ function Dashboard() {
       <div className="dash-cards">
         <div className="dash-card">
           <span className="dash-card__label">Total revenue</span>
-          <span className="dash-card__value">${metrics.totalRevenue}</span>
+          <span className="dash-card__value">₱{metrics.totalRevenue}</span>
         </div>
         <div className="dash-card">
           <span className="dash-card__label">Total orders</span>
@@ -64,7 +64,7 @@ function Dashboard() {
                 <td><Link to={`/admin/orders/${o.id}`}>{o.orderNumber}</Link></td>
                 <td>{o.customerName}</td>
                 <td><span className={`status-pill status-pill--${o.status}`}>{o.status}</span></td>
-                <td>${o.grandTotal}</td>
+                <td>₱{o.grandTotal}</td>
               </tr>
             ))}
           </tbody>

@@ -1,0 +1,35 @@
+.cp-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  align-items: center;
+}
+
+.cp-form input,
+.cp-form select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.cp-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.cp-actions button {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+}
+
+.cp-actions button:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}

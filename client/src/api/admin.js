@@ -13,6 +13,20 @@ export const updateAdminProduct = (id, data) => api.put(`/admin/products/${id}`,
 export const toggleProductActive = (id) => api.patch(`/admin/products/${id}/toggle-active`, {}, { headers: authHeaders() }).then((r) => r.data);
 export const upsertVariant = (productId, data) => api.post(`/admin/products/${productId}/variants`, data, { headers: authHeaders() }).then((r) => r.data);
 export const upsertPrintableArea = (productId, data) => api.post(`/admin/products/${productId}/printable-areas`, data, { headers: authHeaders() }).then((r) => r.data);
+export const listCoupons = () => api.get("/admin/coupons", { headers: authHeaders() }).then((r) => r.data);
+export const createCoupon = (data) => api.post("/admin/coupons", data, { headers: authHeaders() }).then((r) => r.data);
+export const updateCoupon = (id, data) => api.put(`/admin/coupons/${id}`, data, { headers: authHeaders() }).then((r) => r.data);
+export const deleteCoupon = (id) => api.delete(`/admin/coupons/${id}`, { headers: authHeaders() });
+
+export const getSalesAnalytics = (days) =>
+  api.get("/admin/analytics", { headers: authHeaders(), params: { days } }).then((r) => r.data);
+
+export const listAllReviews = (status) =>
+  api.get("/admin/reviews", { headers: authHeaders(), params: status ? { status } : {} }).then((r) => r.data);
+export const setReviewApproval = (id, isApproved) =>
+  api.patch(`/admin/reviews/${id}/approval`, { isApproved }, { headers: authHeaders() }).then((r) => r.data);
+export const deleteReview = (id) => api.delete(`/admin/reviews/${id}`, { headers: authHeaders() });
+
 export const adjustStock = (variantId, changeQty, reason) =>
   api.patch(`/admin/variants/${variantId}/stock`, { changeQty, reason }, { headers: authHeaders() }).then((r) => r.data);
 

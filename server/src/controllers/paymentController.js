@@ -30,6 +30,14 @@ async function createPaymentSession(req, res) {
       quantity: item.quantity,
     }));
 
+    if (Number(order.discountTotal) > 0) {
+      const discountCentavos = toCentavos(order.discountTotal);
+      const lastProductItem = lineItems[lineItems.length - 1];
+      if (lastProductItem) {
+        lastProductItem.amount = Math.max(0, lastProductItem.amount - discountCentavos);
+      }
+    }
+
     if (Number(order.shippingTotal) > 0) {
       lineItems.push({
         currency: "PHP",

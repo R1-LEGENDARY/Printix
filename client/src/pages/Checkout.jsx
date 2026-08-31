@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchAddresses, createAddress, placeOrder } from "../api/checkout";
+import { fetchAddresses, createAddress, placeOrder, previewCoupon } from "../api/checkout";
 import { useCart } from "../context/CartContext";
 import Button from "../components/Button";
 import "./Checkout.css";
@@ -29,6 +29,10 @@ function Checkout() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   useEffect(() => {
     fetchAddresses()
@@ -61,6 +65,27 @@ function Checkout() {
     }
   }
 
+  async function handleApplyCoupon() {
+    if (!couponInput.trim()) return;
+    setApplyingCoupon(true);
+    setCouponError(null);
+    try {
+      const { discountAmount } = await previewCoupon(couponInput.trim(), Number(cart.subtotal));
+      setAppliedCoupon({ code: couponInput.trim().toUpperCase(), discountAmount });
+    } catch (err) {
+      setCouponError(err.response?.data?.message || "Invalid coupon.");
+      setAppliedCoupon(null);
+    } finally {
+      setApplyingCoupon(false);
+    }
+  }
+
+  function handleRemoveCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError(null);
+  }
+
   async function handlePlaceOrder() {
     if (!selectedId) {
       setError("Please select or add a shipping address.");
@@ -69,7 +94,7 @@ function Checkout() {
     setSubmitting(true);
     setError(null);
     try {
-      const order = await placeOrder(selectedId, selectedId);
+      const order = await placeOrder(selectedId, selectedId, appliedCoupon?.code);
       await refresh();
       navigate(`/orders/${order.id}`);
     } catch (err) {
@@ -82,7 +107,8 @@ function Checkout() {
   if (loading) return <p className="checkout-status">Loading checkout...</p>;
 
   const shippingEstimate = 5.0;
-  const grandTotal = (Number(cart.subtotal) + shippingEstimate).toFixed(2);
+  const discountAmount = appliedCoupon?.discountAmount || 0;
+  const grandTotal = (Number(cart.subtotal) - discountAmount + shippingEstimate).toFixed(2);
 
   return (
     <div className="checkout">
@@ -154,20 +180,48 @@ function Checkout() {
         {cart.items.map((item) => (
           <div className="checkout__summary-item" key={item.id}>
             <span>{item.variant.product.name} × {item.quantity}</span>
-            <span>${item.lineTotal}</span>
+            <span>₱{item.lineTotal}</span>
           </div>
         ))}
         <div className="checkout__summary-row">
           <span>Subtotal</span>
-          <span>${cart.subtotal}</span>
+          <span>₱{cart.subtotal}</span>
         </div>
+        <div className="checkout__coupon">
+          {appliedCoupon ? (
+            <div className="checkout__coupon-applied">
+              <span>Coupon <strong>{appliedCoupon.code}</strong> applied</span>
+              <button onClick={handleRemoveCoupon}>Remove</button>
+            </div>
+          ) : (
+            <div className="checkout__coupon-input">
+              <input
+                placeholder="Coupon code"
+                value={couponInput}
+                onChange={(e) => setCouponInput(e.target.value)}
+              />
+              <Button variant="secondary" onClick={handleApplyCoupon} disabled={applyingCoupon}>
+                {applyingCoupon ? "Checking..." : "Apply"}
+              </Button>
+            </div>
+          )}
+          {couponError && <p className="checkout-error">{couponError}</p>}
+        </div>
+
+        {discountAmount > 0 && (
+          <div className="checkout__summary-row">
+            <span>Discount</span>
+            <span>−₱{discountAmount.toFixed(2)}</span>
+          </div>
+        )}
+
         <div className="checkout__summary-row">
           <span>Shipping</span>
-          <span>${shippingEstimate.toFixed(2)}</span>
+          <span>₱{shippingEstimate.toFixed(2)}</span>
         </div>
         <div className="checkout__summary-row checkout__summary-row--total">
           <span>Total</span>
-          <span>${grandTotal}</span>
+          <span>₱{grandTotal}</span>
         </div>
 
         <Button

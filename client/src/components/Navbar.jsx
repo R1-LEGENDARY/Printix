@@ -24,6 +24,7 @@ function Navbar() {
         {user ? (
           <>
             <li><Link to="/orders">Orders</Link></li>
+            <li><Link to="/wishlist">Wishlist</Link></li>
             <li className="navbar__user">Hi, {user.name.split(" ")[0]}</li>
             <li>
               <button className="navbar__logout" onClick={handleLogout}>

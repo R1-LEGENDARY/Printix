@@ -2,6 +2,9 @@ const express = require("express");
 const { requireAuth } = require("../middleware/authMiddleware");
 const { requireAdmin } = require("../middleware/requireAdmin");
 const { getMetrics } = require("../controllers/adminController");
+const { listAllReviews, setReviewApproval, deleteReview } = require("../controllers/adminReviewController");
+const { getSalesAnalytics } = require("../controllers/adminAnalyticsController");
+const { listCoupons, createCoupon, updateCoupon, deleteCoupon } = require("../controllers/adminCouponController");
 const {
   listAllProducts,
   getProductForAdmin,
@@ -33,6 +36,16 @@ const router = express.Router();
 router.use(requireAuth, requireAdmin);
 
 router.get("/metrics", getMetrics);
+router.get("/analytics", getSalesAnalytics);
+
+router.get("/coupons", listCoupons);
+router.post("/coupons", createCoupon);
+router.put("/coupons/:id", updateCoupon);
+router.delete("/coupons/:id", deleteCoupon);
+
+router.get("/reviews", listAllReviews);
+router.patch("/reviews/:id/approval", setReviewApproval);
+router.delete("/reviews/:id", deleteReview);
 
 router.get("/products", listAllProducts);
 router.get("/products/:id", getProductForAdmin);

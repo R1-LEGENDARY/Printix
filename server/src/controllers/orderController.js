@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const { validateAndComputeDiscount } = require("./couponController");
 const prisma = new PrismaClient();
 
 function generateOrderNumber() {
@@ -13,6 +14,7 @@ function serializeOrder(order) {
     orderNumber: order.orderNumber,
     status: order.status,
     subtotal: order.subtotal,
+    discountTotal: order.discountTotal,
     shippingTotal: order.shippingTotal,
     taxTotal: order.taxTotal,
     grandTotal: order.grandTotal,
@@ -34,7 +36,7 @@ const FLAT_SHIPPING = 5.0;
 async function createOrder(req, res) {
   try {
     const userId = BigInt(req.user.userId);
-    const { shippingAddressId, billingAddressId } = req.body;
+    const { shippingAddressId, billingAddressId, couponCode } = req.body;
 
     if (!shippingAddressId || !billingAddressId) {
       return res.status(400).json({ message: "Shipping and billing address are required." });
@@ -73,7 +75,16 @@ async function createOrder(req, res) {
     const subtotal = cart.items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
     const shippingTotal = FLAT_SHIPPING;
     const taxTotal = 0;
-    const grandTotal = subtotal + shippingTotal + taxTotal;
+
+    let discountTotal = 0;
+    let appliedCoupon = null;
+    if (couponCode) {
+      const { coupon, discountAmount } = await validateAndComputeDiscount(couponCode, userId, subtotal);
+      discountTotal = discountAmount;
+      appliedCoupon = coupon;
+    }
+
+    const grandTotal = subtotal - discountTotal + shippingTotal + taxTotal;
 
     const order = await prisma.$transaction(async (tx) => {
       const created = await tx.order.create({
@@ -82,6 +93,7 @@ async function createOrder(req, res) {
           orderNumber: generateOrderNumber(),
           status: "pending",
           subtotal,
+          discountTotal,
           shippingTotal,
           taxTotal,
           grandTotal,
@@ -90,6 +102,12 @@ async function createOrder(req, res) {
           placedAt: new Date(),
         },
       });
+
+      if (appliedCoupon) {
+        await tx.couponRedemption.create({
+          data: { couponId: appliedCoupon.id, userId, orderId: created.id },
+        });
+      }
 
       for (const item of cart.items) {
         let designSnapshotId = null;

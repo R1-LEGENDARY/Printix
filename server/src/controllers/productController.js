@@ -9,18 +9,27 @@ async function listProducts(req, res) {
         category: true,
         images: { where: { isPrimary: true }, take: 1 },
         variants: true,
+        reviews: { where: { isApproved: true }, select: { rating: true } },
       },
     });
 
-    const formatted = products.map((p) => ({
-      id: p.id.toString(),
-      name: p.name,
-      slug: p.slug,
-      basePrice: p.basePrice,
-      category: p.category.name,
-      primaryImage: p.images[0]?.imageUrl || null,
-      variantCount: p.variants.length,
-    }));
+    const formatted = products.map((p) => {
+      const ratingCount = p.reviews.length;
+      const averageRating = ratingCount > 0 ? p.reviews.reduce((s, r) => s + r.rating, 0) / ratingCount : 0;
+
+      return {
+        id: p.id.toString(),
+        name: p.name,
+        slug: p.slug,
+        basePrice: p.basePrice,
+        category: p.category.name,
+        primaryImage: p.images[0]?.imageUrl || null,
+        variantCount: p.variants.length,
+        defaultVariantId: p.variants[0]?.id.toString() || null,
+        averageRating,
+        reviewCount: ratingCount,
+      };
+    });
 
     res.json(formatted);
   } catch (error) {

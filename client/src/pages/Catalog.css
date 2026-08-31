@@ -38,12 +38,32 @@
   transition: box-shadow var(--transition), transform var(--transition);
 }
 
+.catalog-card a {
+  display: block;
+}
+
+.catalog-card__wishlist {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
+.catalog-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--color-ink-soft);
+  margin: var(--space-1) 0;
+}
+
 .catalog-card:hover {
   box-shadow: 0 8px 24px rgba(22, 24, 29, 0.08);
   transform: translateY(-2px);
 }
 
 .catalog-card__image {
+  position: relative;
   aspect-ratio: 1;
   background: var(--color-accent-soft);
 }
