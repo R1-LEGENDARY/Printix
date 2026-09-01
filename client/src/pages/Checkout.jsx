@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchAddresses, createAddress, placeOrder, previewCoupon } from "../api/checkout";
+import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import Button from "../components/Button";
 import "./Checkout.css";
@@ -20,6 +21,7 @@ const emptyForm = {
 
 function Checkout() {
   const { cart, refresh } = useCart();
+  const { previewingAsCustomer } = useAuth();
   const navigate = useNavigate();
 
   const [addresses, setAddresses] = useState([]);
@@ -87,6 +89,10 @@ function Checkout() {
   }
 
   async function handlePlaceOrder() {
+    if (previewingAsCustomer) {
+      setError("You're in customer preview mode — checkout is disabled. Exit preview to place a real order.");
+      return;
+    }
     if (!selectedId) {
       setError("Please select or add a shipping address.");
       return;

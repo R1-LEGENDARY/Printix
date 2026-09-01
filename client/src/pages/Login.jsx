@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { loginUser } from "../api/auth";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/Button";
@@ -10,6 +10,7 @@ function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   function handleChange(e) {
@@ -23,7 +24,8 @@ function Login() {
     try {
       const data = await loginUser(form);
       login(data.user, data.token);
-      navigate("/");
+      const redirectTo = data.user.role === "admin" ? "/admin" : location.state?.from?.pathname || "/";
+      navigate(redirectTo);
     } catch (err) {
       setError(err.response?.data?.message || "Login failed.");
     } finally {
@@ -34,7 +36,7 @@ function Login() {
   return (
     <div className="auth">
       <h2>Welcome back</h2>
-      <p>Log in to continue designing.</p>
+      <p>{location.state?.message || "Log in to continue designing."}</p>
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <div className="field">
@@ -55,6 +57,9 @@ function Login() {
 
       <p className="auth-switch">
         Don't have an account? <Link to="/register">Sign up</Link>
+      </p>
+      <p className="auth-switch">
+        <Link to="/catalog">Continue browsing as guest →</Link>
       </p>
     </div>
   );

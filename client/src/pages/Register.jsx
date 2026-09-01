@@ -57,6 +57,9 @@ function Register() {
       <p className="auth-switch">
         Already have an account? <Link to="/login">Log in</Link>
       </p>
+      <p className="auth-switch">
+        <Link to="/catalog">Continue browsing as guest →</Link>
+      </p>
     </div>
   );
 }

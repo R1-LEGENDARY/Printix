@@ -29,6 +29,70 @@ async function listAddresses(req, res) {
   }
 }
 
+async function updateAddress(req, res) {
+  try {
+    const userId = BigInt(req.user.userId);
+    const id = BigInt(req.params.id);
+    const { label, fullName, phone, line1, line2, city, province, postalCode, country, isDefault } = req.body;
+
+    const existing = await prisma.address.findFirst({ where: { id, userId } });
+    if (!existing) return res.status(404).json({ message: "Address not found." });
+
+    if (isDefault) {
+      await prisma.address.updateMany({ where: { userId }, data: { isDefault: false } });
+    }
+
+    const updated = await prisma.address.update({
+      where: { id },
+      data: { label, fullName, phone, line1, line2, city, province, postalCode, country, isDefault: !!isDefault },
+    });
+    res.json(serialize(updated));
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update address.", error: error.message });
+  }
+}
+
+async function deleteAddress(req, res) {
+  try {
+    const userId = BigInt(req.user.userId);
+    const id = BigInt(req.params.id);
+
+    const existing = await prisma.address.findFirst({ where: { id, userId } });
+    if (!existing) return res.status(404).json({ message: "Address not found." });
+
+    const usedInOrders = await prisma.order.count({
+      where: { OR: [{ shippingAddressId: id }, { billingAddressId: id }] },
+    });
+    if (usedInOrders > 0) {
+      return res.status(409).json({ message: "Can't delete an address used on a past order." });
+    }
+
+    await prisma.address.delete({ where: { id } });
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete address.", error: error.message });
+  }
+}
+
+async function setDefaultAddress(req, res) {
+  try {
+    const userId = BigInt(req.user.userId);
+    const id = BigInt(req.params.id);
+
+    const existing = await prisma.address.findFirst({ where: { id, userId } });
+    if (!existing) return res.status(404).json({ message: "Address not found." });
+
+    await prisma.$transaction([
+      prisma.address.updateMany({ where: { userId }, data: { isDefault: false } }),
+      prisma.address.update({ where: { id }, data: { isDefault: true } }),
+    ]);
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to set default address.", error: error.message });
+  }
+}
+
 async function createAddress(req, res) {
   try {
     const userId = BigInt(req.user.userId);
@@ -52,4 +116,4 @@ async function createAddress(req, res) {
   }
 }
 
-module.exports = { listAddresses, createAddress };
+module.exports = { listAddresses, createAddress, updateAddress, deleteAddress, setDefaultAddress };

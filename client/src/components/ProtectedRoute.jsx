@@ -8,7 +8,7 @@ function ProtectedRoute({ children }) {
   if (loading) return <p className="route-status">Loading...</p>;
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location, message: "Please log in to continue." }} replace />;
   }
 
   return children;

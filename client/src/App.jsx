@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import PreviewBanner from "./components/PreviewBanner";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Register from "./pages/Register";
@@ -22,12 +23,14 @@ import ReviewModeration from "./pages/admin/ReviewModeration";
 import CouponList from "./pages/admin/CouponList";
 import Analytics from "./pages/admin/Analytics";
 import Wishlist from "./pages/Wishlist";
+import Profile from "./pages/Profile";
 import Designer from "./pages/Designer";
 
 function App() {
   return (
     <BrowserRouter>
       <div className="app">
+        <PreviewBanner />
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -48,6 +51,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Wishlist />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />
