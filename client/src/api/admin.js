@@ -11,8 +11,17 @@ export const getAdminProduct = (id) => api.get(`/admin/products/${id}`, { header
 export const createAdminProduct = (data) => api.post("/admin/products", data, { headers: authHeaders() }).then((r) => r.data);
 export const updateAdminProduct = (id, data) => api.put(`/admin/products/${id}`, data, { headers: authHeaders() }).then((r) => r.data);
 export const toggleProductActive = (id) => api.patch(`/admin/products/${id}/toggle-active`, {}, { headers: authHeaders() }).then((r) => r.data);
+export const deleteProduct = (id) => api.delete(`/admin/products/${id}`, { headers: authHeaders() });
 export const upsertVariant = (productId, data) => api.post(`/admin/products/${productId}/variants`, data, { headers: authHeaders() }).then((r) => r.data);
 export const upsertPrintableArea = (productId, data) => api.post(`/admin/products/${productId}/printable-areas`, data, { headers: authHeaders() }).then((r) => r.data);
+export const upsertShipment = (orderId, data) =>
+  api.post(`/admin/orders/${orderId}/shipment`, data, { headers: authHeaders() }).then((r) => r.data);
+
+export const listRefunds = (status) =>
+  api.get("/admin/refunds", { headers: authHeaders(), params: status ? { status } : {} }).then((r) => r.data);
+export const updateRefundStatus = (id, status) =>
+  api.patch(`/admin/refunds/${id}/status`, { status }, { headers: authHeaders() }).then((r) => r.data);
+
 export const listCoupons = () => api.get("/admin/coupons", { headers: authHeaders() }).then((r) => r.data);
 export const createCoupon = (data) => api.post("/admin/coupons", data, { headers: authHeaders() }).then((r) => r.data);
 export const updateCoupon = (id, data) => api.put(`/admin/coupons/${id}`, data, { headers: authHeaders() }).then((r) => r.data);

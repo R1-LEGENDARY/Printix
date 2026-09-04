@@ -5,17 +5,54 @@
   max-width: 400px;
 }
 
+@media (max-width: 560px) {
+  .cat-form {
+    max-width: none;
+    align-items: center;
+  }
+
+  .cat-form input {
+    min-width: 0;
+  }
+
+  .cat-form button {
+    flex: 0 0 auto;
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+    white-space: nowrap;
+  }
+}
+
 .cat-form input {
   flex: 1;
+  min-height: 40px;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.9375rem;
 }
 
+.cat-edit-input {
+  width: min(100%, 260px);
+  min-height: 34px;
+  padding: 5px 10px;
+  border: 1px solid var(--color-accent);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
 .cat-actions {
   display: flex;
   gap: var(--space-2);
+  align-items: center;
+  min-width: 130px;
+}
+
+.dash-table td:last-child {
+  white-space: nowrap;
 }
 
 .cat-actions button {
@@ -26,6 +63,8 @@
   font-size: 0.8125rem;
   cursor: pointer;
   color: var(--color-ink-soft);
+  min-height: 30px;
+  white-space: nowrap;
 }
 
 .cat-actions button:hover {

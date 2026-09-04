@@ -5,12 +5,15 @@ const { getMetrics } = require("../controllers/adminController");
 const { listAllReviews, setReviewApproval, deleteReview } = require("../controllers/adminReviewController");
 const { getSalesAnalytics } = require("../controllers/adminAnalyticsController");
 const { listCoupons, createCoupon, updateCoupon, deleteCoupon } = require("../controllers/adminCouponController");
+const { listRefunds, updateRefundStatus } = require("../controllers/adminRefundController");
+const { upsertShipment } = require("../controllers/adminShipmentController");
 const {
   listAllProducts,
   getProductForAdmin,
   createProduct,
   updateProduct,
   toggleActive,
+  deleteProduct,
   upsertVariant,
 } = require("../controllers/adminProductController");
 const { listOrders, getOrder, updateOrderStatus } = require("../controllers/adminOrderController");
@@ -43,6 +46,11 @@ router.post("/coupons", createCoupon);
 router.put("/coupons/:id", updateCoupon);
 router.delete("/coupons/:id", deleteCoupon);
 
+router.get("/refunds", listRefunds);
+router.patch("/refunds/:id/status", updateRefundStatus);
+
+router.post("/orders/:orderId/shipment", upsertShipment);
+
 router.get("/reviews", listAllReviews);
 router.patch("/reviews/:id/approval", setReviewApproval);
 router.delete("/reviews/:id", deleteReview);
@@ -52,6 +60,7 @@ router.get("/products/:id", getProductForAdmin);
 router.post("/products", createProduct);
 router.put("/products/:id", updateProduct);
 router.patch("/products/:id/toggle-active", toggleActive);
+router.delete("/products/:id", deleteProduct);
 router.post("/products/:id/variants", upsertVariant);
 router.post("/products/:id/printable-areas", upsertPrintableArea);
 router.patch("/variants/:variantId/stock", adjustStock);

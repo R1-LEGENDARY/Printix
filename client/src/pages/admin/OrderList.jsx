@@ -23,7 +23,7 @@ function OrderList() {
     <div>
       <h1>Orders</h1>
 
-      <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ marginBottom: "16px", padding: "8px" }}>
+      <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="admin-filter-select">
         {statuses.map((s) => (
           <option key={s} value={s}>{s ? s[0].toUpperCase() + s.slice(1) : "All statuses"}</option>
         ))}
@@ -36,28 +36,30 @@ function OrderList() {
       ) : orders.length === 0 ? (
         <p className="admin-status">No orders found.</p>
       ) : (
-        <table className="dash-table">
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Placed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((o) => (
-              <tr key={o.id}>
-                <td><Link to={`/admin/orders/${o.id}`}>{o.orderNumber}</Link></td>
-                <td>{o.customer.name}</td>
-                <td><span className={`status-pill status-pill--${o.status}`}>{o.status}</span></td>
-                <td>₱{o.grandTotal}</td>
-                <td>{new Date(o.placedAt).toLocaleDateString()}</td>
+        <div className="dash-table-wrap">
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Placed</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {orders.map((o) => (
+                <tr key={o.id}>
+                  <td><Link to={`/admin/orders/${o.id}`}>{o.orderNumber}</Link></td>
+                  <td>{o.customer.name}</td>
+                  <td><span className={`status-pill status-pill--${o.status}`}>{o.status}</span></td>
+                  <td>₱{o.grandTotal}</td>
+                  <td>{new Date(o.placedAt).toLocaleDateString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

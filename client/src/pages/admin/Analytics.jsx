@@ -6,11 +6,13 @@ import "./Analytics.css";
 function Analytics() {
   const [data, setData] = useState(null);
   const [days, setDays] = useState(30);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    getSalesAnalytics(days).then(setData);
+    getSalesAnalytics(days).then(setData).catch((err) => setError(err.response?.data?.message || err.message));
   }, [days]);
 
+  if (error) return <p className="admin-error">{error}</p>;
   if (!data) return <p className="admin-status">Loading analytics...</p>;
 
   const maxRevenue = Math.max(1, ...data.revenueTimeline.map((d) => d.revenue));
@@ -55,37 +57,41 @@ function Analytics() {
       {data.bestSellers.length === 0 ? (
         <p className="admin-status">No sales in this period.</p>
       ) : (
-        <table className="dash-table">
-          <thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th></tr></thead>
-          <tbody>
-            {data.bestSellers.map((p) => (
-              <tr key={p.name}>
-                <td>{p.name}</td>
-                <td>{p.quantitySold}</td>
-                <td>₱{p.revenue.toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="dash-table-wrap">
+          <table className="dash-table">
+            <thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th></tr></thead>
+            <tbody>
+              {data.bestSellers.map((p) => (
+                <tr key={p.name}>
+                  <td>{p.name}</td>
+                  <td>{p.quantitySold}</td>
+                  <td>₱{p.revenue.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       <h2 className="dash-section-title">Low stock</h2>
       {data.lowStock.length === 0 ? (
         <p className="admin-status">Nothing running low.</p>
       ) : (
-        <table className="dash-table">
-          <thead><tr><th>Product</th><th>Variant</th><th>SKU</th><th>Stock</th></tr></thead>
-          <tbody>
-            {data.lowStock.map((v) => (
-              <tr key={v.id}>
-                <td>{v.productName}</td>
-                <td>{v.color} / {v.size}</td>
-                <td>{v.sku}</td>
-                <td className={v.stockQuantity === 0 ? "an-out-of-stock" : ""}>{v.stockQuantity}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="dash-table-wrap">
+          <table className="dash-table">
+            <thead><tr><th>Product</th><th>Variant</th><th>SKU</th><th>Stock</th></tr></thead>
+            <tbody>
+              {data.lowStock.map((v) => (
+                <tr key={v.id}>
+                  <td>{v.productName}</td>
+                  <td>{v.color} / {v.size}</td>
+                  <td>{v.sku}</td>
+                  <td className={v.stockQuantity === 0 ? "an-out-of-stock" : ""}>{v.stockQuantity}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

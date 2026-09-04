@@ -45,6 +45,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
+}
+
+.oc__item-info span {
+  overflow-wrap: anywhere;
 }
 
 .oc__item-thumb {
@@ -81,4 +86,46 @@
   color: #1E8E3E;
   font-weight: 500;
   margin-bottom: var(--space-4);
+}
+
+.oc__shipment {
+  text-align: left;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.oc__shipment h3 {
+  font-size: 0.9375rem;
+  margin-bottom: var(--space-1);
+}
+
+.oc__shipment-status {
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+}
+
+@media (max-width: 560px) {
+  .oc {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .oc__item {
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+
+  .oc__item > span:last-child {
+    white-space: nowrap;
+  }
+
+  .oc > .btn,
+  .oc > a {
+    width: 100%;
+  }
+
+  .oc > a .btn {
+    width: 100%;
+  }
 }

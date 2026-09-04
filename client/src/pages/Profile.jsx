@@ -145,9 +145,11 @@ function Profile() {
               <input value={user?.email || ""} disabled />
             </label>
             {nameMessage && <p className="profile__message">{nameMessage}</p>}
-            <Button type="submit" variant="primary" disabled={savingName}>
-              {savingName ? "Saving..." : "Save changes"}
-            </Button>
+            <div className="profile__form-footer">
+              <Button type="submit" variant="primary" disabled={savingName}>
+                {savingName ? "Saving..." : "Save changes"}
+              </Button>
+            </div>
           </form>
 
           <form className="profile__form" onSubmit={handleChangePassword}>
@@ -173,9 +175,11 @@ function Profile() {
             </label>
             {passwordError && <p className="profile__error">{passwordError}</p>}
             {passwordMessage && <p className="profile__message">{passwordMessage}</p>}
-            <Button type="submit" variant="primary" disabled={savingPassword}>
-              {savingPassword ? "Updating..." : "Change password"}
-            </Button>
+            <div className="profile__form-footer">
+              <Button type="submit" variant="primary" disabled={savingPassword}>
+                {savingPassword ? "Updating..." : "Change password"}
+              </Button>
+            </div>
           </form>
         </div>
       )}

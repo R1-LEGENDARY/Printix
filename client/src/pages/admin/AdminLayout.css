@@ -2,6 +2,21 @@
   display: grid;
   grid-template-columns: 220px 1fr;
   min-height: calc(100vh - 65px);
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+@media (max-width: 900px) {
+  .admin {
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .admin__content {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
 }
 
 .admin__sidebar {
@@ -38,8 +53,26 @@
   font-weight: 600;
 }
 
+.admin select {
+  min-height: 40px;
+  padding: var(--space-2) 40px var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235B5F6B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;
+  appearance: none;
+  cursor: pointer;
+}
+
+.admin select:hover {
+  border-color: var(--color-accent);
+}
+
 .admin__content {
   padding: var(--space-5);
+  min-width: 0;
 }
 
 .admin__content h1 {
@@ -56,4 +89,24 @@
   color: #C0392B;
   font-size: 0.875rem;
   margin: var(--space-2) 0;
+}
+
+@media (max-width: 560px) {
+  .admin__content {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .admin__content h1 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin__sidebar {
+    display: none;
+  }
+
+  .admin__content {
+    padding-top: var(--space-4);
+  }
 }

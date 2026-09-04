@@ -440,15 +440,16 @@ model Shipment {
 }
 
 model Payment {
-  id             BigInt        @id @default(autoincrement())
-  orderId        BigInt        @map("order_id")
-  gateway        String        @db.VarChar(50)
-  transactionRef String        @map("transaction_ref") @db.VarChar(255)
-  amount         Decimal       @db.Decimal(10, 2)
-  status         PaymentStatus @default(pending)
-  paidAt         DateTime?     @map("paid_at")
-  createdAt      DateTime      @default(now()) @map("created_at")
-  updatedAt      DateTime      @updatedAt @map("updated_at")
+  id                  BigInt        @id @default(autoincrement())
+  orderId             BigInt        @map("order_id")
+  gateway             String        @db.VarChar(50)
+  transactionRef      String        @map("transaction_ref") @db.VarChar(255)
+  gatewayPaymentId    String?       @map("gateway_payment_id") @db.VarChar(255)
+  amount              Decimal       @db.Decimal(10, 2)
+  status              PaymentStatus @default(pending)
+  paidAt              DateTime?     @map("paid_at")
+  createdAt           DateTime      @default(now()) @map("created_at")
+  updatedAt           DateTime      @updatedAt @map("updated_at")
 
   order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
   refunds Refund[]

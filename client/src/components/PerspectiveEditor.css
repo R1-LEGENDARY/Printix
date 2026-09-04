@@ -13,8 +13,7 @@
   background: #fff;
   border-radius: var(--radius);
   padding: var(--space-4);
-  width: 800px;
-  max-width: 90vw;
+  width: min(800px, 90vw);
   height: 85vh;
   display: flex;
   flex-direction: column;

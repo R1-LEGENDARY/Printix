@@ -39,6 +39,35 @@
   margin-top: var(--space-2);
 }
 
+.od-shipment-current {
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-3);
+}
+
+.od-shipment-current strong {
+  color: var(--color-ink);
+}
+
+.od-shipment-form {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3);
+}
+
+.od-shipment-form input {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.od-shipment-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
 .od-status-form {
   display: flex;
   gap: var(--space-2);
@@ -52,6 +81,10 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.875rem;
+}
+
+.od-status-form select {
+  padding-right: 40px;
 }
 
 .od-history {
@@ -76,4 +109,60 @@
 .od-history__note {
   color: var(--color-ink-soft);
   font-style: italic;
+}
+
+@media (max-width: 560px) {
+  .od-shipment-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .od-shipment-form input {
+    width: 100%;
+  }
+
+  .od-shipment-form input[type="date"] {
+    width: 160px;
+    align-self: flex-start;
+  }
+
+  .od-shipment-actions {
+    align-items: stretch;
+    flex-direction: row;
+  }
+
+  .od-shipment-actions button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    font-size: 0.8125rem;
+  }
+
+  .od-status-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .od-status-form select,
+  .od-status-form input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .od-status-form button {
+    grid-column: 2;
+    justify-self: end;
+    width: auto;
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    font-size: 0.8125rem;
+  }
+
+  .od-history li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
 }

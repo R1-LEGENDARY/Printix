@@ -1,0 +1,79 @@
+.rr-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 24, 29, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.rr-panel {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  max-width: 480px;
+  width: 100%;
+}
+
+.rr-panel h3 {
+  font-size: 1.125rem;
+  margin-bottom: var(--space-1);
+}
+
+.rr-note {
+  font-size: 0.875rem;
+  color: var(--color-ink-soft);
+  margin-bottom: var(--space-3);
+}
+
+.rr-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.rr-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.rr-item__check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rr-item__qty {
+  width: 50px;
+  padding: 2px 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+.rr-panel textarea {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  margin-bottom: var(--space-3);
+  resize: vertical;
+}
+
+.rr-error {
+  color: #C0392B;
+  font-size: 0.875rem;
+  margin-bottom: var(--space-2);
+}
+
+.rr-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}

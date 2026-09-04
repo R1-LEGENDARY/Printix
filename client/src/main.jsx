@@ -7,6 +7,12 @@ import { WishlistProvider } from "./context/WishlistContext.jsx";
 import "./index.css";
 import "./components/Button.css";
 
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>

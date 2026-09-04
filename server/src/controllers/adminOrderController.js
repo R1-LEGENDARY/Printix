@@ -50,6 +50,16 @@ function serializeOrder(o) {
     statusHistory: o.statusHistory
       .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
       .map((h) => ({ status: h.status, note: h.note, createdAt: h.createdAt })),
+    shipment: o.shipments?.[0]
+      ? {
+          id: o.shipments[0].id.toString(),
+          carrier: o.shipments[0].carrier,
+          trackingNumber: o.shipments[0].trackingNumber,
+          shippedAt: o.shipments[0].shippedAt,
+          deliveredAt: o.shipments[0].deliveredAt,
+          estimatedDelivery: o.shipments[0].estimatedDelivery,
+        }
+      : null,
   };
 }
 
@@ -60,6 +70,7 @@ const include = {
   payments: true,
   items: true,
   statusHistory: true,
+  shipments: true,
 };
 
 async function listOrders(req, res) {

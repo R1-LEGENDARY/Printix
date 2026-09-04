@@ -1,12 +1,15 @@
 .pl-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .pl-header h1 {
   margin-bottom: 0;
+}
+
+.pl-add-link {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--space-4);
 }
 
 .pl-toggle {
@@ -22,4 +25,39 @@
 .pl-toggle:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+}
+
+.pl-actions {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: nowrap;
+  align-items: center;
+  min-width: 166px;
+  justify-content: flex-start;
+}
+
+.dash-table td:last-child {
+  white-space: nowrap;
+}
+
+.pl-toggle {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pl-actions .pl-toggle {
+  min-height: 30px;
+  min-width: 78px;
+}
+
+@media (max-width: 560px) {
+  .pl-toggle {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+.pl-toggle--danger:hover {
+  border-color: #C0392B;
+  color: #C0392B;
 }

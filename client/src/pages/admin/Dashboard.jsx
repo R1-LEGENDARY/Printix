@@ -49,26 +49,28 @@ function Dashboard() {
       {metrics.recentOrders.length === 0 ? (
         <p className="admin-status">No orders yet.</p>
       ) : (
-        <table className="dash-table">
-          <thead>
-            <tr>
-              <th>Order</th>
-              <th>Customer</th>
-              <th>Status</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {metrics.recentOrders.map((o) => (
-              <tr key={o.id}>
-                <td><Link to={`/admin/orders/${o.id}`}>{o.orderNumber}</Link></td>
-                <td>{o.customerName}</td>
-                <td><span className={`status-pill status-pill--${o.status}`}>{o.status}</span></td>
-                <td>₱{o.grandTotal}</td>
+        <div className="dash-table-wrap">
+          <table className="dash-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {metrics.recentOrders.map((o) => (
+                <tr key={o.id}>
+                  <td><Link to={`/admin/orders/${o.id}`}>{o.orderNumber}</Link></td>
+                  <td>{o.customerName}</td>
+                  <td><span className={`status-pill status-pill--${o.status}`}>{o.status}</span></td>
+                  <td>₱{o.grandTotal}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

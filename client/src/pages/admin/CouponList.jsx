@@ -22,7 +22,10 @@ function CouponList() {
 
   function load() {
     setLoading(true);
-    listCoupons().then(setCoupons).finally(() => setLoading(false));
+    listCoupons()
+      .then(setCoupons)
+      .catch((err) => setError(err.response?.data?.message || err.message))
+      .finally(() => setLoading(false));
   }
 
   useEffect(load, []);
@@ -90,31 +93,33 @@ function CouponList() {
       ) : coupons.length === 0 ? (
         <p className="admin-status">No coupons yet.</p>
       ) : (
-        <table className="dash-table">
-          <thead>
-            <tr><th>Code</th><th>Discount</th><th>Min order</th><th>Used</th><th>Expires</th><th>Status</th><th></th></tr>
-          </thead>
-          <tbody>
-            {coupons.map((c) => (
-              <tr key={c.id}>
-                <td><strong>{c.code}</strong></td>
-                <td>{c.discountType === "percent" ? `${c.value}%` : `₱${c.value}`}</td>
-                <td>{c.minOrderAmount ? `₱${c.minOrderAmount}` : "—"}</td>
-                <td>{c.redemptionCount}{c.usageLimit ? ` / ${c.usageLimit}` : ""}</td>
-                <td>{c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : "Never"}</td>
-                <td>
-                  <span className={`status-pill ${c.isActive ? "status-pill--delivered" : "status-pill--cancelled"}`}>
-                    {c.isActive ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="cp-actions">
-                  <button onClick={() => handleToggle(c)}>{c.isActive ? "Deactivate" : "Activate"}</button>
-                  <button onClick={() => handleDelete(c)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="dash-table-wrap">
+          <table className="dash-table">
+            <thead>
+              <tr><th>Code</th><th>Discount</th><th>Min order</th><th>Used</th><th>Expires</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+              {coupons.map((c) => (
+                <tr key={c.id}>
+                  <td><strong>{c.code}</strong></td>
+                  <td>{c.discountType === "percent" ? `${c.value}%` : `₱${c.value}`}</td>
+                  <td>{c.minOrderAmount ? `₱${c.minOrderAmount}` : "—"}</td>
+                  <td>{c.redemptionCount}{c.usageLimit ? ` / ${c.usageLimit}` : ""}</td>
+                  <td>{c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : "Never"}</td>
+                  <td>
+                    <span className={`status-pill ${c.isActive ? "status-pill--delivered" : "status-pill--cancelled"}`}>
+                      {c.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+                  <td className="cp-actions">
+                    <button onClick={() => handleToggle(c)}>{c.isActive ? "Deactivate" : "Activate"}</button>
+                    <button onClick={() => handleDelete(c)}>Delete</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

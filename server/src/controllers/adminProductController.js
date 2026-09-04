@@ -372,12 +372,35 @@ async function uploadDisplacementMap(req, res) {
   }
 }
 
+async function deleteProduct(req, res) {
+  try {
+    const id = BigInt(req.params.id);
+
+    const orderItemCount = await prisma.orderItem.count({ where: { variant: { productId: id } } });
+    if (orderItemCount > 0) {
+      return res.status(409).json({ message: "Can't delete a product that has order history — deactivate it instead." });
+    }
+
+    await prisma.$transaction([
+      prisma.productImage.deleteMany({ where: { productId: id } }),
+      prisma.printableArea.deleteMany({ where: { productId: id } }),
+      prisma.productVariant.deleteMany({ where: { productId: id } }),
+      prisma.product.delete({ where: { id } }),
+    ]);
+
+    res.status(204).send();
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete product.", error: error.message });
+  }
+}
+
 module.exports = {
   listAllProducts,
   getProductForAdmin,
   createProduct,
   updateProduct,
   toggleActive,
+  deleteProduct,
   upsertVariant,
   addProductImage,
   deleteProductImage,

@@ -56,6 +56,9 @@
 }
 
 .profile__form input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -83,6 +86,17 @@
 .profile__form-actions {
   display: flex;
   gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.profile__form-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.profile__form-footer .btn {
+  width: auto;
+  padding: var(--space-2) var(--space-4);
 }
 
 .profile__message {
@@ -160,4 +174,38 @@
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0;
+}
+
+@media (max-width: 560px) {
+  .profile {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .profile h2 {
+    font-size: 1.625rem;
+  }
+
+  .profile__form {
+    padding: var(--space-3);
+  }
+
+  .profile__form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .profile__form-actions .btn {
+    flex: 1 1 120px;
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.8125rem;
+  }
+
+  .profile__default-badge {
+    position: static;
+    display: inline-block;
+    margin: var(--space-1) 0;
+  }
+
+  .profile__address-actions {
+    flex-wrap: wrap;
+  }
 }

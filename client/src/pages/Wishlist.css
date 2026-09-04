@@ -30,6 +30,33 @@
   gap: var(--space-4);
 }
 
+@media (max-width: 560px) {
+  .wl {
+    padding: var(--space-4) var(--space-3);
+  }
+
+  .wl-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .wl-card h3,
+  .wl-card__variant,
+  .wl-card__price {
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .wl-card h3 {
+    font-size: 0.875rem;
+  }
+
+  .wl-card__remove {
+    padding: var(--space-1);
+    font-size: 0.75rem;
+  }
+}
+
 .wl-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);

@@ -13,6 +13,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const reviewRoutes = require("./routes/reviewRoutes");
 const wishlistRoutes = require("./routes/wishlistRoutes");
 const couponRoutes = require("./routes/couponRoutes");
+const refundRoutes = require("./routes/refundRoutes");
 const { handleWebhook } = require("./controllers/paymentController");
 
 const path = require("path");
@@ -47,6 +48,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/coupons", couponRoutes);
+app.use("/api/refunds", refundRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/designs", designRoutes);
 

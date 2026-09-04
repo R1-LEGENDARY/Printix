@@ -81,39 +81,48 @@ function CategoryList() {
       {categories.length === 0 ? (
         <p className="admin-status">No categories yet.</p>
       ) : (
-        <table className="dash-table">
-          <thead>
-            <tr><th>Name</th><th>Slug</th><th>Products</th><th></th></tr>
-          </thead>
-          <tbody>
-            {categories.map((cat) => (
-              <tr key={cat.id}>
-                <td>
-                  {editingId === cat.id ? (
-                    <input value={editName} onChange={(e) => setEditName(e.target.value)} />
-                  ) : (
-                    cat.name
-                  )}
-                </td>
-                <td>{cat.slug}</td>
-                <td>{cat.productCount}</td>
-                <td className="cat-actions">
-                  {editingId === cat.id ? (
-                    <>
-                      <button onClick={() => saveEdit(cat.id)}>Save</button>
-                      <button onClick={() => setEditingId(null)}>Cancel</button>
-                    </>
-                  ) : (
-                    <>
-                      <button onClick={() => startEdit(cat)}>Edit</button>
-                      <button onClick={() => handleDelete(cat)}>Delete</button>
-                    </>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="dash-table-wrap">
+          <table className="dash-table">
+            <thead>
+              <tr><th>Name</th><th>Slug</th><th>Products</th><th></th></tr>
+            </thead>
+            <tbody>
+              {categories.map((cat) => (
+                <tr key={cat.id}>
+                  <td>
+                    {editingId === cat.id ? (
+                      <input
+                        className="cat-edit-input"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        aria-label="Category name"
+                      />
+                    ) : (
+                      cat.name
+                    )}
+                  </td>
+                  <td>{cat.slug}</td>
+                  <td>{cat.productCount}</td>
+                  <td>
+                    <div className="cat-actions">
+                      {editingId === cat.id ? (
+                        <>
+                          <button onClick={() => saveEdit(cat.id)}>Save</button>
+                          <button onClick={() => setEditingId(null)}>Cancel</button>
+                        </>
+                      ) : (
+                        <>
+                          <button onClick={() => startEdit(cat)}>Edit</button>
+                          <button onClick={() => handleDelete(cat)}>Delete</button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

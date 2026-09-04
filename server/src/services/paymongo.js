@@ -33,4 +33,27 @@ async function createCheckoutSession({ orderNumber, lineItems, successUrl, cance
   return json.data;
 }
 
-module.exports = { createCheckoutSession };
+async function createRefund(paymentIntentOrSessionId, amountCentavos, reason) {
+  const res = await fetch(`${PAYMONGO_API}/refunds`, {
+    method: "POST",
+    headers: authHeader(),
+    body: JSON.stringify({
+      data: {
+        attributes: {
+          amount: amountCentavos,
+          payment_id: paymentIntentOrSessionId,
+          reason: "requested_by_customer",
+          notes: reason || undefined,
+        },
+      },
+    }),
+  });
+
+  const json = await res.json();
+  if (!res.ok) {
+    throw new Error(json.errors?.[0]?.detail || "PayMongo refund failed.");
+  }
+  return json.data;
+}
+
+module.exports = { createCheckoutSession, createRefund };

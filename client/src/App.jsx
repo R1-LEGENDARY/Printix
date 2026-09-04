@@ -21,6 +21,7 @@ import OrderDetail from "./pages/admin/OrderDetail";
 import CategoryList from "./pages/admin/CategoryList";
 import ReviewModeration from "./pages/admin/ReviewModeration";
 import CouponList from "./pages/admin/CouponList";
+import RefundList from "./pages/admin/RefundList";
 import Analytics from "./pages/admin/Analytics";
 import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
@@ -101,6 +102,7 @@ function App() {
             <Route path="categories" element={<CategoryList />} />
             <Route path="reviews" element={<ReviewModeration />} />
             <Route path="coupons" element={<CouponList />} />
+            <Route path="refunds" element={<RefundList />} />
             <Route path="analytics" element={<Analytics />} />
             <Route path="orders" element={<OrderList />} />
             <Route path="orders/:id" element={<OrderDetail />} />

@@ -28,6 +28,15 @@ function serializeOrder(order) {
       lineTotal: item.lineTotal,
       mockupUrl: item.designSnapshot?.mockupImageUrl || null,
     })),
+    shipment: order.shipments?.[0]
+      ? {
+          carrier: order.shipments[0].carrier,
+          trackingNumber: order.shipments[0].trackingNumber,
+          shippedAt: order.shipments[0].shippedAt,
+          deliveredAt: order.shipments[0].deliveredAt,
+          estimatedDelivery: order.shipments[0].estimatedDelivery,
+        }
+      : null,
   };
 }
 
@@ -178,7 +187,7 @@ async function createOrder(req, res) {
 
       return tx.order.findUnique({
         where: { id: created.id },
-        include: { items: { include: { designSnapshot: true } } },
+        include: { items: { include: { designSnapshot: true } }, shipments: true },
       });
     });
 
@@ -192,7 +201,7 @@ async function listMyOrders(req, res) {
   try {
     const orders = await prisma.order.findMany({
       where: { userId: BigInt(req.user.userId) },
-      include: { items: { include: { designSnapshot: true } } },
+      include: { items: { include: { designSnapshot: true } }, shipments: true },
       orderBy: { createdAt: "desc" },
     });
     res.json(orders.map(serializeOrder));

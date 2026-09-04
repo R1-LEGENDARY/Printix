@@ -75,6 +75,21 @@
   gap: var(--space-4);
 }
 
+@media (max-width: 900px) {
+  .designer__body {
+    grid-template-columns: 1fr;
+  }
+
+  .designer__toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .designer__tools {
+    flex-wrap: wrap;
+  }
+}
+
 .designer__canvas-wrap {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);

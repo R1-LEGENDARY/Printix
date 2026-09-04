@@ -14,9 +14,16 @@
   font-size: 0.875rem;
 }
 
+.cp-form select {
+  min-width: 112px;
+  padding-right: 40px;
+}
+
 .cp-actions {
   display: flex;
   gap: var(--space-2);
+  align-items: center;
+  min-width: 150px;
 }
 
 .cp-actions button {
@@ -27,9 +34,50 @@
   font-size: 0.8125rem;
   cursor: pointer;
   color: var(--color-ink-soft);
+  min-height: 30px;
+  white-space: nowrap;
 }
 
 .cp-actions button:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+}
+
+@media (max-width: 720px) {
+  .cp-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .cp-form input,
+  .cp-form select,
+  .cp-form button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .cp-form button {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 420px) {
+  .cp-form {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+
+  .cp-form input,
+  .cp-form select {
+    min-width: 0;
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
+
+  .cp-form button {
+    grid-column: 2;
+    width: 100%;
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+  }
 }

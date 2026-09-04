@@ -4,6 +4,7 @@
   border-radius: 8px;
   margin-bottom: var(--space-4);
   font-size: 0.875rem;
+  padding-right: 40px;
 }
 
 .rm-list {
@@ -24,6 +25,13 @@
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-1);
+}
+
+@media (max-width: 560px) {
+  .rm-item__header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
 }
 
 .rm-item__product {
@@ -53,6 +61,7 @@
 .rm-item__actions {
   display: flex;
   gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 .rm-item__actions button {

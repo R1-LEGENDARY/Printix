@@ -33,21 +33,33 @@
 
 .dash-section-title {
   font-size: 1.125rem;
+  margin-top: var(--space-6);
   margin-bottom: var(--space-3);
+}
+
+.dash-section-title:first-of-type {
+  margin-top: 0;
+}
+
+.dash-table-wrap {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  max-width: 100%;
 }
 
 .dash-table {
   width: 100%;
+  min-width: 480px;
   border-collapse: collapse;
   background: #fff;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  overflow: hidden;
 }
 
 .dash-table th,
 .dash-table td {
   text-align: left;
+  vertical-align: middle;
   padding: var(--space-2) var(--space-3);
   font-size: 0.875rem;
   border-bottom: 1px solid var(--color-border);
@@ -60,11 +72,13 @@
 }
 
 .status-pill {
+  display: inline-block;
   font-size: 0.75rem;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 999px;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .status-pill--pending { background: #FFF4E5; color: #B8720A; }
@@ -72,3 +86,27 @@
 .status-pill--printing, .status-pill--shipped { background: #E5F3FF; color: #0B6DBA; }
 .status-pill--delivered { background: #E5F7EA; color: #1E8E3E; }
 .status-pill--cancelled, .status-pill--refunded { background: #FBEAEA; color: #C0392B; }
+
+.admin select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235B5F6B' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  appearance: none;
+  cursor: pointer;
+}
+
+.admin select:hover {
+  border-color: var(--color-accent);
+}
+
+.admin-filter-select {
+  margin-bottom: var(--space-4);
+}

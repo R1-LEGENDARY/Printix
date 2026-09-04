@@ -4,7 +4,7 @@ import "./AdminLayout.css";
 function AdminLayout() {
   return (
     <div className="admin">
-      <aside className="admin__sidebar">
+      <aside className="admin__sidebar" aria-label="Admin navigation">
         <h2>Printix Admin</h2>
         <nav>
           <NavLink to="/admin" end>Dashboard</NavLink>
@@ -13,10 +13,11 @@ function AdminLayout() {
           <NavLink to="/admin/orders">Orders</NavLink>
           <NavLink to="/admin/reviews">Reviews</NavLink>
           <NavLink to="/admin/coupons">Coupons</NavLink>
+          <NavLink to="/admin/refunds">Refunds</NavLink>
           <NavLink to="/admin/analytics">Analytics</NavLink>
         </nav>
       </aside>
-      <main className="admin__content">
+      <main className="admin__content" id="admin-content">
         <Outlet />
       </main>
     </div>

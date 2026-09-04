@@ -3,6 +3,7 @@ import { useParams, useSearchParams, Link } from "react-router-dom";
 import api from "../api/axios";
 import { startCheckoutSession, getPaymentStatus } from "../api/payment";
 import Button from "../components/Button";
+import RefundRequestModal from "../components/RefundRequestModal";
 import "./OrderConfirmation.css";
 
 function OrderConfirmation() {
@@ -11,6 +12,7 @@ function OrderConfirmation() {
   const paymentResult = searchParams.get("payment"); 
   const [order, setOrder] = useState(null);
   const [payingNow, setPayingNow] = useState(false);
+  const [showRefundModal, setShowRefundModal] = useState(false);
 
   const refreshOrder = useCallback(() => {
     const token = localStorage.getItem("token");
@@ -105,6 +107,38 @@ function OrderConfirmation() {
 
       {order.status === "paid" && (
         <p className="oc__payment-note oc__payment-note--success">Payment confirmed. Thank you!</p>
+      )}
+
+      {order.shipment && (
+        <div className="oc__shipment">
+          <h3>Shipping</h3>
+          <p><strong>{order.shipment.carrier}</strong> — {order.shipment.trackingNumber}</p>
+          {order.shipment.deliveredAt ? (
+            <p className="oc__shipment-status">Delivered on {new Date(order.shipment.deliveredAt).toLocaleDateString()}</p>
+          ) : order.shipment.shippedAt ? (
+            <p className="oc__shipment-status">
+              Shipped {new Date(order.shipment.shippedAt).toLocaleDateString()}
+              {order.shipment.estimatedDelivery && ` — estimated ${new Date(order.shipment.estimatedDelivery).toLocaleDateString()}`}
+            </p>
+          ) : null}
+        </div>
+      )}
+
+      {["paid", "processing", "printing", "shipped", "delivered"].includes(order.status) && (
+        <Button variant="secondary" className="btn--block" onClick={() => setShowRefundModal(true)}>
+          Request a refund
+        </Button>
+      )}
+
+      {showRefundModal && (
+        <RefundRequestModal
+          order={order}
+          onClose={() => setShowRefundModal(false)}
+          onSubmitted={() => {
+            setShowRefundModal(false);
+            alert("Refund request submitted — you'll be notified once it's reviewed.");
+          }}
+        />
       )}
 
       <Link to="/catalog">

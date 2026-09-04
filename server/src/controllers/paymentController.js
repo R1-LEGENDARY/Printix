@@ -111,6 +111,7 @@ async function handleWebhook(req, res) {
       const sessionId = eventData?.id;
       const metadata = eventData?.attributes?.metadata;
       const orderId = metadata?.orderId;
+      const gatewayPaymentId = eventData?.attributes?.payments?.[0]?.id || null;
 
       if (!orderId) return res.status(200).json({ received: true });
 
@@ -122,7 +123,7 @@ async function handleWebhook(req, res) {
         if (payment && payment.status !== "succeeded") {
           await tx.payment.update({
             where: { id: payment.id },
-            data: { status: "succeeded", paidAt: new Date() },
+            data: { status: "succeeded", paidAt: new Date(), gatewayPaymentId },
           });
         }
 

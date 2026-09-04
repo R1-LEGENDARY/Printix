@@ -58,3 +58,77 @@
 .navbar__logout:hover {
   color: var(--color-accent);
 }
+
+.navbar__burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.navbar__burger span {
+  width: 22px;
+  height: 2px;
+  background: var(--color-ink);
+  border-radius: 2px;
+}
+
+.navbar__account {
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 901px) {
+  .navbar--admin .navbar__links {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar__burger {
+    display: flex;
+  }
+
+  .navbar__links {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 12px;
+    left: auto;
+    width: min(240px, calc(100vw - 24px));
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-3) var(--space-5);
+    gap: var(--space-3);
+    display: none;
+    z-index: 150;
+    box-shadow: 0 10px 24px rgba(22, 24, 29, 0.12);
+  }
+
+  .navbar__links--open {
+    display: flex;
+  }
+
+  .navbar {
+    padding: var(--space-3) var(--space-3);
+  }
+
+  .navbar__brand {
+    margin-right: auto;
+  }
+
+  .navbar__burger {
+    margin-left: var(--space-2);
+    order: 2;
+  }
+
+  .navbar__account {
+    order: 3;
+    margin-left: var(--space-2);
+  }
+}

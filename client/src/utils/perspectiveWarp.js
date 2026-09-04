@@ -40,7 +40,6 @@ function drawTriangle(ctx, srcImg, sx0, sy0, sx1, sy1, sx2, sy2, dx0, dy0, dx1, 
 function normalizeCorners(corners) {
   const points = [corners.tl, corners.tr, corners.br, corners.bl];
   const avgY = points.reduce((s, p) => s + p.y, 0) / 4;
-  const avgX = points.reduce((s, p) => s + p.x, 0) / 4;
 
   const top = points.filter((p) => p.y < avgY);
   const bottom = points.filter((p) => p.y >= avgY);
