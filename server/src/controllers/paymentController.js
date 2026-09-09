@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const { PrismaClient } = require("@prisma/client");
 const { createCheckoutSession } = require("../services/paymongo");
+const { createNotification } = require("../services/notifications");
 
 const prisma = new PrismaClient();
 
@@ -116,6 +117,7 @@ async function handleWebhook(req, res) {
       if (!orderId) return res.status(200).json({ received: true });
 
       await prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({ where: { id: BigInt(orderId) } });
         const payment = await tx.payment.findFirst({
           where: { orderId: BigInt(orderId), transactionRef: sessionId },
         });
@@ -125,9 +127,15 @@ async function handleWebhook(req, res) {
             where: { id: payment.id },
             data: { status: "succeeded", paidAt: new Date(), gatewayPaymentId },
           });
+          await createNotification(tx, {
+            userId: order.userId,
+            type: "payment_confirmation",
+            message: `Payment confirmed for order #${order.orderNumber}.`,
+            relatedType: "order",
+            relatedId: order.id,
+          });
         }
 
-        const order = await tx.order.findUnique({ where: { id: BigInt(orderId) } });
         if (order && order.status === "pending") {
           await tx.order.update({ where: { id: order.id }, data: { status: "paid" } });
           await tx.orderStatusHistory.create({

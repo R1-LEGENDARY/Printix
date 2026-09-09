@@ -71,13 +71,24 @@ export function applyFabricLighting(sourceCanvas, photoImage, opacity = 0.55) {
   textureCtx.drawImage(sourceCanvas, 0, 0);
   textureCtx.globalCompositeOperation = "source-over";
 
+  const textureData = textureCtx.getImageData(0, 0, textureCanvas.width, textureCanvas.height).data;
+  let luminanceTotal = 0;
+  let pixelCount = 0;
+  for (let i = 0; i < textureData.length; i += 4) {
+    if (textureData[i + 3] === 0) continue;
+    luminanceTotal += (textureData[i] + textureData[i + 1] + textureData[i + 2]) / 3;
+    pixelCount += 1;
+  }
+  const averageLuminance = pixelCount ? luminanceTotal / pixelCount / 255 : 1;
+  const isDarkFabric = averageLuminance < 0.45;
+
   const outCanvas = document.createElement("canvas");
   outCanvas.width = sourceCanvas.width;
   outCanvas.height = sourceCanvas.height;
   const outCtx = outCanvas.getContext("2d");
   outCtx.drawImage(sourceCanvas, 0, 0);
-  outCtx.globalCompositeOperation = "multiply";
-  outCtx.globalAlpha = opacity;
+  outCtx.globalCompositeOperation = isDarkFabric ? "screen" : "multiply";
+  outCtx.globalAlpha = isDarkFabric ? Math.min(opacity, 0.35) : opacity;
   outCtx.drawImage(textureCanvas, 0, 0);
   outCtx.globalAlpha = 1;
   outCtx.globalCompositeOperation = "source-over";

@@ -58,14 +58,26 @@ function ProductForm() {
   const [editingVariantId, setEditingVariantId] = useState(null);
   const [editingVariantForm, setEditingVariantForm] = useState(emptyVariant);
   const [editingPerspectiveFor, setEditingPerspectiveFor] = useState(null);
+  const [mockupColorByArea, setMockupColorByArea] = useState({});
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     listCategories().then(setCategories).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (isNew) return;
+    try {
+      const savedColors = window.localStorage.getItem(`printix:mockup-colors:${id}`);
+      setMockupColorByArea(savedColors ? JSON.parse(savedColors) : {});
+    } catch {
+      setMockupColorByArea({});
+    }
+  }, [id, isNew]);
 
   function loadProduct() {
     if (isNew) return;
@@ -120,7 +132,9 @@ function ProductForm() {
   }
 
   function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    if (fieldErrors[name]) setFieldErrors({ ...fieldErrors, [name]: "" });
   }
 
   function handleVariantChange(e) {
@@ -130,8 +144,17 @@ function ProductForm() {
 
   async function handleSubmit(e) {
     e.preventDefault();
+    const nextErrors = {};
+    if (!form.name.trim()) nextErrors.name = "Product name is required.";
+    if (!form.categoryId) nextErrors.categoryId = "Choose a category.";
+    if (!form.basePrice || Number(form.basePrice) <= 0) nextErrors.basePrice = "Enter a price greater than 0.";
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
+      return;
+    }
     setSaving(true);
     setError(null);
+    setFieldErrors({});
     try {
       if (isNew) {
         const created = await createAdminProduct({
@@ -151,14 +174,36 @@ function ProductForm() {
     }
   }
 
-  async function handleMockupUpload(areaId, e) {
+  function getMockupColor(areaId) {
+    return mockupColorByArea[areaId] || [...new Set(variants.map((variant) => variant.color))][0] || null;
+  }
+
+  function handleMockupColorChange(areaId, color) {
+    const nextColors = { ...mockupColorByArea, [areaId]: color };
+    setMockupColorByArea(nextColors);
+    if (!isNew) {
+      window.localStorage.setItem(`printix:mockup-colors:${id}`, JSON.stringify(nextColors));
+    }
+  }
+
+  function getMockupVariantId(areaId, color = getMockupColor(areaId)) {
+    return variants.find((variant) => variant.color === color)?.id || null;
+  }
+
+  async function handleMockupUpload(areaId, e, color) {
     const file = e.target.files[0];
     if (!file) return;
     setError(null);
     try {
-      const result = await uploadMockupTemplate(areaId, file);
+      const variantId = getMockupVariantId(areaId, color);
+      const result = await uploadMockupTemplate(areaId, file, variantId);
       setPrintableAreas((prev) =>
-        prev.map((a) => (a.id === areaId ? { ...a, mockupTemplate: { baseImageUrl: result.baseImageUrl } } : a))
+        prev.map((a) => {
+          if (a.id !== areaId) return a;
+          if (!variantId) return { ...a, mockupTemplate: result };
+          const templates = (a.mockupTemplates || []).filter((template) => template.variantId !== variantId);
+          return { ...a, mockupTemplates: [...templates, result] };
+        })
       );
     } catch (err) {
       setError(err.response?.data?.message || "Failed to upload mockup template.");
@@ -171,10 +216,15 @@ function ProductForm() {
     setError(null);
     try {
       const areaId = editingPerspectiveFor.id;
-      const { perspectiveConfig } = await savePerspectiveConfig(areaId, points);
+      const variantId = editingPerspectiveFor.mockupVariantId || null;
+      const { perspectiveConfig } = await savePerspectiveConfig(areaId, points, variantId);
       setPrintableAreas((prev) =>
         prev.map((a) =>
-          a.id === areaId ? { ...a, mockupTemplate: { ...a.mockupTemplate, perspectiveConfig } } : a
+          a.id === areaId
+            ? variantId
+              ? { ...a, mockupTemplates: (a.mockupTemplates || []).map((template) => template.variantId === variantId ? { ...template, perspectiveConfig } : template) }
+              : { ...a, mockupTemplate: { ...a.mockupTemplate, perspectiveConfig } }
+            : a
         )
       );
       setEditingPerspectiveFor(null);
@@ -282,16 +332,18 @@ function ProductForm() {
       <form className="pf-form" onSubmit={handleSubmit}>
         <label>
           Name
-          <input name="name" value={form.name} onChange={handleChange} required />
+          <input name="name" value={form.name} onChange={handleChange} aria-invalid={Boolean(fieldErrors.name)} />
+          {fieldErrors.name && <span className="pf-field-error">{fieldErrors.name}</span>}
         </label>
         <label>
           Category
-          <select name="categoryId" value={form.categoryId} onChange={handleChange} required>
+          <select name="categoryId" value={form.categoryId} onChange={handleChange} aria-invalid={Boolean(fieldErrors.categoryId)}>
             <option value="">Select a category</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          {fieldErrors.categoryId && <span className="pf-field-error">{fieldErrors.categoryId}</span>}
         </label>
         <label>
           Description
@@ -299,7 +351,8 @@ function ProductForm() {
         </label>
         <label>
           Base price
-          <input name="basePrice" type="number" step="0.01" value={form.basePrice} onChange={handleChange} required />
+          <input name="basePrice" type="number" step="0.01" value={form.basePrice} onChange={handleChange} aria-invalid={Boolean(fieldErrors.basePrice)} />
+          {fieldErrors.basePrice && <span className="pf-field-error">{fieldErrors.basePrice}</span>}
         </label>
 
         {error && <p className="admin-error">{error}</p>}
@@ -353,57 +406,65 @@ function ProductForm() {
             <div className="dash-table-wrap">
               <table className="dash-table">
                 <thead>
-                  <tr><th>Name</th><th>Mockup photo</th></tr>
+                  <tr><th>Name</th><th>Color</th><th>Mockup photo</th></tr>
                 </thead>
                 <tbody>
-                  {printableAreas.map((a) => (
-                    <tr key={a.id}>
-                      <td>
-                        {editingAreaId === a.id ? (
-                          <input
-                            value={editingAreaForm.name}
-                            onChange={(e) => setEditingAreaForm({ name: e.target.value })}
-                            aria-label="Printable area name"
-                          />
-                        ) : a.name}
-                      </td>
-                      <td>
-                        <div className="pf-area-actions">
-                          {a.mockupTemplate ? (
-                            <span className="pf-mockup-status">Uploaded ✓</span>
-                          ) : (
-                            <span className="pf-mockup-status pf-mockup-status--missing">None — using blank canvas</span>
-                          )}
-                          <label className="pf-upload-btn pf-upload-btn--small">
-                            {a.mockupTemplate ? "Replace" : "Upload"}
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp"
-                              style={{ display: "none" }}
-                              onChange={(e) => handleMockupUpload(a.id, e)}
-                            />
-                          </label>
-                          {a.mockupTemplate && (
-                            <button
-                              type="button"
-                              className="pf-upload-btn pf-upload-btn--small"
-                              onClick={() => setEditingPerspectiveFor(a)}
-                            >
-                              {a.mockupTemplate.perspectiveConfig ? "Edit print area" : "Set print area"}
-                            </button>
-                          )}
-                          {editingAreaId === a.id ? (
-                            <>
-                              <button type="button" className="pf-row-action" onClick={() => saveArea(a)}>Save</button>
-                              <button type="button" className="pf-row-action" onClick={() => setEditingAreaId(null)}>Cancel</button>
-                            </>
-                          ) : (
-                            <button type="button" className="pf-row-action" onClick={() => startEditArea(a)}>Edit</button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                  {printableAreas.flatMap((a) => {
+                    const colors = [...new Set(variants.map((variant) => variant.color))];
+                    return colors.map((color, colorIndex) => {
+                      const variantId = getMockupVariantId(a.id, color);
+                      const template = a.mockupTemplates?.find((item) => item.variantId === variantId);
+                      return (
+                        <tr key={`${a.id}-${color}`}>
+                          <td>
+                            {colorIndex === 0 && editingAreaId === a.id ? (
+                              <input
+                                value={editingAreaForm.name}
+                                onChange={(e) => setEditingAreaForm({ name: e.target.value })}
+                                aria-label="Printable area name"
+                              />
+                            ) : colorIndex === 0 ? a.name : ""}
+                          </td>
+                          <td>{color}</td>
+                          <td>
+                            <div className="pf-area-actions">
+                              {template ? (
+                                <span className="pf-mockup-status">Uploaded ✓</span>
+                              ) : (
+                                <span className="pf-mockup-status pf-mockup-status--missing">None — using blank canvas</span>
+                              )}
+                              <label className="pf-upload-btn pf-upload-btn--small">
+                                {template ? "Replace" : "Upload"}
+                                <input
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp"
+                                  style={{ display: "none" }}
+                                  onChange={(e) => handleMockupUpload(a.id, e, color)}
+                                />
+                              </label>
+                              {template && (
+                                <button
+                                  type="button"
+                                  className="pf-upload-btn pf-upload-btn--small"
+                                  onClick={() => setEditingPerspectiveFor({ ...a, mockupTemplate: template, mockupVariantId: variantId })}
+                                >
+                                  {template.perspectiveConfig ? "Edit print area" : "Set print area"}
+                                </button>
+                              )}
+                              {colorIndex === 0 && (editingAreaId === a.id ? (
+                                <>
+                                  <button type="button" className="pf-row-action" onClick={() => saveArea(a)}>Save</button>
+                                  <button type="button" className="pf-row-action" onClick={() => setEditingAreaId(null)}>Cancel</button>
+                                </>
+                              ) : (
+                                <button type="button" className="pf-row-action" onClick={() => startEditArea(a)}>Edit</button>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })}
                 </tbody>
               </table>
             </div>
@@ -411,6 +472,7 @@ function ProductForm() {
 
           <form className="pf-variant-form" onSubmit={handleAddArea}>
             <input
+              className="pf-area-name-input"
               placeholder="Name (e.g. Front)"
               value={areaForm.name}
               onChange={(e) => setAreaForm({ ...areaForm, name: e.target.value })}

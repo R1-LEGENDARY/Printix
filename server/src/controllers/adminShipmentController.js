@@ -1,5 +1,11 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { createNotification } = require("../services/notifications");
+
+const shipmentMessages = {
+  shipped: "Your order is on the way.",
+  delivered: "Your order has been delivered.",
+};
 
 function serialize(s) {
   return {
@@ -59,6 +65,13 @@ async function upsertShipment(req, res) {
             data: { orderId, status: newStatus, note: `Marked ${newStatus} with tracking ${trackingNumber}.`, changedBy: adminId },
           }),
         ]);
+        await createNotification(prisma, {
+          userId: order.userId,
+          type: `order_${newStatus}`,
+          message: `${shipmentMessages[newStatus]} Tracking number: ${trackingNumber}.`,
+          relatedType: "order",
+          relatedId: order.id,
+        });
       }
     }
 

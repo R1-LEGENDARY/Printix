@@ -39,12 +39,13 @@ export const deleteReview = (id) => api.delete(`/admin/reviews/${id}`, { headers
 export const adjustStock = (variantId, changeQty, reason) =>
   api.patch(`/admin/variants/${variantId}/stock`, { changeQty, reason }, { headers: authHeaders() }).then((r) => r.data);
 
-export const savePerspectiveConfig = (areaId, points) =>
-  api.put(`/admin/printable-areas/${areaId}/perspective`, { points }, { headers: authHeaders() }).then((r) => r.data);
+export const savePerspectiveConfig = (areaId, points, variantId) =>
+  api.put(`/admin/printable-areas/${areaId}/perspective`, { points, variantId }, { headers: authHeaders() }).then((r) => r.data);
 
-export const uploadDisplacementMap = (areaId, file) => {
+export const uploadDisplacementMap = (areaId, file, variantId) => {
   const formData = new FormData();
   formData.append("file", file);
+  if (variantId) formData.append("variantId", variantId);
   return api
     .post(`/admin/printable-areas/${areaId}/displacement-map`, formData, {
       headers: { ...authHeaders(), "Content-Type": "multipart/form-data" },
@@ -52,9 +53,10 @@ export const uploadDisplacementMap = (areaId, file) => {
     .then((r) => r.data);
 };
 
-export const uploadMockupTemplate = (areaId, file) => {
+export const uploadMockupTemplate = (areaId, file, variantId) => {
   const formData = new FormData();
   formData.append("file", file);
+  if (variantId) formData.append("variantId", variantId);
   return api
     .post(`/admin/printable-areas/${areaId}/mockup-template`, formData, {
       headers: { ...authHeaders(), "Content-Type": "multipart/form-data" },

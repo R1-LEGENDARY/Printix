@@ -1,6 +1,18 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+function serializeMockupTemplate(template) {
+  if (!template) return null;
+  return {
+    id: template.id.toString(),
+    variantId: template.variantId?.toString() || null,
+    color: template.variant?.color || null,
+    baseImageUrl: template.baseImageUrl,
+    perspectiveConfig: template.perspectiveConfig,
+    displacementMapUrl: template.displacementMapUrl,
+  };
+}
+
 function serializeProduct(p) {
   return {
     id: p.id.toString(),
@@ -26,13 +38,8 @@ function serializeProduct(p) {
       y: pa.y,
       width: pa.width,
       height: pa.height,
-      mockupTemplate: pa.mockupTemplates?.[0]
-        ? {
-            baseImageUrl: pa.mockupTemplates[0].baseImageUrl,
-            perspectiveConfig: pa.mockupTemplates[0].perspectiveConfig,
-            displacementMapUrl: pa.mockupTemplates[0].displacementMapUrl,
-          }
-        : null,
+      mockupTemplate: serializeMockupTemplate(pa.mockupTemplates?.find((template) => !template.variantId)),
+      mockupTemplates: (pa.mockupTemplates || []).filter((template) => template.variantId).map(serializeMockupTemplate),
     })),
   };
 }
@@ -41,7 +48,7 @@ const include = {
   category: true,
   images: true,
   variants: true,
-  printableAreas: { include: { mockupTemplates: true } },
+  printableAreas: { include: { mockupTemplates: { include: { variant: true } } } },
 };
 
 async function listAllProducts(req, res) {
@@ -251,6 +258,13 @@ async function upsertPrintableArea(req, res) {
       return res.status(400).json({ message: "Name, width, and height are required." });
     }
 
+    const duplicate = await prisma.printableArea.findFirst({
+      where: { productId, name, ...(id ? { NOT: { id: BigInt(id) } } : {}) },
+    });
+    if (duplicate) {
+      return res.status(409).json({ message: "A printable area with that name already exists for this product." });
+    }
+
     if (id) {
       await prisma.printableArea.update({
         where: { id: BigInt(id) },
@@ -309,21 +323,24 @@ async function adjustStock(req, res) {
 async function uploadMockupTemplate(req, res) {
   try {
     const printableAreaId = BigInt(req.params.areaId);
+    const variantId = req.body.variantId ? BigInt(req.body.variantId) : null;
+    if (!variantId) return res.status(400).json({ message: "Select a product color first." });
     if (!req.file) return res.status(400).json({ message: "No file uploaded." });
 
     const area = await prisma.printableArea.findUnique({ where: { id: printableAreaId } });
     if (!area) return res.status(404).json({ message: "Printable area not found." });
 
-    const existing = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId } });
+    const existing = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId, variantId } });
     const baseImageUrl = `/uploads/${req.file.filename}`;
 
     const template = existing
       ? await prisma.productMockupTemplate.update({ where: { id: existing.id }, data: { baseImageUrl } })
       : await prisma.productMockupTemplate.create({
-          data: { productId: area.productId, printableAreaId, baseImageUrl },
+              data: { productId: area.productId, printableAreaId, variantId, baseImageUrl },
         });
 
-    res.status(201).json({ id: template.id.toString(), baseImageUrl: template.baseImageUrl });
+            const saved = await prisma.productMockupTemplate.findUnique({ where: { id: template.id }, include: { variant: true } });
+            res.status(201).json(serializeMockupTemplate(saved));
   } catch (error) {
     res.status(500).json({ message: "Failed to upload mockup template.", error: error.message });
   }
@@ -332,6 +349,8 @@ async function uploadMockupTemplate(req, res) {
 async function savePerspectiveConfig(req, res) {
   try {
     const areaId = BigInt(req.params.areaId);
+    const variantId = req.body.variantId ? BigInt(req.body.variantId) : null;
+    if (!variantId) return res.status(400).json({ message: "Select a product color first." });
     const { points } = req.body;
 
     const valid = Array.isArray(points) && points.length >= 3 && points.every((p) => typeof p.x === "number" && typeof p.y === "number");
@@ -339,7 +358,7 @@ async function savePerspectiveConfig(req, res) {
       return res.status(400).json({ message: "points must be an array of at least 3 {x, y} coordinates." });
     }
 
-    const template = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId: areaId } });
+    const template = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId: areaId, variantId } });
     if (!template) return res.status(404).json({ message: "Upload a mockup photo for this area first." });
 
     const updated = await prisma.productMockupTemplate.update({
@@ -356,9 +375,11 @@ async function savePerspectiveConfig(req, res) {
 async function uploadDisplacementMap(req, res) {
   try {
     const areaId = BigInt(req.params.areaId);
+    const variantId = req.body.variantId ? BigInt(req.body.variantId) : null;
+    if (!variantId) return res.status(400).json({ message: "Select a product color first." });
     if (!req.file) return res.status(400).json({ message: "No file uploaded." });
 
-    const template = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId: areaId } });
+    const template = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId: areaId, variantId } });
     if (!template) return res.status(404).json({ message: "Upload a mockup photo for this area first." });
 
     const updated = await prisma.productMockupTemplate.update({

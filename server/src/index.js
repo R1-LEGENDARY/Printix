@@ -19,6 +19,7 @@ const { handleWebhook } = require("./controllers/paymentController");
 const path = require("path");
 const uploadRoutes = require("./routes/uploadRoutes");
 const designRoutes = require("./routes/designRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
 const prisma = new PrismaClient();
@@ -51,6 +52,7 @@ app.use("/api/coupons", couponRoutes);
 app.use("/api/refunds", refundRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/designs", designRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.get("/api/health", async (req, res) => {
   try {

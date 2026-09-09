@@ -1,6 +1,18 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+function serializeMockupTemplate(template) {
+  if (!template) return null;
+  return {
+    id: template.id.toString(),
+    variantId: template.variantId?.toString() || null,
+    color: template.variant?.color || null,
+    baseImageUrl: template.baseImageUrl,
+    perspectiveConfig: template.perspectiveConfig,
+    displacementMapUrl: template.displacementMapUrl,
+  };
+}
+
 async function listProducts(req, res) {
   try {
     const products = await prisma.product.findMany({
@@ -25,6 +37,8 @@ async function listProducts(req, res) {
         category: p.category.name,
         primaryImage: p.images[0]?.imageUrl || null,
         variantCount: p.variants.length,
+        colors: [...new Set(p.variants.map((v) => v.color))],
+        sizes: [...new Set(p.variants.map((v) => v.size))],
         defaultVariantId: p.variants[0]?.id.toString() || null,
         averageRating,
         reviewCount: ratingCount,
@@ -47,7 +61,7 @@ async function getProductBySlug(req, res) {
         category: true,
         images: true,
         variants: true,
-        printableAreas: { include: { mockupTemplates: true } },
+        printableAreas: { include: { mockupTemplates: { include: { variant: true } } } },
       },
     });
 
@@ -87,13 +101,8 @@ async function getProductBySlug(req, res) {
         y: pa.y,
         width: pa.width,
         height: pa.height,
-        mockupTemplate: pa.mockupTemplates?.[0]
-          ? {
-              baseImageUrl: pa.mockupTemplates[0].baseImageUrl,
-              perspectiveConfig: pa.mockupTemplates[0].perspectiveConfig,
-              displacementMapUrl: pa.mockupTemplates[0].displacementMapUrl,
-            }
-          : null,
+        mockupTemplate: serializeMockupTemplate(pa.mockupTemplates?.find((template) => !template.variantId)),
+        mockupTemplates: (pa.mockupTemplates || []).filter((template) => template.variantId).map(serializeMockupTemplate),
       })),
     };
 

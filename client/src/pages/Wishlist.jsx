@@ -4,7 +4,7 @@ import Button from "../components/Button";
 import "./Wishlist.css";
 
 function Wishlist() {
-  const { items, loading, remove } = useWishlist();
+  const { items, loading } = useWishlist();
 
   if (loading) return <p className="wl-status">Loading your wishlist...</p>;
 
@@ -14,7 +14,7 @@ function Wishlist() {
         <h2>Your wishlist is empty</h2>
         <p>Save products you're considering for later.</p>
         <Link to="/catalog">
-          <Button variant="primary">Browse products</Button>
+          <Button variant="primary" className="btn--browse-products">Browse products</Button>
         </Link>
       </div>
     );
@@ -39,13 +39,14 @@ function Wishlist() {
                   />
                 )}
               </div>
-              <h3>{item.variant.product.name}</h3>
-              <p className="wl-card__variant">{item.variant.color} / {item.variant.size}</p>
-              <p className="wl-card__price">₱{item.variant.product.basePrice}</p>
             </Link>
-            <button className="wl-card__remove" onClick={() => remove(item.variant.id)}>
-              Remove
-            </button>
+            <div className="wl-card__body">
+              <Link to={`/products/${item.variant.product.slug}`}>
+                <h3>{item.variant.product.name}</h3>
+                <p className="wl-card__variant">{item.variant.color} / {item.variant.size}</p>
+                <p className="wl-card__price">₱{item.variant.product.basePrice}</p>
+              </Link>
+            </div>
           </div>
         ))}
       </div>

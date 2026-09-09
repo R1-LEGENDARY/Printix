@@ -22,6 +22,15 @@ let tempIdCounter = -1;
 
 const MAX_EDIT_DIMENSION = 640;
 
+function UploadIcon() {
+  return (
+    <svg className="designer__upload-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 14.5v3A2.5 2.5 0 0 0 7.5 20h9a2.5 2.5 0 0 0 2.5-2.5v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function MockupBackground({ area, onSize }) {
   const mockupUrl = area.mockupTemplate?.baseImageUrl;
   const [img, setImg] = useState(null);
@@ -58,6 +67,26 @@ function MockupBackground({ area, onSize }) {
   }, [mockupUrl]);
 
   if (!img || !displaySize) {
+    if (!mockupUrl) {
+      return (
+        <>
+          <Rect x={0} y={0} width={area.width} height={area.height} fill="#F7F5F0" stroke="#E4E2DC" />
+          <KonvaText
+            x={0}
+            y={area.height / 2 - 24}
+            width={area.width}
+            text="This side of the product is not available for customization."
+            align="center"
+            fontFamily="Inter"
+            fontSize={20}
+            lineHeight={1.4}
+            fill="#5B5F6B"
+            listening={false}
+          />
+        </>
+      );
+    }
+
     return <Rect x={0} y={0} width={area.width} height={area.height} fill="#ffffff" stroke="#E4E2DC" />;
   }
 
@@ -219,7 +248,7 @@ function Designer() {
   const [searchParams] = useSearchParams();
   const variantId = searchParams.get("variant");
   const navigate = useNavigate();
-  const { add } = useCart();
+  const { cart, add } = useCart();
 
   const [product, setProduct] = useState(null);
   const [design, setDesign] = useState(null);
@@ -228,10 +257,13 @@ function Designer() {
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [cartMessage, setCartMessage] = useState(null);
+  const [previewMessage, setPreviewMessage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewAreaId, setPreviewAreaId] = useState(null);
   const [generatingPreview, setGeneratingPreview] = useState(false);
   const [canvasSize, setCanvasSize] = useState(null);
+  const initialElementsRef = useRef(null);
 
   const fileInputRef = useRef();
   const layerRef = useRef();
@@ -246,9 +278,10 @@ function Designer() {
         const { data: productData } = await api.get(`/products/${slug}`);
         setProduct(productData);
         setActiveArea(productData.printableAreas[0]);
-        const designData = await createDesign(productData.id);
+        const designData = await createDesign(productData.id, true);
         setDesign(designData);
         setElements(designData.elements || []);
+        initialElementsRef.current = JSON.stringify(designData.elements || []);
       } catch (error) {
         setLoadError(error.response?.data?.message || "Failed to load the designer.");
       }
@@ -256,7 +289,7 @@ function Designer() {
 
     init();
     
-  }, [slug]);
+  }, [slug, setElements]);
 
   useEffect(() => {
     layerRef.current?.batchDraw();
@@ -265,6 +298,14 @@ function Designer() {
   const updateElement = (updated) => {
     setElements((elements || []).map((element) => (element.id === updated.id ? updated : element)));
   };
+
+  const activeVariant = product?.variants.find((variant) => variant.id === variantId);
+  const activeMockupTemplate = activeArea?.mockupTemplates?.find(
+    (template) => template.color === activeVariant?.color
+  ) || activeArea?.mockupTemplate;
+  const activeAreaWithMockup = activeArea
+    ? { ...activeArea, mockupTemplate: activeMockupTemplate }
+    : null;
 
   const handleSave = useCallback(async () => {
     if (!design) return;
@@ -285,7 +326,7 @@ function Designer() {
       }));
 
       let mockupToAttach = previewUrl && previewAreaId === activeArea.id ? previewUrl : null;
-      if (!mockupToAttach && activeArea.mockupTemplate?.baseImageUrl) {
+      if (!mockupToAttach && activeMockupTemplate?.baseImageUrl) {
         try {
           mockupToAttach = await generateMockupDataUrl();
         } catch {
@@ -314,7 +355,7 @@ function Designer() {
     } finally {
       setSaving(false);
     }
-  }, [design, elements, setElements, previewUrl, previewAreaId, activeArea]);
+  }, [design, elements, setElements, previewUrl, previewAreaId, activeArea, activeMockupTemplate]);
 
   if (loadError) {
     return <p className="designer-status">{loadError}</p>;
@@ -324,10 +365,8 @@ function Designer() {
     return <p className="designer-status">Loading designer...</p>;
   }
 
-  const activeVariant = product.variants.find((v) => v.id === variantId);
-
   async function generateMockupDataUrl() {
-    const mockup = activeArea.mockupTemplate;
+    const mockup = activeMockupTemplate;
     if (!mockup?.baseImageUrl) return null;
       setSelectedId(null);
       await new Promise((r) => setTimeout(r, 50));
@@ -381,8 +420,13 @@ function Designer() {
   }
 
   async function handleGeneratePreview() {
-    if (!activeArea.mockupTemplate?.baseImageUrl) {
-      alert("This product has no mockup photo yet — ask an admin to upload one.");
+    if (!elements?.length) {
+      setPreviewMessage("Add a design before previewing the mockup.");
+      return;
+    }
+    setPreviewMessage(null);
+    if (!activeMockupTemplate?.baseImageUrl) {
+      setPreviewMessage("This product cannot be previewed until a mockup is uploaded.");
       return;
     }
     setGeneratingPreview(true);
@@ -391,7 +435,7 @@ function Designer() {
       setPreviewUrl(dataUrl);
       setPreviewAreaId(activeArea.id);
     } catch (err) {
-      alert(`Failed to generate preview: ${err.message}`);
+      setPreviewMessage(`Failed to generate preview: ${err.message}`);
     } finally {
       setGeneratingPreview(false);
     }
@@ -476,37 +520,38 @@ function Designer() {
   return (
     <div className="designer">
       <div className="designer__toolbar">
-        {activeVariant && (
-          <p className="designer__variant-label">
-            {product.name} — {activeVariant.color} / {activeVariant.size}
-          </p>
-        )}
-
-        <div className="designer__areas">
-          {product.printableAreas.map((area) => (
-            <button
-              key={area.id}
-              className={`designer__area-tab ${activeArea.id === area.id ? "designer__area-tab--active" : ""}`}
-              onClick={() => {
-                setCanvasSize(null);
-                setActiveArea(area);
-              }}
-            >
-              {area.name}
-            </button>
-          ))}
-        </div>
-        <div className="designer__tools">
-          <button onClick={() => fileInputRef.current?.click()}>Upload image</button>
-          <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={handleImageUpload} />
-          <button onClick={addTextElement}>Add text</button>
-          <button onClick={undo} disabled={!canUndo}>Undo</button>
-          <button onClick={redo} disabled={!canRedo}>Redo</button>
-          {selectedId && <button onClick={removeSelected}>Delete</button>}
+        <div className="designer__controls">
+          <div className="designer__control-group">
+            <span className="designer__control-label">Print area</span>
+            <div className="designer__areas">
+              {product.printableAreas.map((area) => (
+                <button
+                  key={area.id}
+                  className={`designer__area-tab ${activeArea.id === area.id ? "designer__area-tab--active" : ""}`}
+                  onClick={() => {
+                    setCanvasSize(null);
+                    setActiveArea(area);
+                  }}
+                >
+                  {area.name}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="designer__tools" aria-label="Design tools">
+            <button className="designer__tool designer__tool--accent" onClick={() => fileInputRef.current?.click()}><UploadIcon /> <span>Upload image</span></button>
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={handleImageUpload} />
+            <button className="designer__tool" onClick={addTextElement}><span aria-hidden="true">T</span> Text</button>
+            <span className="designer__tool-divider" aria-hidden="true" />
+            <button className="designer__tool designer__tool--icon" onClick={undo} disabled={!canUndo} aria-label="Undo">↶</button>
+            <button className="designer__tool designer__tool--icon" onClick={redo} disabled={!canRedo} aria-label="Redo">↷</button>
+            {selectedId && <button className="designer__tool designer__tool--danger" onClick={removeSelected}>Delete</button>}
+          </div>
         </div>
       </div>
       <div className="designer__body">
         <div className="designer__canvas-wrap">
+          <div className="designer__canvas-label">{activeArea.name} <span>Preview canvas</span></div>
           <Stage
             ref={stageRef}
             width={canvasSize?.width || activeArea.width}
@@ -517,7 +562,7 @@ function Designer() {
             }}
           >
             <Layer ref={layerRef}>
-              <MockupBackground area={activeArea} onSize={setCanvasSize} />
+              <MockupBackground area={activeAreaWithMockup} onSize={setCanvasSize} />
             </Layer>
             <Layer ref={elementsLayerRef}>
               {[...visibleElements].sort((a, b) => a.layerOrder - b.layerOrder).map((element) =>
@@ -531,17 +576,22 @@ function Designer() {
           </Stage>
         </div>
         <div className="designer__sidebar">
-          <h3>Layers</h3>
-          <ul className="designer__layers">
-            {visibleElements.map((element) => (
-              <li key={element.id} className={selectedId === element.id ? "designer__layer--active" : ""} onClick={() => setSelectedId(element.id)}>
-                {element.type === "text" ? `Text: ${element.text?.content?.slice(0, 20)}` : "Image"}
-              </li>
-            ))}
-          </ul>
+          <section className="designer__panel-section">
+            <div className="designer__panel-heading"><h2>Layers</h2><span>{visibleElements.length}</span></div>
+            {visibleElements.length > 0 ? (
+              <ul className="designer__layers">
+                {visibleElements.map((element) => (
+                  <li key={element.id} className={selectedId === element.id ? "designer__layer--active" : ""} onClick={() => setSelectedId(element.id)}>
+                    <span className="designer__layer-icon">{element.type === "text" ? "T" : "IMG"}</span>
+                    <span>{element.type === "text" ? element.text?.content?.slice(0, 20) : "Image layer"}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : <p className="designer__empty">Add text or an image to start building.</p>}
+          </section>
           {selectedElement?.type === "text" && (
-            <div className="designer__text-props">
-              <h3>Text properties</h3>
+            <section className="designer__panel-section designer__text-props">
+              <div className="designer__panel-heading"><h2>Text properties</h2></div>
               <textarea value={selectedElement.text?.content || ""} onChange={(event) => updateSelectedText("content", event.target.value)} />
               <label>Size<input type="number" value={selectedElement.text?.fontSize || 24} onChange={(event) => updateSelectedText("fontSize", Number(event.target.value))} /></label>
               <label>Color<input type="color" value={selectedElement.text?.color || "#16181D"} onChange={(event) => updateSelectedText("color", event.target.value)} /></label>
@@ -549,49 +599,56 @@ function Designer() {
                 <button className={selectedElement.text?.bold ? "active" : ""} onClick={() => updateSelectedText("bold", !selectedElement.text?.bold)}>B</button>
                 <button className={selectedElement.text?.italic ? "active" : ""} onClick={() => updateSelectedText("italic", !selectedElement.text?.italic)}>I</button>
               </div>
-            </div>
+            </section>
           )}
 
-          <Button variant="secondary" className="btn--block" onClick={handleGeneratePreview} disabled={generatingPreview}>
-            {generatingPreview ? "Generating..." : "Preview mockup"}
-          </Button>
-          {!previewUrl && (
-            <p className="designer-status designer-status--inline">
-              Tip: generate a preview before saving so your cart and order show the real mockup.
-            </p>
-          )}
-
-          {previewUrl && (
-            <MockupPreviewModal imageUrl={previewUrl} onClose={() => setPreviewUrl(null)} />
-          )}
-
-          <Button variant="secondary" className="btn--block" onClick={handleSave} disabled={saving}>
-            {saving ? "Saving..." : "Save design"}
-          </Button>
-
-          {activeVariant ? (
-            <Button
-              variant="primary"
-              className="btn--block"
-              disabled={saving || addingToCart}
-              onClick={async () => {
-                setAddingToCart(true);
-                try {
-                  await handleSave();
-                  await add(activeVariant.id, 1, design.id);
-                  navigate("/cart");
-                } finally {
-                  setAddingToCart(false);
-                }
-              }}
-            >
-              {addingToCart ? "Adding..." : "Save & add to cart"}
+          <section className="designer__panel-section designer__actions">
+            <Button variant="secondary" className="btn--block" onClick={handleGeneratePreview} disabled={generatingPreview}>
+              {generatingPreview ? "Generating..." : "Preview mockup"}
             </Button>
-          ) : (
-            <p className="designer-status designer-status--inline">
-              No product variant selected — go back and pick a color/size first.
-            </p>
-          )}
+            {previewMessage && <p className="designer-status designer-status--inline designer-status--error" role="alert">{previewMessage}</p>}
+            {!previewUrl && <p className="designer-status designer-status--inline">Preview your artwork on the product before you save.</p>}
+            {previewUrl && <MockupPreviewModal imageUrl={previewUrl} onClose={() => setPreviewUrl(null)} />}
+            {activeVariant ? (
+              <Button
+                variant="primary"
+                className="btn--block designer__cart-button"
+                disabled={saving || addingToCart}
+                onClick={async () => {
+                  setCartMessage(null);
+                  const hasElements = Boolean(elements?.length);
+                  const alreadyInCart = cart.items.some(
+                    (item) => item.designId === design.id && item.variant.id === activeVariant.id
+                  );
+                  if (!hasElements) {
+                    setCartMessage("Add a design before adding it to your cart.");
+                    return;
+                  }
+                  if (alreadyInCart) {
+                    setCartMessage("This design is already in your cart for this color and size.");
+                    return;
+                  }
+                  setAddingToCart(true);
+                  try {
+                    await handleSave();
+                    const updatedCart = await add(activeVariant.id, 1, design.id);
+                    if (!updatedCart) {
+                      setCartMessage("Please log in to add this design to your cart.");
+                      return;
+                    }
+                    navigate("/cart");
+                  } catch (error) {
+                    setCartMessage(error.response?.data?.message || "Unable to add this design to your cart.");
+                  } finally {
+                    setAddingToCart(false);
+                  }
+                }}
+              >
+                {addingToCart ? "Adding..." : "Save & add to cart"}
+              </Button>
+            ) : <p className="designer-status designer-status--inline">Choose a color and size before adding this design to your cart.</p>}
+            {cartMessage && <p className="designer-status designer-status--inline designer-status--error" role="alert">{cartMessage}</p>}
+          </section>
         </div>
       </div>
     </div>

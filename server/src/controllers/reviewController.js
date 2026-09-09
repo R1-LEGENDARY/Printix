@@ -57,8 +57,8 @@ async function listProductReviews(req, res) {
 }
 
 /*
- * DOCU: Creates a review. Only allowed for order items the requesting user actually
- * purchased and that don't already have a review — enforces verified-purchase reviews.
+ * DOCU: Creates a review and optionally links it to an eligible order item owned by
+ * the requesting user. Linked reviews are marked as verified purchases and cannot be duplicated.
  * @param {Object} req - Express request; body.productId, body.orderItemId, body.rating, body.comment
  * @param {Object} res - Express response
  * @returns {void} - Sends the created review as JSON, or an error status

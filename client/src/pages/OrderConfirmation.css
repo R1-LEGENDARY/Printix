@@ -88,6 +88,15 @@
   margin-bottom: var(--space-4);
 }
 
+.oc > .btn {
+  margin-bottom: var(--space-2);
+}
+
+.oc > a {
+  display: inline-block;
+  margin-top: var(--space-2);
+}
+
 .oc__shipment {
   text-align: left;
   border: 1px solid var(--color-border);

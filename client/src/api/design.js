@@ -5,8 +5,8 @@ function authHeaders() {
   return { Authorization: `Bearer ${token}` };
 }
 
-export async function createDesign(productId) {
-  const res = await api.post("/designs", { productId }, { headers: authHeaders() });
+export async function createDesign(productId, fresh = false) {
+  const res = await api.post("/designs", { productId, fresh }, { headers: authHeaders() });
   return res.data;
 }
 

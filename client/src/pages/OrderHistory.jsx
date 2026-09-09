@@ -75,7 +75,7 @@ function OrderHistory() {
         <p>Find something you'd like to customize.</p>
 
         <Link to="/catalog">
-          <Button variant="primary">Browse products</Button>
+          <Button variant="primary" className="btn--browse-products">Browse products</Button>
         </Link>
       </div>
     );

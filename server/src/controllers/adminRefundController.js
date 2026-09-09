@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const { createRefund: createPaymongoRefund } = require("../services/paymongo");
 const prisma = new PrismaClient();
+const { createNotification } = require("../services/notifications");
 
 function serialize(r) {
   return {
@@ -25,7 +26,7 @@ function serialize(r) {
 }
 
 const include = {
-  order: { include: { user: { select: { name: true } } } },
+  order: { include: { user: { select: { id: true, name: true } } } },
   payment: true,
   items: { include: { orderItem: true } },
 };
@@ -86,6 +87,13 @@ async function updateRefundStatus(req, res) {
     }
 
     const updated = await prisma.refund.findUnique({ where: { id }, include });
+    await createNotification(prisma, {
+      userId: refund.order.userId,
+      type: `refund_${updated.status}`,
+      message: `Refund for order #${refund.order.orderNumber} was ${updated.status}.`,
+      relatedType: "refund",
+      relatedId: refund.id,
+    });
     res.json(serialize(updated));
   } catch (error) {
     res.status(500).json({ message: "Failed to update refund.", error: error.message });

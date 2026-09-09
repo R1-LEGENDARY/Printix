@@ -2,7 +2,7 @@
   font-size: 0.9375rem;
   font-weight: 500;
   padding: var(--space-2) var(--space-4);
-  border-radius: 8px;
+  border-radius: 3px;
   border: 1px solid transparent;
   cursor: pointer;
   transition: background var(--transition), border-color var(--transition), transform var(--transition);
@@ -13,12 +13,12 @@
 }
 
 .btn--primary {
-  background: var(--color-ink);
-  color: var(--color-canvas);
+  background: var(--color-accent);
+  color: #fff;
 }
 
 .btn--primary:hover {
-  background: var(--color-accent);
+  background: var(--color-accent-deep);
 }
 
 .btn--secondary {
@@ -30,4 +30,31 @@
 .btn--secondary:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+}
+
+.btn--browse-products {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .btn--browse-products {
+    width: min(200px, 100%);
+  }
+}
+
+@media (max-width: 400px) {
+  .btn--browse-products {
+    width: min(180px, 100%);
+    padding: var(--space-2) var(--space-2);
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 340px) {
+  .btn--browse-products {
+    width: min(160px, 100%);
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 0.75rem;
+  }
 }

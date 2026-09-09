@@ -18,11 +18,13 @@ function Profile() {
   const [name, setName] = useState(user?.name || "");
   const [savingName, setSavingName] = useState(false);
   const [nameMessage, setNameMessage] = useState(null);
+  const [nameError, setNameError] = useState(null);
 
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "" });
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
+  const [passwordFieldErrors, setPasswordFieldErrors] = useState({});
 
   const [addresses, setAddresses] = useState([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
@@ -30,6 +32,7 @@ function Profile() {
   const [editingId, setEditingId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [addressError, setAddressError] = useState(null);
+  const [addressFieldErrors, setAddressFieldErrors] = useState({});
 
   function loadAddresses() {
     setLoadingAddresses(true);
@@ -42,7 +45,16 @@ function Profile() {
 
   async function handleSaveName(e) {
     e.preventDefault();
+    if (!name.trim()) {
+      setNameError("Name is required.");
+      return;
+    }
+    if (name.trim() === user?.name?.trim()) {
+      setNameError("No changes to save.");
+      return;
+    }
     setSavingName(true);
+    setNameError(null);
     setNameMessage(null);
     try {
       const updated = await updateProfile(name);
@@ -57,7 +69,16 @@ function Profile() {
 
   async function handleChangePassword(e) {
     e.preventDefault();
+    const nextErrors = {};
+    if (!passwordForm.currentPassword) nextErrors.currentPassword = "Current password is required.";
+    if (!passwordForm.newPassword) nextErrors.newPassword = "New password is required.";
+    else if (passwordForm.newPassword.length < 8) nextErrors.newPassword = "Password must be at least 8 characters.";
+    if (Object.keys(nextErrors).length > 0) {
+      setPasswordFieldErrors(nextErrors);
+      return;
+    }
     setSavingPassword(true);
+    setPasswordFieldErrors({});
     setPasswordError(null);
     setPasswordMessage(null);
     try {
@@ -80,16 +101,30 @@ function Profile() {
   function startAdd() {
     setEditingId(null);
     setAddressForm(emptyAddressForm);
+    setAddressFieldErrors({});
+    setAddressError(null);
     setShowAddForm(true);
   }
 
   function handleAddressFormChange(e) {
     const { name: field, value, type, checked } = e.target;
     setAddressForm({ ...addressForm, [field]: type === "checkbox" ? checked : value });
+    if (addressFieldErrors[field]) {
+      setAddressFieldErrors({ ...addressFieldErrors, [field]: "" });
+    }
   }
 
   async function handleAddressSubmit(e) {
     e.preventDefault();
+    const requiredFields = ["fullName", "phone", "line1", "city", "province", "postalCode", "country"];
+    const nextErrors = Object.fromEntries(
+      requiredFields.filter((field) => !addressForm[field].trim()).map((field) => [field, "This field is required."])
+    );
+    if (Object.keys(nextErrors).length > 0) {
+      setAddressFieldErrors(nextErrors);
+      return;
+    }
+    setAddressFieldErrors({});
     setAddressError(null);
     try {
       if (editingId) {
@@ -138,7 +173,8 @@ function Profile() {
             <h3>Profile info</h3>
             <label>
               Name
-              <input value={name} onChange={(e) => setName(e.target.value)} required />
+              <input value={name} onChange={(e) => { setName(e.target.value); setNameError(null); }} aria-invalid={Boolean(nameError)} />
+              {nameError && <span className="profile__field-error">{nameError}</span>}
             </label>
             <label>
               Email
@@ -159,9 +195,10 @@ function Profile() {
               <input
                 type="password"
                 value={passwordForm.currentPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                required
+                onChange={(e) => { setPasswordForm({ ...passwordForm, currentPassword: e.target.value }); setPasswordFieldErrors({ ...passwordFieldErrors, currentPassword: "" }); }}
+                aria-invalid={Boolean(passwordFieldErrors.currentPassword)}
               />
+              {passwordFieldErrors.currentPassword && <span className="profile__field-error">{passwordFieldErrors.currentPassword}</span>}
             </label>
             <label>
               New password
@@ -169,9 +206,10 @@ function Profile() {
                 type="password"
                 minLength={8}
                 value={passwordForm.newPassword}
-                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                required
+                onChange={(e) => { setPasswordForm({ ...passwordForm, newPassword: e.target.value }); setPasswordFieldErrors({ ...passwordFieldErrors, newPassword: "" }); }}
+                aria-invalid={Boolean(passwordFieldErrors.newPassword)}
               />
+              {passwordFieldErrors.newPassword && <span className="profile__field-error">{passwordFieldErrors.newPassword}</span>}
             </label>
             {passwordError && <p className="profile__error">{passwordError}</p>}
             {passwordMessage && <p className="profile__message">{passwordMessage}</p>}
@@ -214,17 +252,27 @@ function Profile() {
               {(showAddForm || editingId) && (
                 <form className="profile__form" onSubmit={handleAddressSubmit}>
                   <h3>{editingId ? "Edit address" : "New address"}</h3>
-                  <input name="fullName" placeholder="Full name" value={addressForm.fullName} onChange={handleAddressFormChange} required />
-                  <input name="phone" placeholder="Phone" value={addressForm.phone} onChange={handleAddressFormChange} required />
-                  <input name="line1" placeholder="Address line 1" value={addressForm.line1} onChange={handleAddressFormChange} required />
-                  <input name="line2" placeholder="Address line 2 (optional)" value={addressForm.line2} onChange={handleAddressFormChange} />
+                  {[["fullName", "Full name"], ["phone", "Phone"], ["line1", "Address line 1"], ["line2", "Address line 2 (optional)"]].map(([field, placeholder]) => (
+                    <div className="profile__field" key={field}>
+                      <input name={field} placeholder={placeholder} value={addressForm[field]} onChange={handleAddressFormChange} aria-invalid={Boolean(addressFieldErrors[field])} />
+                      {addressFieldErrors[field] && <span className="profile__field-error">{addressFieldErrors[field]}</span>}
+                    </div>
+                  ))}
                   <div className="profile__form-row">
-                    <input name="city" placeholder="City" value={addressForm.city} onChange={handleAddressFormChange} required />
-                    <input name="province" placeholder="Province/State" value={addressForm.province} onChange={handleAddressFormChange} required />
+                    {[["city", "City"], ["province", "Province/State"]].map(([field, placeholder]) => (
+                      <div className="profile__field" key={field}>
+                        <input name={field} placeholder={placeholder} value={addressForm[field]} onChange={handleAddressFormChange} aria-invalid={Boolean(addressFieldErrors[field])} />
+                        {addressFieldErrors[field] && <span className="profile__field-error">{addressFieldErrors[field]}</span>}
+                      </div>
+                    ))}
                   </div>
                   <div className="profile__form-row">
-                    <input name="postalCode" placeholder="Postal code" value={addressForm.postalCode} onChange={handleAddressFormChange} required />
-                    <input name="country" placeholder="Country" value={addressForm.country} onChange={handleAddressFormChange} required />
+                    {[["postalCode", "Postal code"], ["country", "Country"]].map(([field, placeholder]) => (
+                      <div className="profile__field" key={field}>
+                        <input name={field} placeholder={placeholder} value={addressForm[field]} onChange={handleAddressFormChange} aria-invalid={Boolean(addressFieldErrors[field])} />
+                        {addressFieldErrors[field] && <span className="profile__field-error">{addressFieldErrors[field]}</span>}
+                      </div>
+                    ))}
                   </div>
                   <label className="profile__checkbox">
                     <input type="checkbox" name="isDefault" checked={addressForm.isDefault} onChange={handleAddressFormChange} />

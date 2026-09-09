@@ -3,6 +3,7 @@
   gap: var(--space-2);
   margin-bottom: var(--space-4);
   max-width: 400px;
+  align-items: flex-start;
 }
 
 @media (max-width: 560px) {
@@ -30,6 +31,27 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.9375rem;
+}
+
+.cat-field {
+  flex: 1;
+  min-width: 0;
+}
+
+.cat-field input {
+  width: 100%;
+}
+
+.cat-form input[aria-invalid="true"],
+.cat-edit-input[aria-invalid="true"] {
+  border-color: #C84B4B;
+}
+
+.cat-field-error {
+  display: block;
+  color: #C84B4B;
+  font-size: 0.75rem;
+  margin-top: 4px;
 }
 
 .cat-edit-input {
@@ -70,4 +92,47 @@
 .cat-actions button:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+}
+
+@media (max-width: 400px) {
+  .cat-form {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cat-form input {
+    width: auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
+    font-size: 0.8125rem;
+  }
+
+  .cat-form button {
+    flex: 0 0 auto;
+    width: auto;
+    padding: var(--space-2);
+    font-size: 0.8125rem;
+  }
+
+  .cat-actions button {
+    padding-left: 7px;
+    padding-right: 7px;
+    font-size: 0.75rem;
+  }
+
+  .cat-actions {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 340px) {
+  .cat-form button {
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 0.75rem;
+  }
 }

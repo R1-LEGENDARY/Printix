@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { fetchCart, addToCart, updateCartItem, removeCartItem } from "../api/cart";
+import { useAuth } from "./AuthContext";
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
+  const { user, loading: authLoading } = useAuth();
   const [cart, setCart] = useState({ items: [], subtotal: "0.00", itemCount: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -19,12 +21,23 @@ export function CartProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    if (authLoading) return;
+    if (!user) {
+      localStorage.removeItem("cartId");
+      Promise.resolve().then(() => {
+        setCart({ items: [], subtotal: "0.00", itemCount: 0 });
+        setLoading(false);
+      });
+      return;
+    }
+    Promise.resolve().then(refresh);
+  }, [authLoading, refresh, user]);
 
   async function add(productVariantId, quantity = 1, designId = null) {
+    if (!user) return null;
     const data = await addToCart(productVariantId, quantity, designId);
     setCart(data);
+    return data;
   }
 
   async function updateQuantity(itemId, quantity) {

@@ -6,10 +6,12 @@ import WishlistButton from "../components/WishlistButton";
 import ProductReviews from "../components/ProductReviews";
 import "./ProductDetail.css";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 function ProductDetail() {
   const { slug } = useParams();
   const { add } = useCart();
+  const { user } = useAuth();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -17,10 +19,10 @@ function ProductDetail() {
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
   const [adding, setAdding] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+  const [authMessage, setAuthMessage] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-
     api
       .get(`/products/${slug}`)
       .then((res) => {
@@ -38,6 +40,17 @@ function ProductDetail() {
       )
       .finally(() => setLoading(false));
   }, [slug]);
+
+  useEffect(() => {
+    if (!product?.category?.name) return;
+    api.get("/products")
+      .then((res) => setRelatedProducts(
+        res.data
+          .filter((item) => item.slug !== product.slug && item.category === product.category.name)
+          .slice(0, 4)
+      ))
+      .catch(() => setRelatedProducts([]));
+  }, [product]);
 
   const colors = useMemo(
     () => [...new Set(product?.variants.map((v) => v.color) || [])],
@@ -168,7 +181,14 @@ function ProductDetail() {
         </p>
 
         <div className="pd__actions">
-          <Link to={`/design/${product.slug}?variant=${activeVariant?.id || ""}`}>
+          <Link
+            to={`/design/${product.slug}?variant=${activeVariant?.id || ""}`}
+            onClick={(event) => {
+              if (user) return;
+              event.preventDefault();
+              setAuthMessage("Please log in to customize this product.");
+            }}
+          >
             <Button variant="primary" disabled={!inStock}>
               Customize this product
             </Button>
@@ -178,6 +198,10 @@ function ProductDetail() {
             variant="secondary"
             disabled={!inStock || adding}
             onClick={async () => {
+              if (!user) {
+                setAuthMessage("Please log in to add items to your cart.");
+                return;
+              }
               setAdding(true);
 
               try {
@@ -190,7 +214,28 @@ function ProductDetail() {
             {adding ? "Adding..." : "Add to cart"}
           </Button>
         </div>
+        {authMessage && <p className="pd__auth-message" role="alert">{authMessage}</p>}
       </div>
+
+      {relatedProducts.length > 0 && (
+        <section className="pd-related" aria-label="Related products">
+          <div className="pd-related__header">
+            <h2>You may also like</h2>
+            <Link to="/catalog">View all products</Link>
+          </div>
+          <div className="pd-related__grid">
+            {relatedProducts.map((related) => (
+              <Link className="pd-related-card" to={`/products/${related.slug}`} key={related.id}>
+                <div className="pd-related-card__image">
+                  {related.primaryImage && <img src={related.primaryImage.startsWith("http") ? related.primaryImage : `http://localhost:5000${related.primaryImage}`} alt={related.name} />}
+                </div>
+                <span>{related.name}</span>
+                <strong>₱{related.basePrice}</strong>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <ProductReviews productId={product.id} />
     </div>

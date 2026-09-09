@@ -1,6 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const { validateAndComputeDiscount } = require("./couponController");
 const prisma = new PrismaClient();
+const { createNotification } = require("../services/notifications");
 
 function generateOrderNumber() {
   const year = new Date().getFullYear();
@@ -191,6 +192,13 @@ async function createOrder(req, res) {
       });
     });
 
+    await createNotification(prisma, {
+      userId,
+      type: "order_confirmation",
+      message: `Order #${order.orderNumber} has been placed successfully.`,
+      relatedType: "order",
+      relatedId: order.id,
+    });
     res.status(201).json(serializeOrder(order));
   } catch (error) {
     res.status(500).json({ message: "Failed to create order.", error: error.message });

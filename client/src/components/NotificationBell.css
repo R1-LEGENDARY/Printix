@@ -1,0 +1,126 @@
+.notification-bell {
+  position: relative;
+}
+
+.notification-bell__button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 5px;
+  border: 0;
+  background: none;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+}
+
+.notification-bell__button:hover {
+  color: var(--color-accent);
+}
+
+.notification-bell__button svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.notification-bell__count {
+  position: absolute;
+  top: -2px;
+  right: -5px;
+  min-width: 16px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 0.625rem;
+  line-height: 14px;
+  text-align: center;
+}
+
+.notification-bell__panel {
+  position: fixed;
+  top: 58px;
+  right: var(--space-5);
+  z-index: 200;
+  width: min(360px, calc(100vw - 24px));
+  max-height: calc(100vh - 72px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(22, 24, 29, 0.12);
+}
+
+@media (max-width: 560px) {
+  .notification-bell__panel {
+    position: fixed;
+    top: 68px;
+    right: 12px;
+    width: min(360px, calc(100vw - 24px));
+    max-height: calc(100vh - 84px);
+  }
+}
+
+.notification-bell__header {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.notification-bell__header button {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+}
+
+.notification-bell__list {
+  max-height: min(360px, calc(100vh - 132px));
+  overflow-y: auto;
+}
+
+.notification-bell__item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 4px;
+  padding: var(--space-3);
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: #fff;
+  color: var(--color-ink);
+  cursor: pointer;
+  text-align: left;
+}
+
+.notification-bell__item:hover,
+.notification-bell__item--unread {
+  background: var(--color-accent-soft);
+}
+
+.notification-bell__item span {
+  font-size: 0.8125rem;
+}
+
+.notification-bell__item small,
+.notification-bell__empty {
+  color: var(--color-ink-soft);
+  font-size: 0.75rem;
+}
+
+.notification-bell__empty {
+  margin: 0;
+  padding: var(--space-4);
+  text-align: center;
+}

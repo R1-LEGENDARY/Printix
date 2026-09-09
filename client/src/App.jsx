@@ -6,6 +6,8 @@ import Home from "./pages/Home";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Catalog from "./pages/Catalog";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -26,6 +28,7 @@ import Analytics from "./pages/admin/Analytics";
 import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
 import Designer from "./pages/Designer";
+import Breadcrumbs from "./components/Breadcrumbs";
 
 function App() {
   return (
@@ -33,11 +36,14 @@ function App() {
       <div className="app">
         <PreviewBanner />
         <Navbar />
+        <Breadcrumbs />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/catalog" element={<Catalog />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/products/:slug" element={<ProductDetail />} />
           <Route
             path="/cart"

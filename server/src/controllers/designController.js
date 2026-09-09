@@ -43,16 +43,18 @@ const designInclude = {
 
 async function createDesign(req, res) {
   try {
-    const { productId } = req.body;
+    const { productId, fresh } = req.body;
     if (!productId) return res.status(400).json({ message: "productId is required." });
 
     const userId = BigInt(req.user.userId);
     const productIdBig = BigInt(productId);
 
-    let design = await prisma.design.findFirst({
-      where: { userId, productId: productIdBig, status: "draft" },
-      include: designInclude,
-    });
+    let design = fresh
+      ? null
+      : await prisma.design.findFirst({
+          where: { userId, productId: productIdBig, status: "draft" },
+          include: designInclude,
+        });
 
     if (!design) {
       design = await prisma.design.create({

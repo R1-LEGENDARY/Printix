@@ -1,5 +1,5 @@
 .pd {
-  max-width: 1100px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-5);
   display: grid;
@@ -14,9 +14,8 @@
 
 .pd__gallery {
   aspect-ratio: 1;
-  border-radius: var(--radius);
   overflow: hidden;
-  background: var(--color-accent-soft);
+  background: var(--color-paper);
 }
 
 .pd__gallery img {
@@ -33,8 +32,10 @@
 }
 
 .pd__info h1 {
-  font-size: 2.25rem;
-  margin: var(--space-1) 0 var(--space-2);
+  max-width: 520px;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  line-height: 0.98;
+  margin: var(--space-2) 0 var(--space-3);
 }
 
 .pd__price-row {
@@ -75,7 +76,7 @@
 .pd__swatch {
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: 3px;
   background: #fff;
   font-size: 0.875rem;
   cursor: pointer;
@@ -83,8 +84,9 @@
 }
 
 .pd__swatch--active {
-  border-color: var(--color-accent);
-  color: var(--color-accent);
+  border-color: var(--color-accent-deep);
+  color: var(--color-accent-deep);
+  background: var(--color-accent-soft);
 }
 
 .pd__availability {
@@ -107,6 +109,70 @@
   flex-wrap: wrap;
 }
 
+.pd__auth-message {
+  margin-top: var(--space-2);
+  color: #C0392B;
+  font-size: 0.875rem;
+}
+
+.pd-related {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.pd-related__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.pd-related__header h2 {
+  font-size: 1.375rem;
+}
+
+.pd-related__header a {
+  color: var(--color-accent-deep);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.pd-related__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.pd-related-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--color-ink);
+  font-size: 0.875rem;
+}
+
+.pd-related-card__image {
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--color-paper);
+  border: 1px solid var(--color-border);
+}
+
+.pd-related-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pd-related-card strong {
+  color: var(--color-ink-soft);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
 @media (max-width: 720px) {
   .pd {
     grid-template-columns: 1fr;
@@ -115,7 +181,7 @@
   }
 
   .pd__info h1 {
-    font-size: 1.75rem;
+    font-size: 2.5rem;
   }
 
   .pd__actions {
@@ -125,5 +191,14 @@
   .pd__actions .btn {
     padding: var(--space-2) var(--space-3);
     font-size: 0.8125rem;
+  }
+
+  .pd-related__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .pd-related__header h2 {
+    font-size: 1.125rem;
   }
 }

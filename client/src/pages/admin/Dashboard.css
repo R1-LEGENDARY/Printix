@@ -6,8 +6,8 @@
 }
 
 .dash-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
   padding: var(--space-3);
   background: #fff;
   display: flex;
@@ -43,7 +43,7 @@
 
 .dash-table-wrap {
   overflow-x: auto;
-  border-radius: var(--radius);
+  border-radius: 12px;
   max-width: 100%;
 }
 
@@ -52,8 +52,8 @@
   min-width: 480px;
   border-collapse: collapse;
   background: #fff;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
 }
 
 .dash-table th,
@@ -82,7 +82,7 @@
 }
 
 .status-pill--pending { background: #FFF4E5; color: #B8720A; }
-.status-pill--paid, .status-pill--processing { background: var(--color-accent-soft); color: var(--color-accent); }
+.status-pill--paid, .status-pill--processing { background: var(--admin-accent-soft); color: var(--admin-accent); }
 .status-pill--printing, .status-pill--shipped { background: #E5F3FF; color: #0B6DBA; }
 .status-pill--delivered { background: #E5F7EA; color: #1E8E3E; }
 .status-pill--cancelled, .status-pill--refunded { background: #FBEAEA; color: #C0392B; }
@@ -109,4 +109,8 @@
 
 .admin-filter-select {
   margin-bottom: var(--space-4);
+}
+
+@media (max-width: 560px) {
+  .dash-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

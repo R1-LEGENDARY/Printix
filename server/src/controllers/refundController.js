@@ -1,5 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { createNotification } = require("../services/notifications");
 
 function serialize(r) {
   return {
@@ -87,6 +88,14 @@ async function requestRefund(req, res) {
         items: { create: refundItemsData },
       },
       include: { items: true },
+    });
+
+    await createNotification(prisma, {
+      userId,
+      type: "refund_requested",
+      message: `Refund request submitted for order #${order.orderNumber}.`,
+      relatedType: "refund",
+      relatedId: refund.id,
     });
 
     res.status(201).json(serialize(refund));

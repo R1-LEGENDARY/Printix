@@ -38,6 +38,15 @@
   padding-right: 40px;
 }
 
+.pf-form [aria-invalid="true"] {
+  border-color: #C84B4B;
+}
+
+.pf-field-error {
+  color: #C84B4B;
+  font-size: 0.75rem;
+}
+
 .pf-variants h2,
 .pf-images h2 {
   font-size: 1.125rem;
@@ -221,6 +230,12 @@
   border-radius: 8px;
   font-size: 0.875rem;
   width: 120px;
+}
+
+@media (min-width: 721px) {
+  .pf-variant-form .pf-area-name-input {
+    width: 240px;
+  }
 }
 
 .pf-variant-form select {

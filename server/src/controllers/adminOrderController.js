@@ -1,7 +1,19 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const { createNotification } = require("../services/notifications");
 
 const statusFlow = ["pending", "paid", "processing", "printing", "shipped", "delivered"];
+
+const statusMessages = {
+  pending: "is awaiting payment",
+  paid: "has been paid and is ready for processing",
+  processing: "is now being prepared",
+  printing: "is now being printed",
+  shipped: "is on the way",
+  delivered: "has been delivered",
+  cancelled: "has been cancelled",
+  refunded: "has been refunded",
+};
 
 function serializeAddress(a) {
   return {
@@ -120,6 +132,13 @@ async function updateOrderStatus(req, res) {
     });
 
     const full = await prisma.order.findUnique({ where: { id: updated.id }, include });
+    await createNotification(prisma, {
+      userId: order.userId,
+      type: `order_${status}`,
+      message: `Your order #${order.orderNumber} ${statusMessages[status] || "has an update"}.`,
+      relatedType: "order",
+      relatedId: order.id,
+    });
     res.json(serializeOrder(full));
   } catch (error) {
     res.status(500).json({ message: "Failed to update order status.", error: error.message });

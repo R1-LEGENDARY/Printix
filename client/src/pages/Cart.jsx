@@ -14,7 +14,7 @@ function Cart() {
         <h2>Your cart is empty</h2>
         <p>Find something you'd like to customize.</p>
         <Link to="/catalog">
-          <Button variant="primary">Browse products</Button>
+          <Button variant="primary" className="btn--browse-products">Browse products</Button>
         </Link>
       </div>
     );

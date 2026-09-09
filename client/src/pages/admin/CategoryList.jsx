@@ -8,8 +8,10 @@ function CategoryList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newName, setNewName] = useState("");
+  const [newNameError, setNewNameError] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
+  const [editNameError, setEditNameError] = useState("");
 
   function load() {
     setLoading(true);
@@ -23,7 +25,11 @@ function CategoryList() {
 
   async function handleCreate(e) {
     e.preventDefault();
-    if (!newName.trim()) return;
+    if (!newName.trim()) {
+      setNewNameError("Category name is required.");
+      return;
+    }
+    setNewNameError("");
     setError(null);
     try {
       await createCategory({ name: newName.trim() });
@@ -37,9 +43,15 @@ function CategoryList() {
   function startEdit(cat) {
     setEditingId(cat.id);
     setEditName(cat.name);
+    setEditNameError("");
   }
 
   async function saveEdit(id) {
+    if (!editName.trim()) {
+      setEditNameError("Category name is required.");
+      return;
+    }
+    setEditNameError("");
     setError(null);
     try {
       await updateCategory(id, { name: editName.trim() });
@@ -68,11 +80,18 @@ function CategoryList() {
       <h1>Categories</h1>
 
       <form className="cat-form" onSubmit={handleCreate}>
-        <input
-          placeholder="New category name"
-          value={newName}
-          onChange={(e) => setNewName(e.target.value)}
-        />
+        <div className="cat-field">
+          <input
+            placeholder="New category name"
+            value={newName}
+            onChange={(e) => {
+              setNewName(e.target.value);
+              if (newNameError) setNewNameError("");
+            }}
+            aria-invalid={Boolean(newNameError)}
+          />
+          {newNameError && <span className="cat-field-error">{newNameError}</span>}
+        </div>
         <Button type="submit" variant="primary">Add category</Button>
       </form>
 
@@ -91,12 +110,19 @@ function CategoryList() {
                 <tr key={cat.id}>
                   <td>
                     {editingId === cat.id ? (
-                      <input
-                        className="cat-edit-input"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        aria-label="Category name"
-                      />
+                      <>
+                        <input
+                          className="cat-edit-input"
+                          value={editName}
+                          onChange={(e) => {
+                            setEditName(e.target.value);
+                            if (editNameError) setEditNameError("");
+                          }}
+                          aria-invalid={Boolean(editNameError)}
+                          aria-label="Category name"
+                        />
+                        {editNameError && <span className="cat-field-error">{editNameError}</span>}
+                      </>
                     ) : (
                       cat.name
                     )}

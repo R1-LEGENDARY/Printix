@@ -51,8 +51,28 @@
 }
 
 @media (max-width: 560px) {
+  .pl-add-link {
+    justify-content: flex-end;
+  }
+
+  .pl-add-link .btn {
+    width: min(150px, 100%);
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.8125rem;
+    white-space: nowrap;
+  }
+
   .pl-toggle {
     padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .pl-add-link .btn {
+    width: min(130px, 100%);
+    padding-left: var(--space-2);
+    padding-right: var(--space-2);
     font-size: 0.75rem;
   }
 }
