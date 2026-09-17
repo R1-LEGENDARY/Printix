@@ -13,6 +13,7 @@ function OrderConfirmation() {
   const [order, setOrder] = useState(null);
   const [payingNow, setPayingNow] = useState(false);
   const [showRefundModal, setShowRefundModal] = useState(false);
+  const [formMessage, setFormMessage] = useState(null);
 
   const refreshOrder = useCallback(() => {
     const token = localStorage.getItem("token");
@@ -44,11 +45,12 @@ function OrderConfirmation() {
 
   async function handlePayNow() {
     setPayingNow(true);
+    setFormMessage(null);
     try {
       const { checkoutUrl } = await startCheckoutSession(id);
       window.location.href = checkoutUrl;
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to start payment.");
+      setFormMessage(err.response?.data?.message || "Failed to start payment.");
       setPayingNow(false);
     }
   }
@@ -99,6 +101,7 @@ function OrderConfirmation() {
               Confirming your payment — this updates automatically once verified...
             </p>
           )}
+          {formMessage && <p className="oc__payment-note oc__payment-note--warn">{formMessage}</p>}
           <Button variant="primary" className="btn--block" onClick={handlePayNow} disabled={payingNow}>
             {payingNow ? "Redirecting to payment..." : "Pay now"}
           </Button>
@@ -136,7 +139,7 @@ function OrderConfirmation() {
           onClose={() => setShowRefundModal(false)}
           onSubmitted={() => {
             setShowRefundModal(false);
-            alert("Refund request submitted — you'll be notified once it's reviewed.");
+            setFormMessage("Refund request submitted — you'll be notified once it's reviewed.");
           }}
         />
       )}

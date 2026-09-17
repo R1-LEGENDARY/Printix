@@ -4,7 +4,6 @@ import {
   Stage,
   Layer,
   Rect,
-  Line,
   Image as KonvaImage,
   Text as KonvaText,
   Transformer,
@@ -14,7 +13,7 @@ import { createDesign, saveDesign, uploadImage } from "../api/design";
 import { applyDisplacement, applyFabricLighting, generateDisplacementFromPhoto } from "../utils/displacementMap";
 import { useHistory } from "../hooks/useHistory";
 import Button from "../components/Button";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/useCart";
 import MockupPreviewModal from "../components/MockupPreviewModal";
 import "./Designer.css";
 
@@ -38,7 +37,6 @@ function MockupBackground({ area, onSize }) {
 
   useEffect(() => {
     if (!mockupUrl) {
-      setImg(null);
       onSize(null);
       return undefined;
     }
@@ -64,7 +62,7 @@ function MockupBackground({ area, onSize }) {
       cancelled = true;
     };
 
-  }, [mockupUrl]);
+  }, [mockupUrl, onSize]);
 
   if (!img || !displaySize) {
     if (!mockupUrl) {
@@ -91,21 +89,6 @@ function MockupBackground({ area, onSize }) {
   }
 
   return <KonvaImage image={img} x={0} y={0} width={displaySize.width} height={displaySize.height} listening={false} />;
-}
-
-function PrintAreaOutline({ points }) {
-  if (!points || points.length < 3) return null;
-  const flat = points.flatMap((p) => [p.x, p.y]);
-  return (
-    <Line
-      points={[...flat, points[0].x, points[0].y]}
-      stroke="#3D3FE0"
-      strokeWidth={2}
-      dash={[8, 6]}
-      closed={false}
-      listening={false}
-    />
-  );
 }
 
 function DesignImage({ el, isSelected, onSelect, onChange }) {
@@ -355,6 +338,8 @@ function Designer() {
     } finally {
       setSaving(false);
     }
+    // The helper is declared below the loading guards and captures these dependencies.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [design, elements, setElements, previewUrl, previewAreaId, activeArea, activeMockupTemplate]);
 
   if (loadError) {
@@ -495,7 +480,7 @@ function Designer() {
       setElements([...(elements || []), newElement]);
       setSelectedId(newElement.id);
     } catch (error) {
-      alert(error.response?.data?.message || "Image upload failed. Please try again.");
+      setPreviewMessage(error.response?.data?.message || "Image upload failed. Please try again.");
     } finally {
       event.target.value = "";
     }
@@ -539,13 +524,13 @@ function Designer() {
             </div>
           </div>
           <div className="designer__tools" aria-label="Design tools">
-            <button className="designer__tool designer__tool--accent" onClick={() => fileInputRef.current?.click()}><UploadIcon /> <span>Upload image</span></button>
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" style={{ display: "none" }} onChange={handleImageUpload} />
-            <button className="designer__tool" onClick={addTextElement}><span aria-hidden="true">T</span> Text</button>
+            <button type="button" className="designer__tool designer__tool--accent" onClick={() => fileInputRef.current?.click()}><UploadIcon /> <span>Upload image</span></button>
+            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="designer__file-input" onChange={handleImageUpload} />
+            <button type="button" className="designer__tool" onClick={addTextElement}><span aria-hidden="true">T</span> Text</button>
             <span className="designer__tool-divider" aria-hidden="true" />
-            <button className="designer__tool designer__tool--icon" onClick={undo} disabled={!canUndo} aria-label="Undo">↶</button>
-            <button className="designer__tool designer__tool--icon" onClick={redo} disabled={!canRedo} aria-label="Redo">↷</button>
-            {selectedId && <button className="designer__tool designer__tool--danger" onClick={removeSelected}>Delete</button>}
+            <button type="button" className="designer__tool designer__tool--icon" onClick={undo} disabled={!canUndo} aria-label="Undo">↶</button>
+            <button type="button" className="designer__tool designer__tool--icon" onClick={redo} disabled={!canRedo} aria-label="Redo">↷</button>
+            {selectedId && <button type="button" className="designer__tool designer__tool--danger" onClick={removeSelected}>Delete</button>}
           </div>
         </div>
       </div>

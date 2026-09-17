@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listAllReviews, setReviewApproval, deleteReview } from "../../api/admin";
 import StarRating from "../../components/StarRating";
 import "./Dashboard.css";
@@ -9,12 +9,14 @@ function ReviewModeration() {
   const [statusFilter, setStatusFilter] = useState("");
   const [loading, setLoading] = useState(true);
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true);
     listAllReviews(statusFilter || undefined).then(setReviews).finally(() => setLoading(false));
-  }
+  }, [statusFilter]);
 
-  useEffect(load, [statusFilter]);
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
 
   async function handleApproval(id, isApproved) {
     await setReviewApproval(id, isApproved);
@@ -56,9 +58,9 @@ function ReviewModeration() {
               <p className="rm-item__meta">{r.reviewerName} ({r.reviewerEmail}) — {new Date(r.createdAt).toLocaleDateString()}</p>
               {r.comment && <p className="rm-item__comment">{r.comment}</p>}
               <div className="rm-item__actions">
-                {!r.isApproved && <button onClick={() => handleApproval(r.id, true)}>Approve</button>}
-                {r.isApproved && <button onClick={() => handleApproval(r.id, false)}>Unapprove</button>}
-                <button onClick={() => handleDelete(r.id)} className="rm-item__delete">Delete</button>
+                {!r.isApproved && <button type="button" onClick={() => handleApproval(r.id, true)}>Approve</button>}
+                {r.isApproved && <button type="button" onClick={() => handleApproval(r.id, false)}>Unapprove</button>}
+                <button type="button" onClick={() => handleDelete(r.id)} className="rm-item__delete">Delete</button>
               </div>
             </div>
           ))}

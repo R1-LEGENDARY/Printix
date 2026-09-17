@@ -5,8 +5,8 @@ import Button from "../components/Button";
 import WishlistButton from "../components/WishlistButton";
 import ProductReviews from "../components/ProductReviews";
 import "./ProductDetail.css";
-import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/useCart";
+import { useAuth } from "../context/useAuth";
 
 function ProductDetail() {
   const { slug } = useParams();

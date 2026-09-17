@@ -12,11 +12,13 @@ function OrderList() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setLoading(true);
-    listAdminOrders(statusFilter || undefined)
-      .then(setOrders)
-      .catch((err) => setError(err.response?.data?.message || err.message))
-      .finally(() => setLoading(false));
+    void Promise.resolve().then(() => {
+      setLoading(true);
+      return listAdminOrders(statusFilter || undefined)
+        .then(setOrders)
+        .catch((err) => setError(err.response?.data?.message || err.message))
+        .finally(() => setLoading(false));
+    });
   }, [statusFilter]);
 
   return (

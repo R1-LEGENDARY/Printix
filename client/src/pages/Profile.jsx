@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { fetchAddresses, createAddress } from "../api/checkout";
 import { updateProfile, changePassword, updateAddress, deleteAddress, setDefaultAddress } from "../api/profile";
 import Button from "../components/Button";
@@ -40,7 +40,7 @@ function Profile() {
   }
 
   useEffect(() => {
-    if (!isAdmin) loadAddresses();
+    if (!isAdmin) void Promise.resolve().then(loadAddresses);
   }, [isAdmin]);
 
   async function handleSaveName(e) {
@@ -147,7 +147,7 @@ function Profile() {
       await deleteAddress(id);
       loadAddresses();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to delete address.");
+      setAddressError(err.response?.data?.message || "Failed to delete address.");
     }
   }
 
@@ -237,16 +237,16 @@ function Profile() {
                     <p>{addr.city}, {addr.province} {addr.postalCode}</p>
                     <p>{addr.country} — {addr.phone}</p>
                     <div className="profile__address-actions">
-                      {!addr.isDefault && <button onClick={() => handleSetDefault(addr.id)}>Set default</button>}
-                      <button onClick={() => startEdit(addr)}>Edit</button>
-                      <button onClick={() => handleDeleteAddress(addr.id)}>Delete</button>
+                      {!addr.isDefault && <button type="button" onClick={() => handleSetDefault(addr.id)}>Set default</button>}
+                      <button type="button" onClick={() => startEdit(addr)}>Edit</button>
+                      <button type="button" onClick={() => handleDeleteAddress(addr.id)}>Delete</button>
                     </div>
                   </div>
                 ))}
               </div>
 
               {!showAddForm && !editingId && (
-                <button className="profile__add-link" onClick={startAdd}>+ Add a new address</button>
+                <button type="button" className="profile__add-link" onClick={startAdd}>+ Add a new address</button>
               )}
 
               {(showAddForm || editingId) && (

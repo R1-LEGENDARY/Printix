@@ -65,6 +65,7 @@ function NotificationBell() {
         setNotifications(response.data.notifications);
         setUnreadCount(response.data.unreadCount);
       } catch {
+        return;
       }
     }
 

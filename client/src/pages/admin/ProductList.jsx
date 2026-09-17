@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { listAdminProducts, toggleProductActive, deleteProduct } from "../../api/admin";
 import Button from "../../components/Button";
@@ -9,22 +9,24 @@ function ProductList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true);
     listAdminProducts()
       .then(setProducts)
       .catch((err) => setError(err.response?.data?.message || err.message))
       .finally(() => setLoading(false));
-  }
+  }, []);
 
-  useEffect(load, []);
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
 
   async function handleToggle(id) {
     try {
       await toggleProductActive(id);
       load();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to update product.");
+      setError(err.response?.data?.message || "Failed to update product.");
     }
   }
 
@@ -34,7 +36,7 @@ function ProductList() {
       await deleteProduct(id);
       load();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to delete product.");
+      setError(err.response?.data?.message || "Failed to delete product.");
     }
   }
 
@@ -79,10 +81,10 @@ function ProductList() {
                   </td>
                   <td>
                     <div className="pl-actions">
-                      <button className="pl-toggle" onClick={() => handleToggle(p.id)}>
+                      <button type="button" className="pl-toggle" onClick={() => handleToggle(p.id)}>
                         {p.isActive ? "Deactivate" : "Activate"}
                       </button>
-                      <button className="pl-toggle pl-toggle--danger" onClick={() => handleDelete(p.id, p.name)}>
+                      <button type="button" className="pl-toggle pl-toggle--danger" onClick={() => handleDelete(p.id, p.name)}>
                         Delete
                       </button>
                     </div>

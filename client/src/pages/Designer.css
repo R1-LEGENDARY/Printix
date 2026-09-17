@@ -118,6 +118,10 @@
   vertical-align: -3px;
 }
 
+.designer__file-input {
+  display: none;
+}
+
 .designer__tool--accent .designer__upload-icon {
   color: var(--color-blue);
 }

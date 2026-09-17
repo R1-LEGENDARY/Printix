@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getProductReviews, getReviewableItems, submitReview } from "../api/reviews";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import StarRating from "./StarRating";
 import Button from "./Button";
 import "./ProductReviews.css";

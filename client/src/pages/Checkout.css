@@ -1,9 +1,10 @@
 .checkout {
   max-width: 1000px;
+  width: 100%;
   margin: 0 auto;
   padding: var(--space-6) var(--space-5);
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: var(--space-6);
 }
 
@@ -69,8 +70,12 @@
 
 .checkout__form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-2);
+}
+
+.checkout__form input {
+  min-width: 0;
 }
 
 .checkout__checkbox {
@@ -136,12 +141,13 @@
 }
 
 .checkout__coupon-input {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: var(--space-2);
 }
 
 .checkout__coupon-input input {
-  flex: 1;
+  min-width: 0;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -177,5 +183,26 @@
 @media (max-width: 720px) {
   .checkout {
     grid-template-columns: 1fr;
+    padding: var(--space-5) var(--space-3);
+  }
+
+  .checkout__form-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .checkout {
+    padding: var(--space-4) var(--space-2);
+  }
+
+  .checkout__form,
+  .checkout__form-row {
+    gap: 6px;
+  }
+
+  .checkout__form input {
+    padding: var(--space-2);
+    font-size: 0.875rem;
   }
 }

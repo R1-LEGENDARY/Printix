@@ -14,6 +14,7 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
   const [finished, setFinished] = useState((initialPoints || []).length >= 3);
   const [zoom, setZoom] = useState(1);
   const [baseScale, setBaseScale] = useState(1);
+  const [imageSize, setImageSize] = useState(null);
 
   function handleImageLoad() {
     const container = scrollRef.current;
@@ -22,6 +23,7 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
 
     const scaleX = container.clientWidth / img.naturalWidth;
     const scaleY = container.clientHeight / img.naturalHeight;
+    setImageSize({ width: img.naturalWidth, height: img.naturalHeight });
     setBaseScale(Math.min(scaleX, scaleY));
   }
 
@@ -91,8 +93,8 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
   }
 
   function toPercent(p) {
-    const w = imgRef.current?.naturalWidth || 1;
-    const h = imgRef.current?.naturalHeight || 1;
+    const w = imageSize?.width || 1;
+    const h = imageSize?.height || 1;
     return { x: (p.x / w) * 100, y: (p.y / h) * 100 };
   }
 
@@ -113,7 +115,7 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
         >
           <div
             className="pe-image-wrap"
-            style={{ width: imgRef.current ? imgRef.current.naturalWidth * baseScale * zoom : "100%" }}
+            style={imageSize ? { width: imageSize.width * baseScale * zoom } : undefined}
           >
             <img ref={imgRef} src={imageUrl} alt="Mockup" onClick={handleClick} onLoad={handleImageLoad} draggable={false} />
             <svg className="pe-svg" viewBox="0 0 100 100" preserveAspectRatio="none">

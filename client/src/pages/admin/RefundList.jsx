@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listRefunds, updateRefundStatus } from "../../api/admin";
 import "./Dashboard.css";
 import "./RefundList.css";
@@ -9,21 +9,26 @@ function RefundList() {
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true);
     listRefunds(statusFilter || undefined).then(setRefunds).finally(() => setLoading(false));
-  }
+  }, [statusFilter]);
 
-  useEffect(load, [statusFilter]);
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
+
+  const [error, setError] = useState(null);
 
   async function handleAction(id, status) {
     if (status === "approved" && !window.confirm("This will process the refund through PayMongo. Continue?")) return;
     setProcessingId(id);
+    setError(null);
     try {
       await updateRefundStatus(id, status);
       load();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to update refund.");
+      setError(err.response?.data?.message || "Failed to update refund.");
     } finally {
       setProcessingId(null);
     }
@@ -40,6 +45,8 @@ function RefundList() {
         <option value="completed">Completed</option>
         <option value="rejected">Rejected</option>
       </select>
+
+      {error && <p className="admin-error">{error}</p>}
 
       {loading ? (
         <p className="admin-status">Loading refunds...</p>
@@ -64,10 +71,10 @@ function RefundList() {
               </ul>
               {r.status === "requested" && (
                 <div className="rf-item__actions">
-                  <button disabled={processingId === r.id} onClick={() => handleAction(r.id, "approved")}>
+                  <button type="button" disabled={processingId === r.id} onClick={() => handleAction(r.id, "approved")}>
                     {processingId === r.id ? "Processing..." : "Approve & refund"}
                   </button>
-                  <button disabled={processingId === r.id} onClick={() => handleAction(r.id, "rejected")}>
+                  <button type="button" disabled={processingId === r.id} onClick={() => handleAction(r.id, "rejected")}>
                     Reject
                   </button>
                 </div>

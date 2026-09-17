@@ -1,8 +1,7 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { fetchCart, addToCart, updateCartItem, removeCartItem } from "../api/cart";
-import { useAuth } from "./AuthContext";
-
-const CartContext = createContext(null);
+import { useAuth } from "./useAuth";
+import { CartContext } from "./CartContextValue";
 
 export function CartProvider({ children }) {
   const { user, loading: authLoading } = useAuth();
@@ -57,6 +56,3 @@ export function CartProvider({ children }) {
   );
 }
 
-export function useCart() {
-  return useContext(CartContext);
-}

@@ -9,7 +9,7 @@ function RefundRequestModal({ order, onClose, onSubmitted }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  function toggleItem(itemId, maxQty) {
+  function toggleItem(itemId) {
     setSelected((prev) => {
       const next = { ...prev };
       if (next[itemId]) delete next[itemId];

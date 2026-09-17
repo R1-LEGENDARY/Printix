@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { loginWithGoogle, registerUser } from "../api/auth";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import Button from "../components/Button";
 import GoogleAuthButton from "../components/GoogleAuthButton";
 import "./Auth.css";

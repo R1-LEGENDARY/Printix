@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listCategories, createCategory, updateCategory, deleteCategory } from "../../api/admin";
 import Button from "../../components/Button";
 import "./CategoryList.css";
@@ -13,15 +13,17 @@ function CategoryList() {
   const [editName, setEditName] = useState("");
   const [editNameError, setEditNameError] = useState("");
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true);
     listCategories()
       .then(setCategories)
       .catch((err) => setError(err.response?.data?.message || err.message))
       .finally(() => setLoading(false));
-  }
+  }, []);
 
-  useEffect(load, []);
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
 
   async function handleCreate(e) {
     e.preventDefault();

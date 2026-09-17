@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listCoupons, createCoupon, updateCoupon, deleteCoupon } from "../../api/admin";
 import Button from "../../components/Button";
 import "./Dashboard.css";
@@ -21,15 +21,17 @@ function CouponList() {
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
 
-  function load() {
+  const load = useCallback(() => {
     setLoading(true);
     listCoupons()
       .then(setCoupons)
       .catch((err) => setError(err.response?.data?.message || err.message))
       .finally(() => setLoading(false));
-  }
+  }, []);
 
-  useEffect(load, []);
+  useEffect(() => {
+    void Promise.resolve().then(load);
+  }, [load]);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -81,7 +83,7 @@ function CouponList() {
       await deleteCoupon(coupon.id);
       load();
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to delete coupon.");
+      setError(err.response?.data?.message || "Failed to delete coupon.");
     }
   }
 
@@ -144,8 +146,8 @@ function CouponList() {
                     </span>
                   </td>
                   <td className="cp-actions">
-                    <button onClick={() => handleToggle(c)}>{c.isActive ? "Deactivate" : "Activate"}</button>
-                    <button onClick={() => handleDelete(c)}>Delete</button>
+                    <button type="button" onClick={() => handleToggle(c)}>{c.isActive ? "Deactivate" : "Activate"}</button>
+                    <button type="button" onClick={() => handleDelete(c)}>Delete</button>
                   </td>
                 </tr>
               ))}

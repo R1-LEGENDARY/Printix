@@ -1,8 +1,7 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { fetchWishlist, addWishlistItem, removeWishlistItem } from "../api/wishlist";
-import { useAuth } from "./AuthContext";
-
-const WishlistContext = createContext(null);
+import { useAuth } from "./useAuth";
+import { WishlistContext } from "./WishlistContextValue";
 
 /*
  * DOCU: Provides wishlist state (list + variant-id set for fast lookups)
@@ -32,7 +31,7 @@ export function WishlistProvider({ children }) {
   }, [user]);
 
   useEffect(() => {
-    refresh();
+    void Promise.resolve().then(refresh);
   }, [refresh]);
 
   async function add(productVariantId) {
@@ -56,6 +55,3 @@ export function WishlistProvider({ children }) {
   );
 }
 
-export function useWishlist() {
-  return useContext(WishlistContext);
-}

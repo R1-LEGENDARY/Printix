@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchAddresses, createAddress, placeOrder, previewCoupon } from "../api/checkout";
-import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/useAuth";
+import { useCart } from "../context/useCart";
 import Button from "../components/Button";
 import "./Checkout.css";
 

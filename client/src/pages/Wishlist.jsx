@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useWishlist } from "../context/WishlistContext";
+import { useWishlist } from "../context/useWishlist";
 import Button from "../components/Button";
 import "./Wishlist.css";
 

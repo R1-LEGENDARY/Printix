@@ -1,5 +1,5 @@
-import { useAuth } from "../context/AuthContext";
-import { useWishlist } from "../context/WishlistContext";
+import { useAuth } from "../context/useAuth";
+import { useWishlist } from "../context/useWishlist";
 import "./WishlistButton.css";
 
 /*

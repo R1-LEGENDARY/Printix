@@ -1,19 +1,15 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import api from "../api/axios";
-
-const AuthContext = createContext(null);
+import { AuthContext } from "./AuthContextValue";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => Boolean(localStorage.getItem("token")));
   const [previewingAsCustomer, setPreviewingAsCustomer] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    if (!token) return;
 
     api
       .get("/auth/me", { headers: { Authorization: `Bearer ${token}` } })
@@ -53,6 +49,3 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}

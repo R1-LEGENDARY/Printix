@@ -71,12 +71,14 @@ function ProductForm() {
 
   useEffect(() => {
     if (isNew) return;
-    try {
-      const savedColors = window.localStorage.getItem(`printix:mockup-colors:${id}`);
-      setMockupColorByArea(savedColors ? JSON.parse(savedColors) : {});
-    } catch {
-      setMockupColorByArea({});
-    }
+    void Promise.resolve().then(() => {
+      try {
+        const savedColors = window.localStorage.getItem(`printix:mockup-colors:${id}`);
+        setMockupColorByArea(savedColors ? JSON.parse(savedColors) : {});
+      } catch {
+        setMockupColorByArea({});
+      }
+    });
   }, [id, isNew]);
 
   function loadProduct() {
@@ -165,7 +167,7 @@ function ProductForm() {
         navigate(`/admin/products/${created.id}`);
       } else {
         await updateAdminProduct(id, { ...form, basePrice: Number(form.basePrice) });
-        alert("Product updated.");
+        setError(null);
       }
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save product.");
@@ -176,14 +178,6 @@ function ProductForm() {
 
   function getMockupColor(areaId) {
     return mockupColorByArea[areaId] || [...new Set(variants.map((variant) => variant.color))][0] || null;
-  }
-
-  function handleMockupColorChange(areaId, color) {
-    const nextColors = { ...mockupColorByArea, [areaId]: color };
-    setMockupColorByArea(nextColors);
-    if (!isNew) {
-      window.localStorage.setItem(`printix:mockup-colors:${id}`, JSON.stringify(nextColors));
-    }
   }
 
   function getMockupVariantId(areaId, color = getMockupColor(areaId)) {
@@ -433,15 +427,18 @@ function ProductForm() {
                               ) : (
                                 <span className="pf-mockup-status pf-mockup-status--missing">None — using blank canvas</span>
                               )}
-                              <label className="pf-upload-btn pf-upload-btn--small">
-                                {template ? "Replace" : "Upload"}
-                                <input
-                                  type="file"
-                                  accept="image/jpeg,image/png,image/webp"
-                                  style={{ display: "none" }}
-                                  onChange={(e) => handleMockupUpload(a.id, e, color)}
-                                />
-                              </label>
+                              <div className="pf-file-control">
+                                <label className="pf-file-picker">
+                                  <span>{template ? "Replace" : "Upload"}</span>
+                                  <input
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp"
+                                    className="pf-upload-input"
+                                    onChange={(e) => handleMockupUpload(a.id, e, color)}
+                                  />
+                                </label>
+                                {!template && <span className="pf-file-name">No file uploaded</span>}
+                              </div>
                               {template && (
                                 <button
                                   type="button"

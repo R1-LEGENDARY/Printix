@@ -153,13 +153,54 @@
 }
 
 .pf-upload-btn {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.875rem;
   cursor: pointer;
   color: var(--color-ink);
+  background: #fff;
+}
+
+.pf-file-control {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.pf-file-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-ink);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.pf-upload-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.pf-file-name {
+  min-width: 108px;
+  font-size: 0.8125rem;
+  color: var(--color-ink-soft);
 }
 
 .pf-upload-btn--small {
@@ -177,6 +218,16 @@
 }
 
 .pf-area-actions .pf-upload-btn--small {
+  margin-left: 0;
+}
+
+.pf-area-actions .pf-file-picker,
+.pf-area-actions .pf-upload-btn--small,
+.pf-area-actions .pf-row-action {
+  box-sizing: border-box;
+  width: 158px;
+  min-width: 158px;
+  height: 32px;
   margin-left: 0;
 }
 
@@ -300,6 +351,38 @@
 @media (max-width: 720px) {
   .pf-form {
     max-width: none;
+  }
+
+  .pf-area-actions {
+    display: grid;
+    grid-template-columns: 190px 190px 150px 90px;
+    gap: var(--space-2);
+    min-width: 640px;
+  }
+
+  .pf-area-actions .pf-mockup-status {
+    min-width: 190px;
+    overflow: visible;
+    white-space: nowrap;
+  }
+
+  .pf-area-actions .pf-file-control {
+    min-width: 190px;
+    flex-wrap: nowrap;
+  }
+
+  .pf-area-actions .pf-file-name {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .pf-area-actions .pf-file-picker,
+  .pf-area-actions .pf-upload-btn--small,
+  .pf-area-actions .pf-row-action {
+    width: 100%;
+    min-width: 0;
+    padding-right: 4px;
+    padding-left: 4px;
   }
 
   .pf-variant-form input {
