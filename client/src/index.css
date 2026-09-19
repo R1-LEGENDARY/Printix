@@ -23,6 +23,34 @@
   --transition: 150ms ease;
 }
 
+html[data-theme="dark"] {
+  --color-canvas: #0f172a;
+  --color-paper: #111827;
+  --color-ink: #f8fafc;
+  --color-ink-soft: #cbd5e1;
+  --color-accent: #f59e7a;
+  --color-accent-deep: #fb923c;
+  --color-accent-soft: rgba(245, 158, 122, 0.12);
+  --color-border: #334155;
+  --color-blue: #7dd3fc;
+}
+
+html[data-theme="dark"] .admin {
+  --admin-canvas: #0f172a;
+  --admin-ink: #f8fafc;
+  --admin-ink-soft: #cbd5e1;
+  --admin-accent: #f59e7a;
+  --admin-accent-soft: rgba(245, 158, 122, 0.12);
+  --admin-border: #334155;
+  --color-canvas: var(--admin-canvas);
+  --color-paper: #111827;
+  --color-ink: var(--admin-ink);
+  --color-ink-soft: var(--admin-ink-soft);
+  --color-accent: var(--admin-accent);
+  --color-accent-soft: var(--admin-accent-soft);
+  --color-border: var(--admin-border);
+}
+
 * {
   margin: 0;
   padding: 0;

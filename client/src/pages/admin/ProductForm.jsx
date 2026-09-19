@@ -15,11 +15,24 @@ import {
   savePerspectiveConfig,
 } from "../../api/admin";
 import Button from "../../components/Button";
+import ConfirmModal from "../../components/ConfirmModal";
 import PerspectiveEditor from "../../components/PerspectiveEditor";
+import { mediaUrl } from "../../utils/mediaUrl";
 import "./ProductForm.css";
 
-const emptyProduct = { name: "", categoryId: "", description: "", basePrice: "" };
-const emptyVariant = { color: "", size: "", sku: "", stockQuantity: 0, priceOverride: "" };
+const emptyProduct = {
+  name: "",
+  categoryId: "",
+  description: "",
+  basePrice: "",
+};
+const emptyVariant = {
+  color: "",
+  size: "",
+  sku: "",
+  stockQuantity: 0,
+  priceOverride: "",
+};
 const emptyArea = { name: "" };
 const sizeOptions = [
   { value: "XS", label: "Extra small" },
@@ -38,7 +51,10 @@ function capitalizeFirstLetter(value) {
 }
 
 function normalizeVariants(variants) {
-  return variants.map((variant) => ({ ...variant, color: capitalizeFirstLetter(variant.color) }));
+  return variants.map((variant) => ({
+    ...variant,
+    color: capitalizeFirstLetter(variant.color),
+  }));
 }
 
 function ProductForm() {
@@ -64,16 +80,21 @@ function ProductForm() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [pendingImageDelete, setPendingImageDelete] = useState(null);
 
   useEffect(() => {
-    listCategories().then(setCategories).catch(() => {});
+    listCategories()
+      .then(setCategories)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
     if (isNew) return;
     void Promise.resolve().then(() => {
       try {
-        const savedColors = window.localStorage.getItem(`printix:mockup-colors:${id}`);
+        const savedColors = window.localStorage.getItem(
+          `printix:mockup-colors:${id}`,
+        );
         setMockupColorByArea(savedColors ? JSON.parse(savedColors) : {});
       } catch {
         setMockupColorByArea({});
@@ -85,7 +106,12 @@ function ProductForm() {
     if (isNew) return;
     getAdminProduct(id)
       .then((p) => {
-        setForm({ name: p.name, categoryId: p.category.id, description: p.description || "", basePrice: p.basePrice });
+        setForm({
+          name: p.name,
+          categoryId: p.category.id,
+          description: p.description || "",
+          basePrice: p.basePrice,
+        });
         setVariants(normalizeVariants(p.variants));
         setImages(p.images);
         setPrintableAreas(p.printableAreas || []);
@@ -112,14 +138,20 @@ function ProductForm() {
     }
   }
 
-  async function handleDeleteImage(imageId) {
-    if (!window.confirm("Remove this image?")) return;
+  function askDeleteImage(imageId) {
+    setPendingImageDelete(imageId);
+  }
+
+  async function confirmDeleteImage() {
+    if (!pendingImageDelete) return;
     setError(null);
     try {
-      const product = await deleteProductImage(id, imageId);
+      const product = await deleteProductImage(id, pendingImageDelete);
       setImages(product.images);
+      setPendingImageDelete(null);
     } catch (err) {
       setError(err.response?.data?.message || "Failed to remove image.");
+      setPendingImageDelete(null);
     }
   }
 
@@ -141,7 +173,10 @@ function ProductForm() {
 
   function handleVariantChange(e) {
     const { name, value } = e.target;
-    setVariantForm({ ...variantForm, [name]: name === "color" ? capitalizeFirstLetter(value) : value });
+    setVariantForm({
+      ...variantForm,
+      [name]: name === "color" ? capitalizeFirstLetter(value) : value,
+    });
   }
 
   async function handleSubmit(e) {
@@ -149,7 +184,8 @@ function ProductForm() {
     const nextErrors = {};
     if (!form.name.trim()) nextErrors.name = "Product name is required.";
     if (!form.categoryId) nextErrors.categoryId = "Choose a category.";
-    if (!form.basePrice || Number(form.basePrice) <= 0) nextErrors.basePrice = "Enter a price greater than 0.";
+    if (!form.basePrice || Number(form.basePrice) <= 0)
+      nextErrors.basePrice = "Enter a price greater than 0.";
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
       return;
@@ -166,7 +202,10 @@ function ProductForm() {
         });
         navigate(`/admin/products/${created.id}`);
       } else {
-        await updateAdminProduct(id, { ...form, basePrice: Number(form.basePrice) });
+        await updateAdminProduct(id, {
+          ...form,
+          basePrice: Number(form.basePrice),
+        });
         setError(null);
       }
     } catch (err) {
@@ -177,7 +216,11 @@ function ProductForm() {
   }
 
   function getMockupColor(areaId) {
-    return mockupColorByArea[areaId] || [...new Set(variants.map((variant) => variant.color))][0] || null;
+    return (
+      mockupColorByArea[areaId] ||
+      [...new Set(variants.map((variant) => variant.color))][0] ||
+      null
+    );
   }
 
   function getMockupVariantId(areaId, color = getMockupColor(areaId)) {
@@ -195,12 +238,16 @@ function ProductForm() {
         prev.map((a) => {
           if (a.id !== areaId) return a;
           if (!variantId) return { ...a, mockupTemplate: result };
-          const templates = (a.mockupTemplates || []).filter((template) => template.variantId !== variantId);
+          const templates = (a.mockupTemplates || []).filter(
+            (template) => template.variantId !== variantId,
+          );
           return { ...a, mockupTemplates: [...templates, result] };
-        })
+        }),
       );
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to upload mockup template.");
+      setError(
+        err.response?.data?.message || "Failed to upload mockup template.",
+      );
     } finally {
       e.target.value = "";
     }
@@ -211,19 +258,35 @@ function ProductForm() {
     try {
       const areaId = editingPerspectiveFor.id;
       const variantId = editingPerspectiveFor.mockupVariantId || null;
-      const { perspectiveConfig } = await savePerspectiveConfig(areaId, points, variantId);
+      const { perspectiveConfig } = await savePerspectiveConfig(
+        areaId,
+        points,
+        variantId,
+      );
       setPrintableAreas((prev) =>
         prev.map((a) =>
           a.id === areaId
             ? variantId
-              ? { ...a, mockupTemplates: (a.mockupTemplates || []).map((template) => template.variantId === variantId ? { ...template, perspectiveConfig } : template) }
-              : { ...a, mockupTemplate: { ...a.mockupTemplate, perspectiveConfig } }
-            : a
-        )
+              ? {
+                  ...a,
+                  mockupTemplates: (a.mockupTemplates || []).map((template) =>
+                    template.variantId === variantId
+                      ? { ...template, perspectiveConfig }
+                      : template,
+                  ),
+                }
+              : {
+                  ...a,
+                  mockupTemplate: { ...a.mockupTemplate, perspectiveConfig },
+                }
+            : a,
+        ),
       );
       setEditingPerspectiveFor(null);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to save perspective corners.");
+      setError(
+        err.response?.data?.message || "Failed to save perspective corners.",
+      );
     }
   }
 
@@ -231,8 +294,13 @@ function ProductForm() {
     e.preventDefault();
     setError(null);
     try {
-
-      const updated = await upsertPrintableArea(id, { ...areaForm, width: 1000, height: 1000, x: 0, y: 0 });
+      const updated = await upsertPrintableArea(id, {
+        ...areaForm,
+        width: 1000,
+        height: 1000,
+        x: 0,
+        y: 0,
+      });
       setPrintableAreas(updated.printableAreas);
       setAreaForm(emptyArea);
     } catch (err) {
@@ -259,7 +327,9 @@ function ProductForm() {
       setPrintableAreas(updated.printableAreas);
       setEditingAreaId(null);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update printable area.");
+      setError(
+        err.response?.data?.message || "Failed to update printable area.",
+      );
     }
   }
 
@@ -280,7 +350,9 @@ function ProductForm() {
       const updated = await upsertVariant(id, {
         ...variantForm,
         stockQuantity: Number(variantForm.stockQuantity),
-        priceOverride: variantForm.priceOverride ? Number(variantForm.priceOverride) : null,
+        priceOverride: variantForm.priceOverride
+          ? Number(variantForm.priceOverride)
+          : null,
       });
       setVariants(normalizeVariants(updated.variants));
       setVariantForm(emptyVariant);
@@ -308,7 +380,9 @@ function ProductForm() {
         ...editingVariantForm,
         color: capitalizeFirstLetter(editingVariantForm.color),
         stockQuantity: Number(editingVariantForm.stockQuantity),
-        priceOverride: editingVariantForm.priceOverride ? Number(editingVariantForm.priceOverride) : null,
+        priceOverride: editingVariantForm.priceOverride
+          ? Number(editingVariantForm.priceOverride)
+          : null,
       });
       setVariants(normalizeVariants(updated.variants));
       setEditingVariantId(null);
@@ -320,33 +394,67 @@ function ProductForm() {
   if (loading) return <p className="admin-status">Loading product...</p>;
 
   return (
-    <div className="pf">
+    <div className="product-form">
       <h1>{isNew ? "Add product" : "Edit product"}</h1>
 
-      <form className="pf-form" onSubmit={handleSubmit}>
+      <form className="product-form-form" onSubmit={handleSubmit}>
         <label>
           Name
-          <input name="name" value={form.name} onChange={handleChange} aria-invalid={Boolean(fieldErrors.name)} />
-          {fieldErrors.name && <span className="pf-field-error">{fieldErrors.name}</span>}
+          <input
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            aria-invalid={Boolean(fieldErrors.name)}
+          />
+          {fieldErrors.name && (
+            <span className="product-form-field-error">{fieldErrors.name}</span>
+          )}
         </label>
         <label>
           Category
-          <select name="categoryId" value={form.categoryId} onChange={handleChange} aria-invalid={Boolean(fieldErrors.categoryId)}>
+          <select
+            name="categoryId"
+            value={form.categoryId}
+            onChange={handleChange}
+            aria-invalid={Boolean(fieldErrors.categoryId)}
+          >
             <option value="">Select a category</option>
             {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
           </select>
-          {fieldErrors.categoryId && <span className="pf-field-error">{fieldErrors.categoryId}</span>}
+          {fieldErrors.categoryId && (
+            <span className="product-form-field-error">
+              {fieldErrors.categoryId}
+            </span>
+          )}
         </label>
         <label>
           Description
-          <textarea name="description" value={form.description} onChange={handleChange} rows={3} />
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            rows={3}
+          />
         </label>
         <label>
           Base price
-          <input name="basePrice" type="number" step="0.01" value={form.basePrice} onChange={handleChange} aria-invalid={Boolean(fieldErrors.basePrice)} />
-          {fieldErrors.basePrice && <span className="pf-field-error">{fieldErrors.basePrice}</span>}
+          <input
+            name="basePrice"
+            type="number"
+            step="0.01"
+            value={form.basePrice}
+            onChange={handleChange}
+            aria-invalid={Boolean(fieldErrors.basePrice)}
+          />
+          {fieldErrors.basePrice && (
+            <span className="product-form-field-error">
+              {fieldErrors.basePrice}
+            </span>
+          )}
         </label>
 
         {error && <p className="admin-error">{error}</p>}
@@ -357,25 +465,37 @@ function ProductForm() {
       </form>
 
       {!isNew && (
-        <div className="pf-images">
+        <div className="product-form-images">
           <h2>Images</h2>
 
-          <div className="pf-image-grid">
+          <div className="product-form-image-grid">
             {images.map((img) => (
-              <div key={img.id} className={`pf-image-item ${img.isPrimary ? "pf-image-item--primary" : ""}`}>
-                <img src={`http://localhost:5000${img.imageUrl}`} alt="" />
-                <div className="pf-image-item__actions">
+              <div
+                key={img.id}
+                className={`product-form-image-item ${img.isPrimary ? "product-form-image-item--primary" : ""}`}
+              >
+                <img
+                  src={mediaUrl(img.imageUrl)}
+                  alt={`${form.name || "Product"} image`}
+                />
+                <div className="product-form-image-item__actions">
                   {!img.isPrimary && (
-                    <button onClick={() => handleSetPrimary(img.id)}>Set primary</button>
+                    <button onClick={() => handleSetPrimary(img.id)}>
+                      Set primary
+                    </button>
                   )}
-                  {img.isPrimary && <span className="pf-image-item__badge">Primary</span>}
-                  <button onClick={() => handleDeleteImage(img.id)}>Remove</button>
+                  {img.isPrimary && (
+                    <span className="product-form-image-item__badge">
+                      Primary
+                    </span>
+                  )}
+                  <button onClick={() => askDeleteImage(img.id)}>Remove</button>
                 </div>
               </div>
             ))}
           </div>
 
-          <label className="pf-upload-btn">
+          <label className="product-form-upload-btn">
             {uploadingImage ? "Uploading..." : "Upload image"}
             <input
               type="file"
@@ -389,73 +509,125 @@ function ProductForm() {
       )}
 
       {!isNew && (
-        <div className="pf-variants">
+        <div className="product-form-variants">
           <h2>Printable areas</h2>
-          <p className="pf-hint">
-            These define where customers can place designs (e.g. Front, Back). Give it a name, then upload a
-            mockup photo and trace the print area shape on it — the designer uses the photo's real size.
+          <p className="product-form-hint">
+            These define where customers can place designs (e.g. Front, Back).
+            Give it a name, then upload a mockup photo and trace the print area
+            shape on it — the designer uses the photo's real size.
           </p>
 
           {printableAreas.length > 0 && (
-            <div className="dash-table-wrap">
-              <table className="dash-table">
+            <div className="dashboard-table-wrap">
+              <table className="dashboard-table">
                 <thead>
-                  <tr><th>Name</th><th>Color</th><th>Mockup photo</th></tr>
+                  <tr>
+                    <th>Name</th>
+                    <th>Color</th>
+                    <th>Mockup photo</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {printableAreas.flatMap((a) => {
-                    const colors = [...new Set(variants.map((variant) => variant.color))];
+                    const colors = [
+                      ...new Set(variants.map((variant) => variant.color)),
+                    ];
                     return colors.map((color, colorIndex) => {
                       const variantId = getMockupVariantId(a.id, color);
-                      const template = a.mockupTemplates?.find((item) => item.variantId === variantId);
+                      const template = a.mockupTemplates?.find(
+                        (item) => item.variantId === variantId,
+                      );
                       return (
                         <tr key={`${a.id}-${color}`}>
                           <td>
                             {colorIndex === 0 && editingAreaId === a.id ? (
                               <input
                                 value={editingAreaForm.name}
-                                onChange={(e) => setEditingAreaForm({ name: e.target.value })}
+                                onChange={(e) =>
+                                  setEditingAreaForm({ name: e.target.value })
+                                }
                                 aria-label="Printable area name"
                               />
-                            ) : colorIndex === 0 ? a.name : ""}
+                            ) : colorIndex === 0 ? (
+                              a.name
+                            ) : (
+                              ""
+                            )}
                           </td>
                           <td>{color}</td>
                           <td>
-                            <div className="pf-area-actions">
+                            <div className="product-form-area-actions">
                               {template ? (
-                                <span className="pf-mockup-status">Uploaded ✓</span>
+                                <span className="product-form-mockup-status">
+                                  Uploaded ✓
+                                </span>
                               ) : (
-                                <span className="pf-mockup-status pf-mockup-status--missing">None — using blank canvas</span>
+                                <span className="product-form-mockup-status product-form-mockup-status--missing">
+                                  None — using blank canvas
+                                </span>
                               )}
-                              <div className="pf-file-control">
-                                <label className="pf-file-picker">
+                              <div className="product-form-file-control">
+                                <label className="product-form-file-picker">
                                   <span>{template ? "Replace" : "Upload"}</span>
                                   <input
                                     type="file"
                                     accept="image/jpeg,image/png,image/webp"
-                                    className="pf-upload-input"
-                                    onChange={(e) => handleMockupUpload(a.id, e, color)}
+                                    className="product-form-upload-input"
+                                    onChange={(e) =>
+                                      handleMockupUpload(a.id, e, color)
+                                    }
                                   />
                                 </label>
-                                {!template && <span className="pf-file-name">No file uploaded</span>}
+                                {!template && (
+                                  <span className="product-form-file-name">
+                                    No file uploaded
+                                  </span>
+                                )}
                               </div>
                               {template && (
                                 <button
                                   type="button"
-                                  className="pf-upload-btn pf-upload-btn--small"
-                                  onClick={() => setEditingPerspectiveFor({ ...a, mockupTemplate: template, mockupVariantId: variantId })}
+                                  className="product-form-upload-btn product-form-upload-btn--small"
+                                  onClick={() =>
+                                    setEditingPerspectiveFor({
+                                      ...a,
+                                      mockupTemplate: template,
+                                      mockupVariantId: variantId,
+                                    })
+                                  }
                                 >
-                                  {template.perspectiveConfig ? "Edit print area" : "Set print area"}
+                                  {template.perspectiveConfig
+                                    ? "Edit print area"
+                                    : "Set print area"}
                                 </button>
                               )}
-                              {colorIndex === 0 && (editingAreaId === a.id ? (
-                                <>
-                                  <button type="button" className="pf-row-action" onClick={() => saveArea(a)}>Save</button>
-                                  <button type="button" className="pf-row-action" onClick={() => setEditingAreaId(null)}>Cancel</button>
-                                </>
-                              ) : (
-                                <button type="button" className="pf-row-action" onClick={() => startEditArea(a)}>Edit</button>
-                              ))}
+                              {colorIndex === 0 &&
+                                (editingAreaId === a.id ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      className="product-form-row-action"
+                                      onClick={() => saveArea(a)}
+                                    >
+                                      Save
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="product-form-row-action"
+                                      onClick={() => setEditingAreaId(null)}
+                                    >
+                                      Cancel
+                                    </button>
+                                  </>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="product-form-row-action"
+                                    onClick={() => startEditArea(a)}
+                                  >
+                                    Edit
+                                  </button>
+                                ))}
                             </div>
                           </td>
                         </tr>
@@ -467,26 +639,30 @@ function ProductForm() {
             </div>
           )}
 
-          <form className="pf-variant-form" onSubmit={handleAddArea}>
+          <form className="product-form-variant-form" onSubmit={handleAddArea}>
             <input
-              className="pf-area-name-input"
+              className="product-form-area-name-input"
               placeholder="Name (e.g. Front)"
               value={areaForm.name}
-              onChange={(e) => setAreaForm({ ...areaForm, name: e.target.value })}
+              onChange={(e) =>
+                setAreaForm({ ...areaForm, name: e.target.value })
+              }
               required
             />
-            <Button type="submit" variant="secondary">Add area</Button>
+            <Button type="submit" variant="secondary">
+              Add area
+            </Button>
           </form>
         </div>
       )}
 
       {!isNew && (
-        <div className="pf-variants">
+        <div className="product-form-variants">
           <h2>Variants</h2>
 
           {variants.length > 0 && (
-            <div className="dash-table-wrap">
-              <table className="dash-table pf-variant-table">
+            <div className="dashboard-table-wrap">
+              <table className="dashboard-table product-form-variant-table">
                 <thead>
                   <tr>
                     <th>Color</th>
@@ -499,29 +675,105 @@ function ProductForm() {
                 <tbody>
                   {variants.map((v) => (
                     <tr key={v.id}>
-                      <td>{editingVariantId === v.id ? <input value={editingVariantForm.color} onChange={(e) => setEditingVariantForm({ ...editingVariantForm, color: e.target.value })} aria-label="Variant color" /> : v.color}</td>
-                      <td>{editingVariantId === v.id ? (
-                        <select value={editingVariantForm.size} onChange={(e) => setEditingVariantForm({ ...editingVariantForm, size: e.target.value })} aria-label="Variant size">
-                          {!sizeOptions.some((option) => option.value === editingVariantForm.size) && (
-                            <option value={editingVariantForm.size}>{editingVariantForm.size}</option>
-                          )}
-                          {sizeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                        </select>
-                      ) : v.size}</td>
-                      <td>{editingVariantId === v.id ? <input value={editingVariantForm.sku} onChange={(e) => setEditingVariantForm({ ...editingVariantForm, sku: e.target.value })} aria-label="Variant SKU" /> : v.sku}</td>
                       <td>
                         {editingVariantId === v.id ? (
-                          <input name="stockQuantity" type="number" value={editingVariantForm.stockQuantity} onChange={(e) => setEditingVariantForm({ ...editingVariantForm, stockQuantity: e.target.value })} aria-label="Variant stock" />
+                          <input
+                            value={editingVariantForm.color}
+                            onChange={(e) =>
+                              setEditingVariantForm({
+                                ...editingVariantForm,
+                                color: e.target.value,
+                              })
+                            }
+                            aria-label="Variant color"
+                          />
                         ) : (
-                          <div className="pf-stock-control">
-                            <button type="button" onClick={() => handleAdjustStock(v.id, -1)} disabled={v.stockQuantity <= 0}>−</button>
-                            <span>{v.stockQuantity}</span>
-                            <button type="button" onClick={() => handleAdjustStock(v.id, 1)}>+</button>
+                          v.color
+                        )}
+                      </td>
+                      <td>
+                        {editingVariantId === v.id ? (
+                          <select
+                            value={editingVariantForm.size}
+                            onChange={(e) =>
+                              setEditingVariantForm({
+                                ...editingVariantForm,
+                                size: e.target.value,
+                              })
+                            }
+                            aria-label="Variant size"
+                          >
+                            {!sizeOptions.some(
+                              (option) =>
+                                option.value === editingVariantForm.size,
+                            ) && (
+                              <option value={editingVariantForm.size}>
+                                {editingVariantForm.size}
+                              </option>
+                            )}
+                            {sizeOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          v.size
+                        )}
+                      </td>
+                      <td>
+                        {editingVariantId === v.id ? (
+                          <input
+                            value={editingVariantForm.sku}
+                            onChange={(e) =>
+                              setEditingVariantForm({
+                                ...editingVariantForm,
+                                sku: e.target.value,
+                              })
+                            }
+                            aria-label="Variant SKU"
+                          />
+                        ) : (
+                          v.sku
+                        )}
+                      </td>
+                      <td>
+                        {editingVariantId === v.id ? (
+                          <input
+                            name="stockQuantity"
+                            type="number"
+                            value={editingVariantForm.stockQuantity}
+                            onChange={(e) =>
+                              setEditingVariantForm({
+                                ...editingVariantForm,
+                                stockQuantity: e.target.value,
+                              })
+                            }
+                            aria-label="Variant stock"
+                          />
+                        ) : (
+                          <div className="product-form-stock-control">
                             <button
                               type="button"
-                              className="pf-stock-restock"
+                              onClick={() => handleAdjustStock(v.id, -1)}
+                              disabled={v.stockQuantity <= 0}
+                            >
+                              −
+                            </button>
+                            <span>{v.stockQuantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleAdjustStock(v.id, 1)}
+                            >
+                              +
+                            </button>
+                            <button
+                              type="button"
+                              className="product-form-stock-restock"
                               onClick={() => {
-                                const amount = Number(prompt("Restock quantity to add:", "10"));
+                                const amount = Number(
+                                  prompt("Restock quantity to add:", "10"),
+                                );
                                 if (amount > 0) handleAdjustStock(v.id, amount);
                               }}
                             >
@@ -531,14 +783,32 @@ function ProductForm() {
                         )}
                       </td>
                       <td>
-                        <div className="pf-row-actions">
+                        <div className="product-form-row-actions">
                           {editingVariantId === v.id ? (
                             <>
-                              <button type="button" className="pf-row-action" onClick={() => saveVariant(v)}>Save</button>
-                              <button type="button" className="pf-row-action" onClick={() => setEditingVariantId(null)}>Cancel</button>
+                              <button
+                                type="button"
+                                className="product-form-row-action"
+                                onClick={() => saveVariant(v)}
+                              >
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                className="product-form-row-action"
+                                onClick={() => setEditingVariantId(null)}
+                              >
+                                Cancel
+                              </button>
                             </>
                           ) : (
-                            <button type="button" className="pf-row-action" onClick={() => startEditVariant(v)}>Edit</button>
+                            <button
+                              type="button"
+                              className="product-form-row-action"
+                              onClick={() => startEditVariant(v)}
+                            >
+                              Edit
+                            </button>
                           )}
                         </div>
                       </td>
@@ -549,26 +819,71 @@ function ProductForm() {
             </div>
           )}
 
-          <form className="pf-variant-form" onSubmit={handleAddVariant}>
-            <input name="color" placeholder="Color" value={variantForm.color} onChange={handleVariantChange} required />
-            <select name="size" value={variantForm.size} onChange={handleVariantChange} required aria-label="Variant size">
+          <form
+            className="product-form-variant-form"
+            onSubmit={handleAddVariant}
+          >
+            <input
+              name="color"
+              placeholder="Color"
+              value={variantForm.color}
+              onChange={handleVariantChange}
+              required
+            />
+            <select
+              name="size"
+              value={variantForm.size}
+              onChange={handleVariantChange}
+              required
+              aria-label="Variant size"
+            >
               <option value="">Size</option>
-              {sizeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+              {sizeOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
-            <input name="sku" placeholder="SKU" value={variantForm.sku} onChange={handleVariantChange} required />
-            <input name="stockQuantity" type="number" placeholder="Stock" value={variantForm.stockQuantity} onChange={handleVariantChange} />
-            <Button type="submit" variant="secondary">Add variant</Button>
+            <input
+              name="sku"
+              placeholder="SKU"
+              value={variantForm.sku}
+              onChange={handleVariantChange}
+              required
+            />
+            <input
+              name="stockQuantity"
+              type="number"
+              placeholder="Stock"
+              value={variantForm.stockQuantity}
+              onChange={handleVariantChange}
+            />
+            <Button type="submit" variant="secondary">
+              Add variant
+            </Button>
           </form>
         </div>
       )}
       {editingPerspectiveFor && (
         <PerspectiveEditor
-          imageUrl={`http://localhost:5000${editingPerspectiveFor.mockupTemplate.baseImageUrl}`}
-          initialPoints={editingPerspectiveFor.mockupTemplate.perspectiveConfig?.points}
+          imageUrl={mediaUrl(editingPerspectiveFor.mockupTemplate.baseImageUrl)}
+          initialPoints={
+            editingPerspectiveFor.mockupTemplate.perspectiveConfig?.points
+          }
           onSave={handleSavePerspective}
           onCancel={() => setEditingPerspectiveFor(null)}
         />
       )}
+
+      <ConfirmModal
+        open={Boolean(pendingImageDelete)}
+        title="Remove product image?"
+        message="This image will be removed from the product gallery."
+        confirmText="Remove image"
+        onConfirm={confirmDeleteImage}
+        onClose={() => setPendingImageDelete(null)}
+        destructive
+      />
     </div>
   );
 }

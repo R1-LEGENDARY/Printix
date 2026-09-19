@@ -18,39 +18,39 @@ function Dashboard() {
     <div>
       <h1>Dashboard</h1>
 
-      <div className="dash-cards">
-        <div className="dash-card">
-          <span className="dash-card__label">Total revenue</span>
-          <span className="dash-card__value">₱{metrics.totalRevenue}</span>
-        </div>
-        <div className="dash-card">
-          <span className="dash-card__label">Total orders</span>
-          <span className="dash-card__value">{metrics.totalOrders}</span>
-        </div>
-        <div className="dash-card">
-          <span className="dash-card__label">Pending orders</span>
-          <span className="dash-card__value">{metrics.pendingOrders}</span>
-        </div>
-        <div className="dash-card">
-          <span className="dash-card__label">Active products</span>
-          <span className="dash-card__value">{metrics.totalProducts}</span>
-        </div>
-        <div className="dash-card">
-          <span className="dash-card__label">Customers</span>
-          <span className="dash-card__value">{metrics.totalCustomers}</span>
-        </div>
-        <div className="dash-card dash-card--warn">
-          <span className="dash-card__label">Low stock variants</span>
-          <span className="dash-card__value">{metrics.lowStockVariants}</span>
-        </div>
+      <div className="dashboard-cards">
+        <article className="dashboard-card">
+          <span className="dashboard-card__label">Total revenue</span>
+          <span className="dashboard-card__value">₱{metrics.totalRevenue}</span>
+        </article>
+        <article className="dashboard-card">
+          <span className="dashboard-card__label">Total orders</span>
+          <span className="dashboard-card__value">{metrics.totalOrders}</span>
+        </article>
+        <article className="dashboard-card">
+          <span className="dashboard-card__label">Pending orders</span>
+          <span className="dashboard-card__value">{metrics.pendingOrders}</span>
+        </article>
+        <article className="dashboard-card">
+          <span className="dashboard-card__label">Active products</span>
+          <span className="dashboard-card__value">{metrics.totalProducts}</span>
+        </article>
+        <article className="dashboard-card">
+          <span className="dashboard-card__label">Customers</span>
+          <span className="dashboard-card__value">{metrics.totalCustomers}</span>
+        </article>
+        <article className="dashboard-card dashboard-card--warn">
+          <span className="dashboard-card__label">Low stock variants</span>
+          <span className="dashboard-card__value">{metrics.lowStockVariants}</span>
+        </article>
       </div>
 
-      <h2 className="dash-section-title">Recent orders</h2>
+      <h2 className="dashboard-section-title">Recent orders</h2>
       {metrics.recentOrders.length === 0 ? (
         <p className="admin-status">No orders yet.</p>
       ) : (
-        <div className="dash-table-wrap">
-          <table className="dash-table">
+        <div className="dashboard-table-wrap">
+          <table className="dashboard-table">
             <thead>
               <tr>
                 <th>Order</th>

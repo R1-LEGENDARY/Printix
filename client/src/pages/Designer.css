@@ -96,8 +96,8 @@
 }
 
 .designer__tool--accent {
-  background: var(--color-ink);
-  border-color: var(--color-ink);
+  background: var(--color-accent);
+  border-color: var(--color-accent);
   color: #fff;
 }
 
@@ -281,13 +281,13 @@
 }
 
 .designer__layers li:hover {
-  background: #f3eee6;
+  background: var(--color-accent-soft);
 }
 
-.designer__layer--active {
-  border-color: var(--color-accent-soft) !important;
+.designer__layers li.designer__layer--active {
+  border-color: var(--color-accent-soft);
   background: var(--color-accent-soft);
-  color: var(--color-accent-deep) !important;
+  color: var(--color-accent-deep);
   font-weight: 600;
 }
 
@@ -323,7 +323,7 @@
   resize: vertical;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: 0.8125rem;
@@ -358,7 +358,7 @@
   height: 30px;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-ink);
   cursor: pointer;
   font-weight: 700;

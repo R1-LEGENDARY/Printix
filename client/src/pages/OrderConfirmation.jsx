@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
+import { mediaUrl } from "../utils/mediaUrl";
 import api from "../api/axios";
 import { startCheckoutSession, getPaymentStatus } from "../api/payment";
 import Button from "../components/Button";
@@ -55,20 +56,20 @@ function OrderConfirmation() {
     }
   }
 
-  if (!order) return <p className="oc-status">Loading order...</p>;
+  if (!order) return <p className="order-confirmation-status">Loading order...</p>;
 
   return (
-    <div className="oc">
+    <div className="order-confirmation">
       <h2>Thank you for your order!</h2>
-      <p className="oc__number">Order #{order.orderNumber}</p>
-      <p className="oc__status">Status: {order.status}</p>
+      <p className="order-confirmation__number">Order #{order.orderNumber}</p>
+      <p className="order-confirmation__status">Status: {order.status}</p>
 
-      <div className="oc__items">
+      <div className="order-confirmation__items">
         {order.items.map((item) => (
-          <div className="oc__item" key={item.id}>
-            <div className="oc__item-info">
+          <div className="order-confirmation__item" key={item.id}>
+            <div className="order-confirmation__item-info">
               {item.mockupUrl && (
-                <img className="oc__item-thumb" src={`http://localhost:5000${item.mockupUrl}`} alt="" />
+                <img className="order-confirmation__item-thumb" src={mediaUrl(item.mockupUrl)} alt={`${item.productName} custom mockup`} />
               )}
               <span>{item.productName} ({item.variantLabel}) × {item.quantity}</span>
             </div>
@@ -78,30 +79,30 @@ function OrderConfirmation() {
       </div>
 
       {Number(order.discountTotal) > 0 && (
-        <div className="oc__item">
+        <div className="order-confirmation__item">
           <span>Discount</span>
           <span>−₱{order.discountTotal}</span>
         </div>
       )}
 
-      <div className="oc__total">
+      <div className="order-confirmation__total">
         <span>Total</span>
         <span>₱{order.grandTotal}</span>
       </div>
 
       {order.status === "pending" && (
-        <div className="oc__payment">
+        <div className="order-confirmation__payment">
           {paymentResult === "cancelled" && (
-            <p className="oc__payment-note oc__payment-note--warn">
+            <p className="order-confirmation__payment-note order-confirmation__payment-note--warn">
               Payment was cancelled. You can try again below.
             </p>
           )}
           {paymentResult === "success" && (
-            <p className="oc__payment-note">
+            <p className="order-confirmation__payment-note">
               Confirming your payment — this updates automatically once verified...
             </p>
           )}
-          {formMessage && <p className="oc__payment-note oc__payment-note--warn">{formMessage}</p>}
+          {formMessage && <p className="order-confirmation__payment-note order-confirmation__payment-note--warn">{formMessage}</p>}
           <Button variant="primary" className="btn--block" onClick={handlePayNow} disabled={payingNow}>
             {payingNow ? "Redirecting to payment..." : "Pay now"}
           </Button>
@@ -109,17 +110,17 @@ function OrderConfirmation() {
       )}
 
       {order.status === "paid" && (
-        <p className="oc__payment-note oc__payment-note--success">Payment confirmed. Thank you!</p>
+        <p className="order-confirmation__payment-note order-confirmation__payment-note--success">Payment confirmed. Thank you!</p>
       )}
 
       {order.shipment && (
-        <div className="oc__shipment">
+        <div className="order-confirmation__shipment">
           <h3>Shipping</h3>
           <p><strong>{order.shipment.carrier}</strong> — {order.shipment.trackingNumber}</p>
           {order.shipment.deliveredAt ? (
-            <p className="oc__shipment-status">Delivered on {new Date(order.shipment.deliveredAt).toLocaleDateString()}</p>
+            <p className="order-confirmation__shipment-status">Delivered on {new Date(order.shipment.deliveredAt).toLocaleDateString()}</p>
           ) : order.shipment.shippedAt ? (
-            <p className="oc__shipment-status">
+            <p className="order-confirmation__shipment-status">
               Shipped {new Date(order.shipment.shippedAt).toLocaleDateString()}
               {order.shipment.estimatedDelivery && ` — estimated ${new Date(order.shipment.estimatedDelivery).toLocaleDateString()}`}
             </p>

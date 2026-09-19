@@ -3,6 +3,8 @@ import { Link, useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 import WishlistButton from "../components/WishlistButton";
 import StarRating from "../components/StarRating";
+import Seo from "../components/Seo";
+import { mediaUrl } from "../utils/mediaUrl";
 import "./Catalog.css";
 
 function Catalog() {
@@ -33,12 +35,17 @@ function Catalog() {
     return (!query || `${product.name} ${product.category}`.toLowerCase().includes(query))
       && (!selectedCategory || product.category.toLowerCase() === selectedCategory.toLowerCase());
   });
+  const categoryTitle = selectedCategory || "Custom Products";
+  const catalogDescription = selectedCategory
+    ? `Shop customizable ${selectedCategory.toLowerCase()} from Printix.`
+    : "Shop customizable products from Printix and make every piece your own.";
 
   if (loading) return <p className="catalog-status">Loading products...</p>;
   if (error) return <p className="catalog-status">Error: {error}</p>;
 
   return (
     <div className="catalog">
+      <Seo title={categoryTitle} description={catalogDescription} path="/catalog" />
       <section className="catalog-categories" aria-label="Product categories">
         <h3>Categories</h3>
         <div className="catalog-categories__grid">
@@ -49,7 +56,7 @@ function Catalog() {
               className={selectedCategory === category.name ? "catalog-category catalog-category--active" : "catalog-category"}
               onClick={() => setSelectedCategory((current) => current === category.name ? "" : category.name)}
             >
-              <img className="catalog-category__image" src={category.image} alt="" />
+              <img className="catalog-category__image" src={category.image} alt={`${category.name} product category`} />
               <span>
                 <span className="catalog-category__name-full">{category.name}</span>
                 <span className="catalog-category__name-mobile">{category.mobileName}</span>
@@ -65,16 +72,12 @@ function Catalog() {
         <>
           {filteredProducts.length === 0 ? <p className="catalog-status">No products match your search.</p> : <div className="catalog-grid">
           {filteredProducts.map((product) => (
-            <div key={product.id} className="catalog-card">
+            <article key={product.id} className="catalog-card">
               <Link to={`/products/${product.slug}`}>
                 <div className="catalog-card__image">
                   {product.primaryImage && (
                     <img
-                      src={
-                        product.primaryImage.startsWith("http")
-                          ? product.primaryImage
-                          : `http://localhost:5000${product.primaryImage}`
-                      }
+                      src={mediaUrl(product.primaryImage)}
                       alt={product.name}
                     />
                   )}
@@ -94,7 +97,7 @@ function Catalog() {
                   <p>₱{product.basePrice}</p>
                 </div>
               </Link>
-            </div>
+            </article>
           ))}
         </div>}
         </>

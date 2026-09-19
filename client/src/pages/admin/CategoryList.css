@@ -1,4 +1,4 @@
-.cat-form {
+.category-form {
   display: flex;
   gap: var(--space-2);
   margin-bottom: var(--space-4);
@@ -7,16 +7,16 @@
 }
 
 @media (max-width: 560px) {
-  .cat-form {
+  .category-form {
     max-width: none;
     align-items: center;
   }
 
-  .cat-form input {
+  .category-form input {
     min-width: 0;
   }
 
-  .cat-form button {
+  .category-form button {
     flex: 0 0 auto;
     padding-left: var(--space-3);
     padding-right: var(--space-3);
@@ -24,7 +24,7 @@
   }
 }
 
-.cat-form input {
+.category-form input {
   flex: 1;
   min-height: 40px;
   padding: var(--space-2) var(--space-3);
@@ -33,51 +33,56 @@
   font-size: 0.9375rem;
 }
 
-.cat-field {
+.category-form .btn {
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.category-field {
   flex: 1;
   min-width: 0;
 }
 
-.cat-field input {
+.category-field input {
   width: 100%;
 }
 
-.cat-form input[aria-invalid="true"],
-.cat-edit-input[aria-invalid="true"] {
+.category-form input[aria-invalid="true"],
+.category-edit-input[aria-invalid="true"] {
   border-color: #C84B4B;
 }
 
-.cat-field-error {
+.category-field-error {
   display: block;
   color: #C84B4B;
   font-size: 0.75rem;
   margin-top: 4px;
 }
 
-.cat-edit-input {
+.category-edit-input {
   width: min(100%, 260px);
   min-height: 34px;
   padding: 5px 10px;
   border: 1px solid var(--color-accent);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-ink);
   font: inherit;
   font-size: 0.875rem;
 }
 
-.cat-actions {
+.category-actions {
   display: flex;
   gap: var(--space-2);
   align-items: center;
   min-width: 130px;
 }
 
-.dash-table td:last-child {
+.dashboard-table td:last-child {
   white-space: nowrap;
 }
 
-.cat-actions button {
+.category-actions button {
   background: none;
   border: 1px solid var(--color-border);
   border-radius: 6px;
@@ -89,19 +94,19 @@
   white-space: nowrap;
 }
 
-.cat-actions button:hover {
+.category-actions button:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
 @media (max-width: 400px) {
-  .cat-form {
+  .category-form {
     flex-direction: row;
     align-items: center;
     gap: 6px;
   }
 
-  .cat-form input {
+  .category-form input {
     width: auto;
     flex: 1 1 auto;
     min-width: 0;
@@ -110,27 +115,27 @@
     font-size: 0.8125rem;
   }
 
-  .cat-form button {
+  .category-form button {
     flex: 0 0 auto;
     width: auto;
     padding: var(--space-2);
     font-size: 0.8125rem;
   }
 
-  .cat-actions button {
+  .category-actions button {
     padding-left: 7px;
     padding-right: 7px;
     font-size: 0.75rem;
   }
 
-  .cat-actions {
+  .category-actions {
     min-width: 0;
     flex-wrap: wrap;
   }
 }
 
 @media (max-width: 340px) {
-  .cat-form button {
+  .category-form button {
     padding-left: 6px;
     padding-right: 6px;
     font-size: 0.75rem;

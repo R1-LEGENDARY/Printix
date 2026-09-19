@@ -15,6 +15,7 @@ import { useHistory } from "../hooks/useHistory";
 import Button from "../components/Button";
 import { useCart } from "../context/useCart";
 import MockupPreviewModal from "../components/MockupPreviewModal";
+import { mediaUrl } from "../utils/mediaUrl";
 import "./Designer.css";
 
 let tempIdCounter = -1;
@@ -56,7 +57,7 @@ function MockupBackground({ area, onSize }) {
       setImg(null);
       onSize(null);
     };
-    image.src = `http://localhost:5000${mockupUrl}`;
+    image.src = mediaUrl(mockupUrl);
 
     return () => {
       cancelled = true;
@@ -93,7 +94,7 @@ function MockupBackground({ area, onSize }) {
 
 function DesignImage({ el, isSelected, onSelect, onChange }) {
   const imageUrl = el.image?.fileUrl
-    ? `http://localhost:5000${el.image.fileUrl}`
+    ? mediaUrl(el.image.fileUrl)
     : "";
   const [img, setImg] = useState(null);
   const shapeRef = useRef();
@@ -369,7 +370,7 @@ function Designer() {
       await new Promise((resolve, reject) => {
         mockupImg.onload = resolve;
         mockupImg.onerror = reject;
-        mockupImg.src = `http://localhost:5000${mockup.baseImageUrl}`;
+        mockupImg.src = mediaUrl(mockup.baseImageUrl);
       });
 
       const finalCanvas = document.createElement("canvas");
@@ -572,7 +573,7 @@ function Designer() {
                   </li>
                 ))}
               </ul>
-            ) : <p className="designer__empty">Add text or an image to start building.</p>}
+            ) : <p className="designer__empty">Add text or analytics image to start building.</p>}
           </section>
           {selectedElement?.type === "text" && (
             <section className="designer__panel-section designer__text-props">

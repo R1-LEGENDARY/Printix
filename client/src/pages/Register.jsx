@@ -11,6 +11,8 @@ function Register() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -82,12 +84,46 @@ function Register() {
         </div>
         <div className="field">
           <label htmlFor="password">Password</label>
-          <input id="password" name="password" type="password" value={form.password} onChange={(e) => { handleChange(e); setFieldErrors((current) => ({ ...current, password: "" })); }} />
+          <div className="password-field">
+            <input id="password" name="password" type={showPassword ? "text" : "password"} value={form.password} onChange={(e) => { handleChange(e); setFieldErrors((current) => ({ ...current, password: "" })); }} />
+            <button type="button" className="password-toggle" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? "Hide password" : "Show password"}>
+              {showPassword ? (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 10.6A2 2 0 0 0 13.4 13.4" />
+                  <path d="M9.1 5.5A11 11 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-4.3 5.5" />
+                  <path d="M6.2 6.2A16.5 16.5 0 0 0 2 12s3.5 7 10 7a11.5 11.5 0 0 0 5.8-1.8" />
+                </svg>
+              )}
+            </button>
+          </div>
           {fieldErrors.password && <span className="field-error">{fieldErrors.password}</span>}
         </div>
         <div className="field">
           <label htmlFor="confirmation">Confirm password</label>
-          <input id="confirmation" name="confirmation" type="password" value={form.confirmation} onChange={(e) => { handleChange(e); setFieldErrors((current) => ({ ...current, confirmation: "" })); }} />
+          <div className="password-field">
+            <input id="confirmation" name="confirmation" type={showConfirmation ? "text" : "password"} value={form.confirmation} onChange={(e) => { handleChange(e); setFieldErrors((current) => ({ ...current, confirmation: "" })); }} />
+            <button type="button" className="password-toggle" onClick={() => setShowConfirmation((current) => !current)} aria-label={showConfirmation ? "Hide confirmation password" : "Show confirmation password"}>
+              {showConfirmation ? (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 3l18 18" />
+                  <path d="M10.6 10.6A2 2 0 0 0 13.4 13.4" />
+                  <path d="M9.1 5.5A11 11 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-4.3 5.5" />
+                  <path d="M6.2 6.2A16.5 16.5 0 0 0 2 12s3.5 7 10 7a11.5 11.5 0 0 0 5.8-1.8" />
+                </svg>
+              )}
+            </button>
+          </div>
           {fieldErrors.confirmation && <span className="field-error">{fieldErrors.confirmation}</span>}
         </div>
 
@@ -104,7 +140,7 @@ function Register() {
       <GoogleAuthButton action="sign up" onSuccess={handleGoogleSuccess} onError={() => setError("Google sign-up failed.")} />
 
       <p className="auth-switch">
-        Already have an account? <Link to="/login">Log in</Link>
+        Already have analytics account? <Link to="/login">Log in</Link>
       </p>
       <p className="auth-switch auth-guest">
         <Link to="/catalog">Continue as a guest</Link>

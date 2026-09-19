@@ -66,17 +66,17 @@ router.post("/products/:id/printable-areas", upsertPrintableArea);
 router.patch("/variants/:variantId/stock", adjustStock);
 router.post(
   "/printable-areas/:areaId/mockup-template",
-  require("../middleware/upload").upload.single("file"),
+  require("../middleware/upload").mockupUpload.single("file"),
   uploadMockupTemplate
 );
 router.put("/printable-areas/:areaId/perspective", savePerspectiveConfig);
 router.post(
   "/printable-areas/:areaId/displacement-map",
-  require("../middleware/upload").upload.single("file"),
+  require("../middleware/upload").displacementMapUpload.single("file"),
   uploadDisplacementMap
 );
 
-router.post("/products/:id/images", require("../middleware/upload").upload.single("file"), addProductImage);
+router.post("/products/:id/images", require("../middleware/upload").productImageUpload.single("file"), addProductImage);
 router.delete("/products/:productId/images/:imageId", deleteProductImage);
 router.patch("/products/:productId/images/:imageId/primary", setPrimaryImage);
 

@@ -1,4 +1,4 @@
-.pd {
+.product-detail {
   max-width: 1240px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-5);
@@ -7,59 +7,59 @@
   gap: var(--space-6);
 }
 
-.pd-status {
+.product-detail-status {
   padding: var(--space-6) var(--space-5);
   color: var(--color-ink-soft);
 }
 
-.pd__gallery {
+.product-detail__gallery {
   aspect-ratio: 1;
   overflow: hidden;
   background: var(--color-paper);
 }
 
-.pd__gallery img {
+.product-detail__gallery img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.pd__category {
+.product-detail__category {
   font-size: 0.8125rem;
   color: var(--color-ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.pd__info h1 {
+.product-detail__info h1 {
   max-width: 520px;
   font-size: clamp(2.5rem, 5vw, 4.5rem);
   line-height: 0.98;
   margin: var(--space-2) 0 var(--space-3);
 }
 
-.pd__price-row {
+.product-detail__price-row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
-.pd__price {
+.product-detail__price {
   font-size: 1.375rem;
   font-weight: 600;
 }
 
-.pd__description {
+.product-detail__description {
   color: var(--color-ink-soft);
   margin-bottom: var(--space-4);
 }
 
-.pd__option-group {
+.product-detail__option-group {
   margin-bottom: var(--space-4);
 }
 
-.pd__option-label {
+.product-detail__option-label {
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
@@ -67,13 +67,13 @@
   margin-bottom: var(--space-2);
 }
 
-.pd__swatches {
+.product-detail__swatches {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
 }
 
-.pd__swatch {
+.product-detail__swatch {
   padding: var(--space-1) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 3px;
@@ -83,45 +83,45 @@
   transition: border-color var(--transition), color var(--transition);
 }
 
-.pd__swatch--active {
+.product-detail__swatch--active {
   border-color: var(--color-accent-deep);
   color: var(--color-accent-deep);
   background: var(--color-accent-soft);
 }
 
-.pd__availability {
+.product-detail__availability {
   font-size: 0.9375rem;
   font-weight: 500;
   margin-bottom: var(--space-4);
 }
 
-.pd__availability--in {
+.product-detail__availability--in {
   color: #1E8E3E;
 }
 
-.pd__availability--out {
+.product-detail__availability--out {
   color: #C0392B;
 }
 
-.pd__actions {
+.product-detail__actions {
   display: flex;
   gap: var(--space-3);
   flex-wrap: wrap;
 }
 
-.pd__auth-message {
+.product-detail__auth-message {
   margin-top: var(--space-2);
   color: #C0392B;
   font-size: 0.875rem;
 }
 
-.pd-related {
+.product-detail-related {
   grid-column: 1 / -1;
   border-top: 1px solid var(--color-border);
   padding-top: var(--space-4);
 }
 
-.pd-related__header {
+.product-detail-related__header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -129,23 +129,23 @@
   margin-bottom: var(--space-3);
 }
 
-.pd-related__header h2 {
+.product-detail-related__header h2 {
   font-size: 1.375rem;
 }
 
-.pd-related__header a {
+.product-detail-related__header a {
   color: var(--color-accent-deep);
   font-size: 0.8125rem;
   font-weight: 600;
 }
 
-.pd-related__grid {
+.product-detail-related__grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-3);
 }
 
-.pd-related-card {
+.product-detail-related-card {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -154,51 +154,51 @@
   font-size: 0.875rem;
 }
 
-.pd-related-card__image {
+.product-detail-related-card__image {
   aspect-ratio: 1;
   overflow: hidden;
   background: var(--color-paper);
   border: 1px solid var(--color-border);
 }
 
-.pd-related-card__image img {
+.product-detail-related-card__image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.pd-related-card strong {
+.product-detail-related-card strong {
   color: var(--color-ink-soft);
   font-size: 0.8125rem;
   font-weight: 500;
 }
 
 @media (max-width: 720px) {
-  .pd {
+  .product-detail {
     grid-template-columns: 1fr;
     padding: var(--space-4) var(--space-3);
     gap: var(--space-4);
   }
 
-  .pd__info h1 {
+  .product-detail__info h1 {
     font-size: 2.5rem;
   }
 
-  .pd__actions {
+  .product-detail__actions {
     gap: var(--space-2);
   }
 
-  .pd__actions .btn {
+  .product-detail__actions .btn {
     padding: var(--space-2) var(--space-3);
     font-size: 0.8125rem;
   }
 
-  .pd-related__grid {
+  .product-detail-related__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-2);
   }
 
-  .pd-related__header h2 {
+  .product-detail-related__header h2 {
     font-size: 1.125rem;
   }
 }

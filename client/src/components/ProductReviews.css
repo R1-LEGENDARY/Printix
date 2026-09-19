@@ -1,16 +1,16 @@
-.pr {
+.product-reviews {
   max-width: 700px;
   margin-top: var(--space-6);
   padding-top: var(--space-5);
   border-top: 1px solid var(--color-border);
 }
 
-.pr-summary h3 {
+.product-reviews-summary h3 {
   font-size: 1.375rem;
   margin-bottom: var(--space-2);
 }
 
-.pr-summary__row {
+.product-reviews-summary__row {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -18,13 +18,13 @@
   color: var(--color-ink-soft);
 }
 
-.pr-status {
+.product-reviews-status {
   color: var(--color-ink-soft);
   font-size: 0.9375rem;
 }
 
-.pr-form {
-  background: #fff;
+.product-reviews-form {
+  background: var(--color-paper);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-4);
@@ -34,63 +34,65 @@
   gap: var(--space-3);
 }
 
-.pr-form h4 {
+.product-reviews-form h4 {
   font-size: 1rem;
 }
 
-.pr-form select,
-.pr-form textarea {
+.product-reviews-form select,
+.product-reviews-form textarea {
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-family: var(--font-body);
   font-size: 0.9375rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 
-.pr-error {
+.product-reviews-error {
   color: #C0392B;
   font-size: 0.875rem;
 }
 
-.pr-list {
+.product-reviews-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
   margin-top: var(--space-4);
 }
 
-.pr-item {
+.product-reviews-item {
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--color-border);
 }
 
-.pr-item__header {
+.product-reviews-item__header {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   margin-bottom: var(--space-1);
 }
 
-.pr-item__name {
+.product-reviews-item__name {
   font-weight: 600;
   font-size: 0.9375rem;
 }
 
-.pr-item__verified {
+.product-reviews-item__verified {
   font-size: 0.75rem;
   color: #1E8E3E;
-  background: #E5F7EA;
+  background: rgba(34, 197, 94, 0.12);
   padding: 2px 8px;
   border-radius: 999px;
 }
 
-.pr-item__comment {
+.product-reviews-item__comment {
   font-size: 0.9375rem;
   color: var(--color-ink);
   margin-bottom: var(--space-1);
 }
 
-.pr-item__date {
+.product-reviews-item__date {
   font-size: 0.8125rem;
   color: var(--color-ink-soft);
 }

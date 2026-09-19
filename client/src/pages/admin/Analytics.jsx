@@ -19,7 +19,7 @@ function Analytics() {
 
   return (
     <div>
-      <div className="an-header">
+      <div className="analytics-header">
         <h1>Sales analytics</h1>
         <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
           <option value={7}>Last 7 days</option>
@@ -28,37 +28,42 @@ function Analytics() {
         </select>
       </div>
 
-      <div className="dash-cards">
-        <div className="dash-card">
-          <span className="dash-card__label">Revenue ({days}d)</span>
-          <span className="dash-card__value">₱{data.totalRevenue.toFixed(2)}</span>
-        </div>
-        <div className="dash-card">
-          <span className="dash-card__label">Orders ({days}d)</span>
-          <span className="dash-card__value">{data.totalOrders}</span>
-        </div>
+      <div className="dashboard-cards">
+        <article className="dashboard-card">
+          <span className="dashboard-card__label">Revenue ({days}d)</span>
+          <span className="dashboard-card__value">₱{data.totalRevenue.toFixed(2)}</span>
+        </article>
+        <article className="dashboard-card">
+          <span className="dashboard-card__label">Orders ({days}d)</span>
+          <span className="dashboard-card__value">{data.totalOrders}</span>
+        </article>
       </div>
 
-      <h2 className="dash-section-title">Revenue timeline</h2>
+      <h2 className="dashboard-section-title">Revenue timeline</h2>
       {data.revenueTimeline.length === 0 ? (
         <p className="admin-status">No paid orders in this period.</p>
       ) : (
-        <div className="an-chart">
-          {data.revenueTimeline.map((d) => (
-            <div key={d.date} className="an-bar-wrap" title={`${d.date}: ₱${d.revenue.toFixed(2)}`}>
-              <div className="an-bar" style={{ height: `${(d.revenue / maxRevenue) * 100}%` }} />
-              <span className="an-bar-label">{d.date.slice(5)}</span>
-            </div>
-          ))}
+        <div className="analytics-chart">
+          <div className="analytics-chart__plot">
+            {data.revenueTimeline.map((d) => (
+              <div key={d.date} className="analytics-bar-wrap" title={`${d.date}: ₱${d.revenue.toFixed(2)}`}>
+                <span className="analytics-bar-value">₱{d.revenue.toFixed(0)}</span>
+                <div className="analytics-bar-area">
+                  <div className="analytics-bar" style={{ height: `${(d.revenue / maxRevenue) * 100}%` }} />
+                </div>
+                <span className="analytics-bar-label">{d.date.slice(5)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      <h2 className="dash-section-title">Best-selling products</h2>
+      <h2 className="dashboard-section-title">Best-selling products</h2>
       {data.bestSellers.length === 0 ? (
         <p className="admin-status">No sales in this period.</p>
       ) : (
-        <div className="dash-table-wrap">
-          <table className="dash-table">
+        <div className="dashboard-table-wrap">
+          <table className="dashboard-table">
             <thead><tr><th>Product</th><th>Units sold</th><th>Revenue</th></tr></thead>
             <tbody>
               {data.bestSellers.map((p) => (
@@ -73,12 +78,12 @@ function Analytics() {
         </div>
       )}
 
-      <h2 className="dash-section-title">Low stock</h2>
+      <h2 className="dashboard-section-title">Low stock</h2>
       {data.lowStock.length === 0 ? (
         <p className="admin-status">Nothing running low.</p>
       ) : (
-        <div className="dash-table-wrap">
-          <table className="dash-table">
+        <div className="dashboard-table-wrap">
+          <table className="dashboard-table">
             <thead><tr><th>Product</th><th>Variant</th><th>SKU</th><th>Stock</th></tr></thead>
             <tbody>
               {data.lowStock.map((v) => (
@@ -86,7 +91,7 @@ function Analytics() {
                   <td>{v.productName}</td>
                   <td>{v.color} / {v.size}</td>
                   <td>{v.sku}</td>
-                  <td className={v.stockQuantity === 0 ? "an-out-of-stock" : ""}>{v.stockQuantity}</td>
+                  <td className={v.stockQuantity === 0 ? "analytics-out-of-stock" : ""}>{v.stockQuantity}</td>
                 </tr>
               ))}
             </tbody>

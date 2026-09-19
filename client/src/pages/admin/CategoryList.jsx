@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { listCategories, createCategory, updateCategory, deleteCategory } from "../../api/admin";
 import Button from "../../components/Button";
+import ConfirmModal from "../../components/ConfirmModal";
 import "./CategoryList.css";
 
 function CategoryList() {
@@ -12,6 +13,7 @@ function CategoryList() {
   const [editingId, setEditingId] = useState(null);
   const [editName, setEditName] = useState("");
   const [editNameError, setEditNameError] = useState("");
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -42,9 +44,9 @@ function CategoryList() {
     }
   }
 
-  function startEdit(cat) {
-    setEditingId(cat.id);
-    setEditName(cat.name);
+  function startEdit(category) {
+    setEditingId(category.id);
+    setEditName(category.name);
     setEditNameError("");
   }
 
@@ -64,14 +66,20 @@ function CategoryList() {
     }
   }
 
-  async function handleDelete(cat) {
-    if (!window.confirm(`Delete category "${cat.name}"?`)) return;
+  function askDelete(category) {
+    setPendingDelete(category);
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
     setError(null);
     try {
-      await deleteCategory(cat.id);
+      await deleteCategory(pendingDelete.id);
+      setPendingDelete(null);
       load();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete category.");
+      setPendingDelete(null);
     }
   }
 
@@ -81,8 +89,8 @@ function CategoryList() {
     <div>
       <h1>Categories</h1>
 
-      <form className="cat-form" onSubmit={handleCreate}>
-        <div className="cat-field">
+      <form className="category-form" onSubmit={handleCreate}>
+        <div className="category-field">
           <input
             placeholder="New category name"
             value={newName}
@@ -92,29 +100,39 @@ function CategoryList() {
             }}
             aria-invalid={Boolean(newNameError)}
           />
-          {newNameError && <span className="cat-field-error">{newNameError}</span>}
+          {newNameError && <span className="category-field-error">{newNameError}</span>}
         </div>
         <Button type="submit" variant="primary">Add category</Button>
       </form>
 
       {error && <p className="admin-error">{error}</p>}
 
+      <ConfirmModal
+        open={Boolean(pendingDelete)}
+        title="Delete category"
+        message={pendingDelete ? `Delete category "${pendingDelete.name}"?` : ""}
+        confirmText="Delete"
+        destructive
+        onConfirm={confirmDelete}
+        onClose={() => setPendingDelete(null)}
+      />
+
       {categories.length === 0 ? (
         <p className="admin-status">No categories yet.</p>
       ) : (
-        <div className="dash-table-wrap">
-          <table className="dash-table">
+        <div className="dashboard-table-wrap">
+          <table className="dashboard-table">
             <thead>
               <tr><th>Name</th><th>Slug</th><th>Products</th><th></th></tr>
             </thead>
             <tbody>
-              {categories.map((cat) => (
-                <tr key={cat.id}>
+              {categories.map((category) => (
+                <tr key={category.id}>
                   <td>
-                    {editingId === cat.id ? (
+                    {editingId === category.id ? (
                       <>
                         <input
-                          className="cat-edit-input"
+                          className="category-edit-input"
                           value={editName}
                           onChange={(e) => {
                             setEditName(e.target.value);
@@ -123,25 +141,25 @@ function CategoryList() {
                           aria-invalid={Boolean(editNameError)}
                           aria-label="Category name"
                         />
-                        {editNameError && <span className="cat-field-error">{editNameError}</span>}
+                        {editNameError && <span className="category-field-error">{editNameError}</span>}
                       </>
                     ) : (
-                      cat.name
+                      category.name
                     )}
                   </td>
-                  <td>{cat.slug}</td>
-                  <td>{cat.productCount}</td>
+                  <td>{category.slug}</td>
+                  <td>{category.productCount}</td>
                   <td>
-                    <div className="cat-actions">
-                      {editingId === cat.id ? (
+                    <div className="category-actions">
+                      {editingId === category.id ? (
                         <>
-                          <button onClick={() => saveEdit(cat.id)}>Save</button>
+                          <button onClick={() => saveEdit(category.id)}>Save</button>
                           <button onClick={() => setEditingId(null)}>Cancel</button>
                         </>
                       ) : (
                         <>
-                          <button onClick={() => startEdit(cat)}>Edit</button>
-                          <button onClick={() => handleDelete(cat)}>Delete</button>
+                          <button onClick={() => startEdit(category)}>Edit</button>
+                          <button onClick={() => askDelete(category)}>Delete</button>
                         </>
                       )}
                     </div>

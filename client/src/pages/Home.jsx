@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
 import Button from "../components/Button";
+import { mediaUrl } from "../utils/mediaUrl";
 import "./Home.css";
 
 function Home() {
@@ -36,7 +37,7 @@ function Home() {
                 <Link className={`home__product home__product--${index + 1}`} to={`/products/${product.slug}`} key={product.id}>
                   {product.primaryImage && (
                     <img
-                      src={product.primaryImage.startsWith("http") ? product.primaryImage : `http://localhost:5000${product.primaryImage}`}
+                      src={mediaUrl(product.primaryImage)}
                       alt={product.name}
                     />
                   )}

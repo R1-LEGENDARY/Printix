@@ -11,9 +11,11 @@
   height: 32px;
   padding: 5px;
   border: 0;
-  background: none;
+  border-radius: 50%;
+  background: var(--color-paper);
   color: var(--color-ink-soft);
   cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
 }
 
 .notification-bell__button:hover {
@@ -48,12 +50,13 @@
   position: fixed;
   top: 58px;
   right: var(--space-5);
-  z-index: 200;
+  z-index: 300;
   width: min(360px, calc(100vw - 24px));
   max-height: calc(100vh - 72px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  background: #fff;
+  background: var(--color-paper);
+  color: var(--color-ink);
   box-shadow: 0 10px 24px rgba(22, 24, 29, 0.12);
 }
 
@@ -73,6 +76,8 @@
   gap: var(--space-3);
   padding: var(--space-3);
   border-bottom: 1px solid var(--color-border);
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 
 .notification-bell__header button {
@@ -98,7 +103,7 @@
   padding: var(--space-3);
   border: 0;
   border-bottom: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-ink);
   cursor: pointer;
   text-align: left;

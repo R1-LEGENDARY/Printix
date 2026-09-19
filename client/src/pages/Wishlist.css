@@ -1,82 +1,82 @@
-.wl {
+.wishlist {
   max-width: 1240px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-5);
 }
 
-.wl-status {
+.wishlist-status {
   padding: var(--space-6) var(--space-5);
   color: var(--color-ink-soft);
 }
 
-.wl h2 {
+.wishlist h2 {
   font-size: 2.5rem;
   margin-bottom: var(--space-5);
 }
 
-.wl--empty {
+.wishlist--empty {
   text-align: center;
   padding-top: var(--space-6);
 }
 
-.wl--empty p {
+.wishlist--empty p {
   color: var(--color-ink-soft);
   margin-bottom: var(--space-4);
 }
 
-.wl-grid {
+.wishlist-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: var(--space-4);
 }
 
 @media (max-width: 1000px) {
-  .wl-grid {
+  .wishlist-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 560px) {
-  .wl--empty h2 {
+  .wishlist--empty h2 {
     font-size: 1.75rem;
   }
 
-  .wl--empty p {
+  .wishlist--empty p {
     font-size: 0.9375rem;
   }
 
-  .wl {
+  .wishlist {
     padding: var(--space-4) var(--space-3);
   }
 
-  .wl-grid {
+  .wishlist-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-2);
   }
 
-  .wl-card h3,
-  .wl-card__variant,
-  .wl-card__price {
+  .wishlist-card h3,
+  .wishlist-card__variant,
+  .wishlist-card__price {
     padding-left: 0;
     padding-right: 0;
   }
 
-  .wl-card h3 {
+  .wishlist-card h3 {
     font-size: 0.875rem;
   }
 
-  .wl-card__remove {
+  .wishlist-card__remove {
     padding: var(--space-1);
     font-size: 0.75rem;
   }
 }
 
-.wl-card {
+.wishlist-card {
   overflow: hidden;
   background: transparent;
 }
 
-.wl-card__body {
+.wishlist-card__body {
   min-height: 96px;
   padding: var(--space-1) var(--space-2);
   background: var(--color-paper);
@@ -84,34 +84,34 @@
   border-top: 0;
 }
 
-.wl-card__image {
+.wishlist-card__image {
   aspect-ratio: 1.15;
   background: var(--color-paper);
 }
 
-.wl-card__image img {
+.wishlist-card__image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.wl-card h3 {
+.wishlist-card h3 {
   font-size: 1rem;
   margin: 0;
 }
 
-.wl-card__variant {
+.wishlist-card__variant {
   font-size: 0.8125rem;
   color: var(--color-ink-soft);
   padding: 2px 0 0;
 }
 
-.wl-card__price {
+.wishlist-card__price {
   font-weight: 600;
   padding: var(--space-1) 0 var(--space-2);
 }
 
-.wl-card__remove {
+.wishlist-card__remove {
   width: 100%;
   padding: var(--space-2) 0;
   background: none;
@@ -122,16 +122,16 @@
   cursor: pointer;
 }
 
-.wl-card__remove:hover {
+.wishlist-card__remove:hover {
   color: #C0392B;
 }
 
 @media (max-width: 400px) {
-  .wl--empty h2 {
+  .wishlist--empty h2 {
     font-size: 1.5rem;
   }
 
-  .wl--empty p {
+  .wishlist--empty p {
     font-size: 0.8125rem;
   }
 }

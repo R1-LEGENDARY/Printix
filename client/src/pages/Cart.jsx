@@ -1,10 +1,38 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/useCart";
 import Button from "../components/Button";
+import ConfirmModal from "../components/ConfirmModal";
+import { mediaUrl } from "../utils/mediaUrl";
 import "./Cart.css";
 
 function Cart() {
+  const navigate = useNavigate();
   const { cart, loading, updateQuantity, remove } = useCart();
+  const [pendingRemoveId, setPendingRemoveId] = useState(null);
+  const [checkoutConfirmationOpen, setCheckoutConfirmationOpen] =
+    useState(false);
+
+  async function confirmRemove() {
+    if (!pendingRemoveId) return;
+    await remove(pendingRemoveId);
+    setPendingRemoveId(null);
+  }
+
+  function proceedToCheckout() {
+    if (cart.items.some((item) => !item.designId)) {
+      setCheckoutConfirmationOpen(true);
+      return;
+    }
+    navigate("/checkout");
+  }
+
+  function customizeFirstUndesignedItem() {
+    const item = cart.items.find((cartItem) => !cartItem.designId);
+    if (!item) return;
+    setCheckoutConfirmationOpen(false);
+    navigate(`/design/${item.variant.product.slug}?variant=${item.variant.id}`);
+  }
 
   if (loading) return <p className="cart-status">Loading cart...</p>;
 
@@ -14,7 +42,9 @@ function Cart() {
         <h2>Your cart is empty</h2>
         <p>Find something you'd like to customize.</p>
         <Link to="/catalog">
-          <Button variant="primary" className="btn--browse-products">Browse products</Button>
+          <Button variant="primary" className="btn--browse-products">
+            Browse products
+          </Button>
         </Link>
       </div>
     );
@@ -22,22 +52,45 @@ function Cart() {
 
   return (
     <div className="cart">
+      <ConfirmModal
+        open={Boolean(pendingRemoveId)}
+        title="Remove item"
+        message="Remove this item from your cart?"
+        confirmText="Remove"
+        destructive
+        onConfirm={confirmRemove}
+        onClose={() => setPendingRemoveId(null)}
+      />
+
+      <ConfirmModal
+        open={checkoutConfirmationOpen}
+        title="Continue without a design?"
+        message="You can customize this product first, or continue and purchase it without a custom design."
+        cancelText="Customize"
+        confirmText="Continue"
+        onCancel={customizeFirstUndesignedItem}
+        onConfirm={() => {
+          setCheckoutConfirmationOpen(false);
+          navigate("/checkout");
+        }}
+        onClose={() => setCheckoutConfirmationOpen(false)}
+      />
+
       <h2>Your cart</h2>
 
       <div className="cart-list">
         {cart.items.map((item) => (
-          <div className="cart-item" key={item.id}>
+          <article className="cart-item" key={item.id}>
             <div className="cart-item__image">
               {item.mockupUrl ? (
-                <img src={`http://localhost:5000${item.mockupUrl}`} alt={`${item.variant.product.name} custom design`} />
+                <img
+                  src={mediaUrl(item.mockupUrl)}
+                  alt={`${item.variant.product.name} custom design`}
+                />
               ) : (
                 item.variant.product.image && (
                   <img
-                    src={
-                      item.variant.product.image.startsWith("http")
-                        ? item.variant.product.image
-                        : `http://localhost:5000${item.variant.product.image}`
-                    }
+                    src={mediaUrl(item.variant.product.image)}
                     alt={item.variant.product.name}
                   />
                 )
@@ -71,10 +124,13 @@ function Cart() {
 
             <p className="cart-item__total">₱{item.lineTotal}</p>
 
-            <button className="cart-item__remove" onClick={() => remove(item.id)}>
+            <button
+              className="cart-item__remove"
+              onClick={() => setPendingRemoveId(item.id)}
+            >
               Remove
             </button>
-          </div>
+          </article>
         ))}
       </div>
 
@@ -83,12 +139,16 @@ function Cart() {
           <span>Subtotal</span>
           <span>₱{cart.subtotal}</span>
         </div>
-        <p className="cart-summary__note">Shipping and taxes calculated at checkout.</p>
-        <Link to="/checkout">
-          <Button variant="primary" className="btn--block">
-            Proceed to checkout
-          </Button>
-        </Link>
+        <p className="cart-summary__note">
+          Shipping and taxes calculated at checkout.
+        </p>
+        <Button
+          variant="primary"
+          className="btn--block"
+          onClick={proceedToCheckout}
+        >
+          Proceed to checkout
+        </Button>
       </div>
     </div>
   );

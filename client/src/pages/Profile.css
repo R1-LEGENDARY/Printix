@@ -36,7 +36,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  background: #fff;
+  background: var(--color-paper);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-4);
@@ -63,6 +63,8 @@
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.9375rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 
 .profile__form input:disabled {
@@ -142,7 +144,7 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-3);
-  background: #fff;
+  background: var(--color-paper);
   font-size: 0.875rem;
   color: var(--color-ink-soft);
 }

@@ -7,8 +7,6 @@ import "./StarRating.css";
  * @param {Function} onChange - Optional; if given, stars become clickable
  * @param {string} size - Optional CSS font-size override
  * @returns {JSX.Element} - The star row
- *
- * Author: JC
  */
 function StarRating({ value, onChange, size = "1rem" }) {
   const interactive = !!onChange;

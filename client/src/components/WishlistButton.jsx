@@ -7,8 +7,6 @@ import "./WishlistButton.css";
  * from the logged-in user's wishlist. Renders nothing for guests.
  * @param {string} variantId - The product variant to toggle
  * @returns {JSX.Element|null}
- *
- * Author: JC
  */
 function WishlistButton({ variantId }) {
   const { user } = useAuth();

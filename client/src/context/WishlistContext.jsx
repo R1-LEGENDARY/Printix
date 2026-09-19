@@ -8,8 +8,6 @@ import { WishlistContext } from "./WishlistContextValue";
  * and mutation helpers. Only loads/works for logged-in users.
  * @param {ReactNode} children
  * @returns {JSX.Element} - Provider wrapping children
- *
- * Author: JC
  */
 export function WishlistProvider({ children }) {
   const { user } = useAuth();

@@ -21,7 +21,6 @@ function AdminLayout() {
   return (
     <div className="admin">
       <aside className="admin__sidebar" aria-label="Admin navigation">
-        <h2>Printix Admin</h2>
         <nav>
           <NavLink to="/admin" end><AdminIcon name="dashboard" />Dashboard</NavLink>
           <NavLink to="/admin/products"><AdminIcon name="products" />Products</NavLink>

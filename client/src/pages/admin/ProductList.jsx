@@ -1,13 +1,32 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { listAdminProducts, toggleProductActive, deleteProduct } from "../../api/admin";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  listAdminProducts,
+  toggleProductActive,
+  deleteProduct,
+} from "../../api/admin";
 import Button from "../../components/Button";
+import ConfirmModal from "../../components/ConfirmModal";
 import "./ProductList.css";
 
 function ProductList() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
+
+  function openProduct(id) {
+    navigate(`/admin/products/${id}`);
+  }
+
+  function handleRowKeyDown(event, id) {
+    if (event.target.closest("button, a")) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openProduct(id);
+    }
+  }
 
   const load = useCallback(() => {
     setLoading(true);
@@ -30,13 +49,19 @@ function ProductList() {
     }
   }
 
-  async function handleDelete(id, name) {
-    if (!window.confirm(`Delete "${name}" permanently? This can't be undone.`)) return;
+  function askDelete(product) {
+    setPendingDelete(product);
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
     try {
-      await deleteProduct(id);
+      await deleteProduct(pendingDelete.id);
+      setPendingDelete(null);
       load();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete product.");
+      setPendingDelete(null);
     }
   }
 
@@ -45,18 +70,32 @@ function ProductList() {
 
   return (
     <div>
-      <div className="pl-header">
+      <div className="product-list-header">
         <h1>Products</h1>
       </div>
-      <Link className="pl-add-link" to="/admin/products/new">
+      <Link className="product-list-add-link" to="/admin/products/new">
         <Button variant="primary">Add product</Button>
       </Link>
+
+      <ConfirmModal
+        open={Boolean(pendingDelete)}
+        title="Delete product"
+        message={
+          pendingDelete
+            ? `Delete "${pendingDelete.name}" permanently? This can't be undone.`
+            : ""
+        }
+        confirmText="Delete"
+        destructive
+        onConfirm={confirmDelete}
+        onClose={() => setPendingDelete(null)}
+      />
 
       {products.length === 0 ? (
         <p className="admin-status">No products yet.</p>
       ) : (
-        <div className="dash-table-wrap">
-          <table className="dash-table">
+        <div className="dashboard-table-wrap">
+          <table className="dashboard-table">
             <thead>
               <tr>
                 <th>Name</th>
@@ -69,22 +108,44 @@ function ProductList() {
             </thead>
             <tbody>
               {products.map((p) => (
-                <tr key={p.id}>
-                  <td><Link to={`/admin/products/${p.id}`}>{p.name}</Link></td>
+                <tr
+                  key={p.id}
+                  className="dashboard-table__clickable-row"
+                  onClick={(event) => {
+                    if (!event.target.closest("button, a")) openProduct(p.id);
+                  }}
+                  onKeyDown={(event) => handleRowKeyDown(event, p.id)}
+                  tabIndex={0}
+                  role="link"
+                  aria-label={`View product ${p.name}`}
+                >
+                  <td>
+                    <Link to={`/admin/products/${p.id}`}>{p.name}</Link>
+                  </td>
                   <td>{p.category.name}</td>
                   <td>₱{p.basePrice}</td>
                   <td>{p.variants.length}</td>
                   <td>
-                    <span className={`status-pill ${p.isActive ? "status-pill--delivered" : "status-pill--cancelled"}`}>
+                    <span
+                      className={`status-pill ${p.isActive ? "status-pill--delivered" : "status-pill--cancelled"}`}
+                    >
                       {p.isActive ? "Active" : "Inactive"}
                     </span>
                   </td>
                   <td>
-                    <div className="pl-actions">
-                      <button type="button" className="pl-toggle" onClick={() => handleToggle(p.id)}>
+                    <div className="product-list-actions">
+                      <button
+                        type="button"
+                        className="product-list-toggle"
+                        onClick={() => handleToggle(p.id)}
+                      >
                         {p.isActive ? "Deactivate" : "Activate"}
                       </button>
-                      <button type="button" className="pl-toggle pl-toggle--danger" onClick={() => handleDelete(p.id, p.name)}>
+                      <button
+                        type="button"
+                        className="product-list-toggle product-list-toggle--danger"
+                        onClick={() => askDelete(p)}
+                      >
                         Delete
                       </button>
                     </div>

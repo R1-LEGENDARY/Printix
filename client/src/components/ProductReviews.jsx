@@ -10,8 +10,6 @@ import "./ProductReviews.css";
  * for logged-in verified buyers, a form to leave a new review per unreviewed order item.
  * @param {string} productId - The product these reviews belong to
  * @returns {JSX.Element} - The reviews section
- *
- * Author: JC
  */
 function ProductReviews({ productId }) {
   const { user } = useAuth();
@@ -57,24 +55,24 @@ function ProductReviews({ productId }) {
     }
   }
 
-  if (loading) return <p className="pr-status">Loading reviews...</p>;
+  if (loading) return <p className="product-reviews-status">Loading reviews...</p>;
 
   return (
-    <div className="pr">
-      <div className="pr-summary">
+    <div className="product-reviews">
+      <div className="product-reviews-summary">
         <h3>Reviews</h3>
         {data.totalCount > 0 ? (
-          <div className="pr-summary__row">
+          <div className="product-reviews-summary__row">
             <StarRating value={data.averageRating} size="1.25rem" />
             <span>{data.averageRating.toFixed(1)} out of 5 ({data.totalCount} review{data.totalCount !== 1 ? "s" : ""})</span>
           </div>
         ) : (
-          <p className="pr-status">No reviews yet — be the first to share your thoughts.</p>
+          <p className="product-reviews-status">No reviews yet — be the first to share your thoughts.</p>
         )}
       </div>
 
       {user && reviewableItems.length > 0 && (
-        <form className="pr-form" onSubmit={handleSubmit}>
+        <form className="product-reviews-form" onSubmit={handleSubmit}>
           <h4>Write a review</h4>
           {reviewableItems.length > 1 && (
             <select value={selectedItemId} onChange={(e) => setSelectedItemId(e.target.value)}>
@@ -93,23 +91,23 @@ function ProductReviews({ productId }) {
             onChange={(e) => setComment(e.target.value)}
             rows={3}
           />
-          {error && <p className="pr-error">{error}</p>}
+          {error && <p className="product-reviews-error">{error}</p>}
           <Button type="submit" variant="primary" disabled={submitting}>
             {submitting ? "Submitting..." : "Submit review"}
           </Button>
         </form>
       )}
 
-      <div className="pr-list">
+      <div className="product-reviews-list">
         {data.reviews.map((r) => (
-          <div className="pr-item" key={r.id}>
-            <div className="pr-item__header">
+          <div className="product-reviews-item" key={r.id}>
+            <div className="product-reviews-item__header">
               <StarRating value={r.rating} />
-              <span className="pr-item__name">{r.reviewerName}</span>
-              {r.verifiedPurchase && <span className="pr-item__verified">Verified purchase</span>}
+              <span className="product-reviews-item__name">{r.reviewerName}</span>
+              {r.verifiedPurchase && <span className="product-reviews-item__verified">Verified purchase</span>}
             </div>
-            {r.comment && <p className="pr-item__comment">{r.comment}</p>}
-            <span className="pr-item__date">{new Date(r.createdAt).toLocaleDateString()}</span>
+            {r.comment && <p className="product-reviews-item__comment">{r.comment}</p>}
+            <span className="product-reviews-item__date">{new Date(r.createdAt).toLocaleDateString()}</span>
           </div>
         ))}
       </div>

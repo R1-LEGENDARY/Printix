@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { listCoupons, createCoupon, updateCoupon, deleteCoupon } from "../../api/admin";
 import Button from "../../components/Button";
+import ConfirmModal from "../../components/ConfirmModal";
 import "./Dashboard.css";
 import "./CouponList.css";
 
@@ -20,6 +21,7 @@ function CouponList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -77,13 +79,19 @@ function CouponList() {
     load();
   }
 
-  async function handleDelete(coupon) {
-    if (!window.confirm(`Delete coupon "${coupon.code}"?`)) return;
+  function askDelete(coupon) {
+    setPendingDelete(coupon);
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return;
     try {
-      await deleteCoupon(coupon.id);
+      await deleteCoupon(pendingDelete.id);
+      setPendingDelete(null);
       load();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete coupon.");
+      setPendingDelete(null);
     }
   }
 
@@ -91,30 +99,30 @@ function CouponList() {
     <div>
       <h1>Coupons</h1>
 
-      <form className="cp-form" onSubmit={handleCreate}>
-        <div className="cp-field">
+      <form className="coupon-form" onSubmit={handleCreate}>
+        <div className="coupon-field">
           <input name="code" placeholder="CODE" value={form.code} onChange={handleChange} aria-invalid={Boolean(fieldErrors.code)} />
-          {fieldErrors.code && <span className="cp-field-error">{fieldErrors.code}</span>}
+          {fieldErrors.code && <span className="coupon-field-error">{fieldErrors.code}</span>}
         </div>
         <select name="discountType" value={form.discountType} onChange={handleChange}>
           <option value="percent">% off</option>
           <option value="fixed">₱ off</option>
         </select>
-        <div className="cp-field">
+        <div className="coupon-field">
           <input name="value" type="number" step="0.01" placeholder="Value" value={form.value} onChange={handleChange} aria-invalid={Boolean(fieldErrors.value)} />
-          {fieldErrors.value && <span className="cp-field-error">{fieldErrors.value}</span>}
+          {fieldErrors.value && <span className="coupon-field-error">{fieldErrors.value}</span>}
         </div>
-        <div className="cp-field">
+        <div className="coupon-field">
           <input name="minOrderAmount" type="number" step="0.01" placeholder="Min order (optional)" value={form.minOrderAmount} onChange={handleChange} aria-invalid={Boolean(fieldErrors.minOrderAmount)} />
-          {fieldErrors.minOrderAmount && <span className="cp-field-error">{fieldErrors.minOrderAmount}</span>}
+          {fieldErrors.minOrderAmount && <span className="coupon-field-error">{fieldErrors.minOrderAmount}</span>}
         </div>
-        <div className="cp-field">
+        <div className="coupon-field">
           <input name="usageLimit" type="number" placeholder="Total use limit (optional)" value={form.usageLimit} onChange={handleChange} aria-invalid={Boolean(fieldErrors.usageLimit)} />
-          {fieldErrors.usageLimit && <span className="cp-field-error">{fieldErrors.usageLimit}</span>}
+          {fieldErrors.usageLimit && <span className="coupon-field-error">{fieldErrors.usageLimit}</span>}
         </div>
-        <div className="cp-field">
+        <div className="coupon-field">
           <input name="usageLimitPerUser" type="number" placeholder="Per-user limit (optional)" value={form.usageLimitPerUser} onChange={handleChange} aria-invalid={Boolean(fieldErrors.usageLimitPerUser)} />
-          {fieldErrors.usageLimitPerUser && <span className="cp-field-error">{fieldErrors.usageLimitPerUser}</span>}
+          {fieldErrors.usageLimitPerUser && <span className="coupon-field-error">{fieldErrors.usageLimitPerUser}</span>}
         </div>
         <input name="expiresAt" type="date" value={form.expiresAt} onChange={handleChange} />
         <Button type="submit" variant="primary">Create coupon</Button>
@@ -122,13 +130,23 @@ function CouponList() {
 
       {error && <p className="admin-error">{error}</p>}
 
+      <ConfirmModal
+        open={Boolean(pendingDelete)}
+        title="Delete coupon"
+        message={pendingDelete ? `Delete coupon "${pendingDelete.code}"?` : ""}
+        confirmText="Delete"
+        destructive
+        onConfirm={confirmDelete}
+        onClose={() => setPendingDelete(null)}
+      />
+
       {loading ? (
         <p className="admin-status">Loading coupons...</p>
       ) : coupons.length === 0 ? (
         <p className="admin-status">No coupons yet.</p>
       ) : (
-        <div className="dash-table-wrap">
-          <table className="dash-table">
+        <div className="dashboard-table-wrap">
+          <table className="dashboard-table">
             <thead>
               <tr><th>Code</th><th>Discount</th><th>Min order</th><th>Used</th><th>Expires</th><th>Status</th><th></th></tr>
             </thead>
@@ -145,9 +163,9 @@ function CouponList() {
                       {c.isActive ? "Active" : "Inactive"}
                     </span>
                   </td>
-                  <td className="cp-actions">
+                  <td className="coupon-actions">
                     <button type="button" onClick={() => handleToggle(c)}>{c.isActive ? "Deactivate" : "Activate"}</button>
-                    <button type="button" onClick={() => handleDelete(c)}>Delete</button>
+                    <button type="button" onClick={() => askDelete(c)}>Delete</button>
                   </td>
                 </tr>
               ))}

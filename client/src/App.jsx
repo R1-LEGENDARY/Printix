@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import PreviewBanner from "./components/PreviewBanner";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -29,100 +30,114 @@ import Wishlist from "./pages/Wishlist";
 import Profile from "./pages/Profile";
 import Designer from "./pages/Designer";
 import Breadcrumbs from "./components/Breadcrumbs";
+import ScrollToTopButton from "./components/ScrollToTopButton";
+
+function AppShell() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname]);
+
+  return (
+    <div className="app">
+      <PreviewBanner />
+      <Navbar />
+      <Breadcrumbs />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/catalog" element={<Catalog />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/products/:slug" element={<ProductDetail />} />
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wishlist"
+          element={
+            <ProtectedRoute>
+              <Wishlist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <Checkout />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders/:id"
+          element={
+            <ProtectedRoute>
+              <OrderConfirmation />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute>
+              <OrderHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="products" element={<ProductList />} />
+          <Route path="products/new" element={<ProductForm />} />
+          <Route path="products/:id" element={<ProductForm />} />
+          <Route path="categories" element={<CategoryList />} />
+          <Route path="reviews" element={<ReviewModeration />} />
+          <Route path="coupons" element={<CouponList />} />
+          <Route path="refunds" element={<RefundList />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="orders" element={<OrderList />} />
+          <Route path="orders/:id" element={<OrderDetail />} />
+        </Route>
+        <Route
+          path="/design/:slug"
+          element={
+            <ProtectedRoute>
+            <Designer />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      <ScrollToTopButton />
+    </div>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="app">
-        <PreviewBanner />
-        <Navbar />
-        <Breadcrumbs />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/catalog" element={<Catalog />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/products/:slug" element={<ProductDetail />} />
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <Cart />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/wishlist"
-            element={
-              <ProtectedRoute>
-                <Wishlist />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <Checkout />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders/:id"
-            element={
-              <ProtectedRoute>
-                <OrderConfirmation />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <OrderHistory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <AdminRoute>
-                <AdminLayout />
-              </AdminRoute>
-            }
-          >
-            <Route index element={<Dashboard />} />
-            <Route path="products" element={<ProductList />} />
-            <Route path="products/new" element={<ProductForm />} />
-            <Route path="products/:id" element={<ProductForm />} />
-            <Route path="categories" element={<CategoryList />} />
-            <Route path="reviews" element={<ReviewModeration />} />
-            <Route path="coupons" element={<CouponList />} />
-            <Route path="refunds" element={<RefundList />} />
-            <Route path="analytics" element={<Analytics />} />
-            <Route path="orders" element={<OrderList />} />
-            <Route path="orders/:id" element={<OrderDetail />} />
-          </Route>
-          <Route
-            path="/design/:slug"
-            element={
-              <ProtectedRoute>
-              <Designer />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </div>
+      <AppShell />
     </BrowserRouter>
   );
 }

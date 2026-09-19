@@ -6,6 +6,11 @@ import "./AccountMenu.css";
 function AccountMenu() {
   const { user, logout, previewingAsCustomer, startPreview, exitPreview } = useAuth();
   const [open, setOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) return savedTheme === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
   const menuRef = useRef();
   const navigate = useNavigate();
 
@@ -18,6 +23,11 @@ function AccountMenu() {
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   if (!user) return null;
 
@@ -77,6 +87,32 @@ function AccountMenu() {
           <Link to="/profile" className="account-menu__link" onClick={() => setOpen(false)}>
             Profile / Settings
           </Link>
+
+          <div className="account-menu__theme-row">
+            <span className="account-menu__theme-label">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                {darkMode ? (
+                  <path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z" />
+                ) : (
+                  <>
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                  </>
+                )}
+              </svg>
+              <span>{darkMode ? "Dark mode" : "Light mode"}</span>
+            </span>
+            <button
+              className={`account-menu__switch ${darkMode ? "account-menu__switch--on" : ""}`}
+              type="button"
+              role="switch"
+              aria-checked={darkMode}
+              aria-label={`Turn ${darkMode ? "off" : "on"} dark mode`}
+              onClick={() => setDarkMode((current) => !current)}
+            >
+              <span className="account-menu__switch-thumb" />
+            </button>
+          </div>
 
           <button className="account-menu__link account-menu__link--logout" onClick={handleLogout}>
             Logout

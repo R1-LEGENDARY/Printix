@@ -102,21 +102,23 @@ function Navbar() {
             )}
           </div>
         )}
+
+        {!isAuthPage && (
+          <button
+            className="navbar__burger"
+            onClick={() => setMobileOpen((o) => !o)}
+            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        )}
+
         {user && (
           <div className="navbar__account">
             {!isAdminMode && <NotificationBell />}
-            {!isAuthPage && (
-              <button
-                className="navbar__burger"
-                onClick={() => setMobileOpen((o) => !o)}
-                aria-label="Toggle menu"
-                aria-expanded={mobileOpen}
-              >
-                <span />
-                <span />
-                <span />
-              </button>
-            )}
             <AccountMenu />
           </div>
         )}

@@ -169,15 +169,17 @@ async function saveDesign(req, res) {
       const fs = require("fs");
       const path = require("path");
       const base64 = mockupImageDataUrl.replace(/^data:image\/png;base64,/, "");
-      const filename = `mockup-${design.id}-${Date.now()}.png`;
-      const filepath = path.join(__dirname, "../../uploads", filename);
+      const filename = `design-${design.id}-${Date.now()}.png`;
+      const designDir = path.join(__dirname, "../../uploads/generated-mockups");
+      if (!fs.existsSync(designDir)) fs.mkdirSync(designDir, { recursive: true });
+      const filepath = path.join(designDir, filename);
       fs.writeFileSync(filepath, Buffer.from(base64, "base64"));
 
       await prisma.designSnapshot.create({
         data: {
           designId: design.id,
           printableAreaId: BigInt(printableAreaId),
-          mockupImageUrl: `/uploads/${filename}`,
+          mockupImageUrl: `/uploads/generated-mockups/${filename}`,
           elementsJson: JSON.parse(
             JSON.stringify(elements, (k, v) => (typeof v === "bigint" ? v.toString() : v))
           ),

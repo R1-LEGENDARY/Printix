@@ -1,31 +1,31 @@
-.oc {
+.order-confirmation {
   max-width: 600px;
   margin: 0 auto;
   padding: var(--space-6) var(--space-5);
   text-align: center;
 }
 
-.oc-status {
+.order-confirmation-status {
   padding: var(--space-6) var(--space-5);
   color: var(--color-ink-soft);
 }
 
-.oc h2 {
+.order-confirmation h2 {
   font-size: 2rem;
   margin-bottom: var(--space-2);
 }
 
-.oc__number {
+.order-confirmation__number {
   font-weight: 600;
   margin-bottom: var(--space-1);
 }
 
-.oc__status {
+.order-confirmation__status {
   color: var(--color-ink-soft);
   margin-bottom: var(--space-5);
 }
 
-.oc__items {
+.order-confirmation__items {
   text-align: left;
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
@@ -33,7 +33,7 @@
   margin-bottom: var(--space-3);
 }
 
-.oc__item {
+.order-confirmation__item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -41,18 +41,18 @@
   margin-bottom: var(--space-2);
 }
 
-.oc__item-info {
+.order-confirmation__item-info {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
 }
 
-.oc__item-info span {
+.order-confirmation__item-info span {
   overflow-wrap: anywhere;
 }
 
-.oc__item-thumb {
+.order-confirmation__item-thumb {
   width: 36px;
   height: 36px;
   border-radius: 6px;
@@ -60,7 +60,7 @@
   border: 1px solid var(--color-border);
 }
 
-.oc__total {
+.order-confirmation__total {
   display: flex;
   justify-content: space-between;
   font-weight: 700;
@@ -68,36 +68,36 @@
   margin-bottom: var(--space-4);
 }
 
-.oc__payment {
+.order-confirmation__payment {
   margin-bottom: var(--space-4);
 }
 
-.oc__payment-note {
+.order-confirmation__payment-note {
   font-size: 0.875rem;
   color: var(--color-ink-soft);
   margin-bottom: var(--space-2);
 }
 
-.oc__payment-note--warn {
+.order-confirmation__payment-note--warn {
   color: #C0392B;
 }
 
-.oc__payment-note--success {
+.order-confirmation__payment-note--success {
   color: #1E8E3E;
   font-weight: 500;
   margin-bottom: var(--space-4);
 }
 
-.oc > .btn {
+.order-confirmation > .btn {
   margin-bottom: var(--space-2);
 }
 
-.oc > a {
+.order-confirmation > a {
   display: inline-block;
   margin-top: var(--space-2);
 }
 
-.oc__shipment {
+.order-confirmation__shipment {
   text-align: left;
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
@@ -105,36 +105,36 @@
   margin-bottom: var(--space-4);
 }
 
-.oc__shipment h3 {
+.order-confirmation__shipment h3 {
   font-size: 0.9375rem;
   margin-bottom: var(--space-1);
 }
 
-.oc__shipment-status {
+.order-confirmation__shipment-status {
   font-size: 0.875rem;
   color: var(--color-ink-soft);
 }
 
 @media (max-width: 560px) {
-  .oc {
+  .order-confirmation {
     padding: var(--space-4) var(--space-3);
   }
 
-  .oc__item {
+  .order-confirmation__item {
     align-items: flex-start;
     gap: var(--space-2);
   }
 
-  .oc__item > span:last-child {
+  .order-confirmation__item > span:last-child {
     white-space: nowrap;
   }
 
-  .oc > .btn,
-  .oc > a {
+  .order-confirmation > .btn,
+  .order-confirmation > a {
     width: 100%;
   }
 
-  .oc > a .btn {
+  .order-confirmation > a .btn {
     width: 100%;
   }
 }

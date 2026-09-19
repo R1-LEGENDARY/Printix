@@ -4,6 +4,8 @@ import api from "../api/axios";
 import Button from "../components/Button";
 import WishlistButton from "../components/WishlistButton";
 import ProductReviews from "../components/ProductReviews";
+import Seo from "../components/Seo";
+import { mediaUrl } from "../utils/mediaUrl";
 import "./ProductDetail.css";
 import { useCart } from "../context/useCart";
 import { useAuth } from "../context/useAuth";
@@ -35,104 +37,107 @@ function ProductDetail() {
           setSelectedSize(firstVariant.size);
         }
       })
-      .catch((err) =>
-        setError(err.response?.data?.message || err.message)
-      )
+      .catch((err) => setError(err.response?.data?.message || err.message))
       .finally(() => setLoading(false));
   }, [slug]);
 
   useEffect(() => {
     if (!product?.category?.name) return;
-    api.get("/products")
-      .then((res) => setRelatedProducts(
-        res.data
-          .filter((item) => item.slug !== product.slug && item.category === product.category.name)
-          .slice(0, 4)
-      ))
+    api
+      .get("/products")
+      .then((res) =>
+        setRelatedProducts(
+          res.data
+            .filter(
+              (item) =>
+                item.slug !== product.slug &&
+                item.category === product.category.name,
+            )
+            .slice(0, 4),
+        ),
+      )
       .catch(() => setRelatedProducts([]));
   }, [product]);
 
   const colors = useMemo(
     () => [...new Set(product?.variants.map((v) => v.color) || [])],
-    [product]
+    [product],
   );
 
   const sizes = useMemo(
     () => [...new Set(product?.variants.map((v) => v.size) || [])],
-    [product]
+    [product],
   );
 
   const activeVariant = useMemo(
     () =>
       product?.variants.find(
-        (v) => v.color === selectedColor && v.size === selectedSize
+        (v) => v.color === selectedColor && v.size === selectedSize,
       ),
-    [product, selectedColor, selectedSize]
+    [product, selectedColor, selectedSize],
   );
 
   if (loading) {
-    return <p className="pd-status">Loading product...</p>;
+    return <p className="product-detail-status">Loading product...</p>;
   }
 
   if (error) {
-    return <p className="pd-status">Error: {error}</p>;
+    return <p className="product-detail-status">Error: {error}</p>;
   }
 
   if (!product) {
     return null;
   }
 
-  const inStock = activeVariant
-    ? activeVariant.stockQuantity > 0
-    : false;
+  const inStock = activeVariant ? activeVariant.stockQuantity > 0 : false;
 
   const primaryImage =
     product.images.find((img) => img.isPrimary) || product.images[0];
 
   return (
-    <div className="pd">
-      <div className="pd__gallery">
+    <div className="product-detail">
+      <Seo
+        title={product.name}
+        description={
+          product.description ||
+          `Customize and order ${product.name} from Printix.`
+        }
+        image={mediaUrl(primaryImage?.imageUrl)}
+        path={`/products/${product.slug}`}
+      />
+      <div className="product-detail__gallery">
         {primaryImage ? (
-          <img
-            src={
-              primaryImage.imageUrl.startsWith("http")
-                ? primaryImage.imageUrl
-                : `http://localhost:5000${primaryImage.imageUrl}`
-            }
-            alt={product.name}
-          />
+          <img src={mediaUrl(primaryImage.imageUrl)} alt={product.name} />
         ) : (
-          <div className="pd__gallery-empty" />
+          <div className="product-detail__gallery-empty" />
         )}
       </div>
 
-      <div className="pd__info">
-        <span className="pd__category">
+      <div className="product-detail__info">
+        <span className="product-detail__category">
           {product.category?.name}
         </span>
 
         <h1>{product.name}</h1>
 
-        <div className="pd__price-row">
-          <p className="pd__price">₱{product.basePrice}</p>
+        <div className="product-detail__price-row">
+          <p className="product-detail__price">₱{product.basePrice}</p>
           <WishlistButton variantId={activeVariant?.id} />
         </div>
 
-        <p className="pd__description">
-          {product.description}
-        </p>
+        <p className="product-detail__description">{product.description}</p>
 
         {colors.length > 0 && (
-          <div className="pd__option-group">
-            <span className="pd__option-label">Color</span>
+          <div className="product-detail__option-group">
+            <span className="product-detail__option-label">Color</span>
 
-            <div className="pd__swatches">
+            <div className="product-detail__swatches">
               {colors.map((color) => (
                 <button
                   key={color}
-                  className={`pd__swatch ${
+                  className={`product-detail__swatch ${
                     selectedColor === color
-                      ? "pd__swatch--active"
+                      ? "product-detail__swatch--active"
                       : ""
                   }`}
                   onClick={() => setSelectedColor(color)}
@@ -145,16 +150,16 @@ function ProductDetail() {
         )}
 
         {sizes.length > 0 && (
-          <div className="pd__option-group">
-            <span className="pd__option-label">Size</span>
+          <div className="product-detail__option-group">
+            <span className="product-detail__option-label">Size</span>
 
-            <div className="pd__swatches">
+            <div className="product-detail__swatches">
               {sizes.map((size) => (
                 <button
                   key={size}
-                  className={`pd__swatch ${
+                  className={`product-detail__swatch ${
                     selectedSize === size
-                      ? "pd__swatch--active"
+                      ? "product-detail__swatch--active"
                       : ""
                   }`}
                   onClick={() => setSelectedSize(size)}
@@ -167,10 +172,10 @@ function ProductDetail() {
         )}
 
         <p
-          className={`pd__availability ${
+          className={`product-detail__availability ${
             inStock
-              ? "pd__availability--in"
-              : "pd__availability--out"
+              ? "product-detail__availability--in"
+              : "product-detail__availability--out"
           }`}
         >
           {activeVariant
@@ -180,7 +185,7 @@ function ProductDetail() {
             : "Select options"}
         </p>
 
-        <div className="pd__actions">
+        <div className="product-detail__actions">
           <Link
             to={`/design/${product.slug}?variant=${activeVariant?.id || ""}`}
             onClick={(event) => {
@@ -214,20 +219,36 @@ function ProductDetail() {
             {adding ? "Adding..." : "Add to cart"}
           </Button>
         </div>
-        {authMessage && <p className="pd__auth-message" role="alert">{authMessage}</p>}
+        {authMessage && (
+          <p className="product-detail__auth-message" role="alert">
+            {authMessage}
+          </p>
+        )}
       </div>
 
       {relatedProducts.length > 0 && (
-        <section className="pd-related" aria-label="Related products">
-          <div className="pd-related__header">
+        <section
+          className="product-detail-related"
+          aria-label="Related products"
+        >
+          <div className="product-detail-related__header">
             <h2>You may also like</h2>
             <Link to="/catalog">View all products</Link>
           </div>
-          <div className="pd-related__grid">
+          <div className="product-detail-related__grid">
             {relatedProducts.map((related) => (
-              <Link className="pd-related-card" to={`/products/${related.slug}`} key={related.id}>
-                <div className="pd-related-card__image">
-                  {related.primaryImage && <img src={related.primaryImage.startsWith("http") ? related.primaryImage : `http://localhost:5000${related.primaryImage}`} alt={related.name} />}
+              <Link
+                className="product-detail-related-card"
+                to={`/products/${related.slug}`}
+                key={related.id}
+              >
+                <div className="product-detail-related-card__image">
+                  {related.primaryImage && (
+                    <img
+                      src={mediaUrl(related.primaryImage)}
+                      alt={related.name}
+                    />
+                  )}
                 </div>
                 <span>{related.name}</span>
                 <strong>₱{related.basePrice}</strong>

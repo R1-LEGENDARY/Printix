@@ -192,7 +192,7 @@ async function addProductImage(req, res) {
     const image = await prisma.productImage.create({
       data: {
         productId,
-        imageUrl: `/uploads/${req.file.filename}`,
+        imageUrl: `/uploads/product-images/${req.file.filename}`,
         isPrimary: existingCount === 0, 
         sortOrder: existingCount,
       },
@@ -331,7 +331,7 @@ async function uploadMockupTemplate(req, res) {
     if (!area) return res.status(404).json({ message: "Printable area not found." });
 
     const existing = await prisma.productMockupTemplate.findFirst({ where: { printableAreaId, variantId } });
-    const baseImageUrl = `/uploads/${req.file.filename}`;
+    const baseImageUrl = `/uploads/mockups/${req.file.filename}`;
 
     const template = existing
       ? await prisma.productMockupTemplate.update({ where: { id: existing.id }, data: { baseImageUrl } })
@@ -384,7 +384,7 @@ async function uploadDisplacementMap(req, res) {
 
     const updated = await prisma.productMockupTemplate.update({
       where: { id: template.id },
-      data: { displacementMapUrl: `/uploads/${req.file.filename}` },
+      data: { displacementMapUrl: `/uploads/displacement-maps/${req.file.filename}` },
     });
 
     res.status(201).json({ id: updated.id.toString(), displacementMapUrl: updated.displacementMapUrl });

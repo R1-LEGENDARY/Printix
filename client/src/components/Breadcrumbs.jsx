@@ -11,8 +11,6 @@ function titleize(value) {
  * DOCU: Builds the customer-facing breadcrumb trail from the current URL.
  * @param {string} pathname - Current browser pathname
  * @returns {Array<Object>} - Breadcrumb labels and optional destination paths
- *
- * Author: JC
  */
 function getCustomerItems(pathname) {
   const segments = pathname.split("/").filter(Boolean);
@@ -53,8 +51,6 @@ function getCustomerItems(pathname) {
  * DOCU: Builds the admin breadcrumb trail for list, create, and detail routes.
  * @param {string} pathname - Current admin pathname
  * @returns {Array<Object>} - Breadcrumb labels and optional destination paths
- *
- * Author: JC
  */
 function getAdminItems(pathname) {
   const segments = pathname.split("/").filter(Boolean).slice(1);
@@ -86,8 +82,6 @@ function getAdminItems(pathname) {
  * DOCU: Renders the breadcrumb navigation for the current customer or admin route.
  * @param {boolean} admin - Whether to render the admin breadcrumb variant
  * @returns {JSX.Element|null} - Breadcrumb navigation or nothing for the other route family
- *
- * Author: JC
  */
 function Breadcrumbs({ admin = false }) {
   const { pathname } = useLocation();

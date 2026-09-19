@@ -1,4 +1,4 @@
-.cp-form {
+.coupon-form {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -6,56 +6,63 @@
   align-items: flex-start;
 }
 
-.cp-form input,
-.cp-form select {
+.coupon-form input,
+.coupon-form select {
   height: 44px;
   box-sizing: border-box;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.875rem;
+  background: var(--color-paper);
+  color: var(--color-ink);
 }
 
-.cp-field {
+.coupon-form .btn {
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.coupon-field {
   position: relative;
 }
 
-.cp-field:has(.cp-field-error) {
+.coupon-field:has(.coupon-field-error) {
   margin-bottom: 18px;
 }
 
-.cp-field input {
+.coupon-field input {
   width: 100%;
 }
 
-.cp-field input[aria-invalid="true"] {
-  border-color: #C84B4B;
+.coupon-field input[aria-invalid="true"] {
+  border-color: #c84b4b;
 }
 
-.cp-field-error {
+.coupon-field-error {
   position: absolute;
   top: calc(100% + 2px);
   left: 0;
   z-index: 1;
-  color: #C84B4B;
+  color: #c84b4b;
   font-size: 0.75rem;
   white-space: nowrap;
 }
 
-.cp-form select {
+.coupon-form select {
   min-height: 0;
   min-width: 112px;
   padding-right: 40px;
 }
 
-.cp-actions {
+.coupon-actions {
   display: flex;
   gap: var(--space-2);
   align-items: center;
   min-width: 150px;
 }
 
-.cp-actions button {
+.coupon-actions button {
   background: none;
   border: 1px solid var(--color-border);
   border-radius: 6px;
@@ -67,43 +74,51 @@
   white-space: nowrap;
 }
 
-.cp-actions button:hover {
+.coupon-actions button:first-child {
+  width: 100px;
+}
+
+.coupon-actions button:last-child {
+  width: 68px;
+}
+
+.coupon-actions button:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
 @media (max-width: 720px) {
-  .cp-form {
+  .coupon-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: stretch;
   }
 
-  .cp-form input,
-  .cp-form select,
-  .cp-form button {
+  .coupon-form input,
+  .coupon-form select,
+  .coupon-form button {
     width: 100%;
     min-width: 0;
   }
 
-  .cp-form button {
+  .coupon-form button {
     grid-column: 2;
   }
 }
 
 @media (max-width: 420px) {
-  .cp-form {
+  .coupon-form {
     grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   }
 
-  .cp-form input,
-  .cp-form select {
+  .coupon-form input,
+  .coupon-form select {
     min-width: 0;
     padding-left: var(--space-2);
     padding-right: var(--space-2);
   }
 
-  .cp-form button {
+  .coupon-form button {
     grid-column: 2;
     width: 100%;
     padding-left: var(--space-2);
@@ -112,19 +127,19 @@
 }
 
 @media (max-width: 360px) {
-  .cp-form {
+  .coupon-form {
     gap: 6px;
   }
 
-  .cp-form input,
-  .cp-form select,
-  .cp-form button {
+  .coupon-form input,
+  .coupon-form select,
+  .coupon-form button {
     padding-left: 6px;
     padding-right: 6px;
     font-size: 0.75rem;
   }
 
-  .cp-form select {
+  .coupon-form select {
     padding-right: 28px;
   }
 }

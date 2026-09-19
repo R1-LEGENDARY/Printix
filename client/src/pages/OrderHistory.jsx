@@ -35,7 +35,7 @@ function OrderStatusIcon({ type }) {
     cancelled: <><circle cx="12" cy="12" r="8" /><path d="m9 9 6 6m0-6-6 6" /></>,
   };
 
-  return <svg className="oh-tab__icon" viewBox="0 0 24 24" aria-hidden="true">{paths[type]}</svg>;
+  return <svg className="order-history-tab__icon" viewBox="0 0 24 24" aria-hidden="true">{paths[type]}</svg>;
 }
 
 function OrderHistory() {
@@ -61,16 +61,16 @@ function OrderHistory() {
   }, []);
 
   if (loading) {
-    return <p className="oh-status">Loading your orders...</p>;
+    return <p className="order-history-status">Loading your orders...</p>;
   }
 
   if (error) {
-    return <p className="oh-status">Error: {error}</p>;
+    return <p className="order-history-status">Error: {error}</p>;
   }
 
   if (orders.length === 0) {
     return (
-      <div className="oh oh--empty">
+      <div className="order-history order-history--empty">
         <h2>You haven't placed any orders yet</h2>
         <p>Find something you'd like to customize.</p>
 
@@ -99,13 +99,13 @@ function OrderHistory() {
         );
 
   return (
-    <div className="oh">
+    <div className="order-history">
       <h2>Your orders</h2>
 
-      <div className="oh-tabs">
+      <div className="order-history-tabs">
         <button
           type="button"
-          className={activeTab === "all" ? "oh-tab--active" : ""}
+          className={activeTab === "all" ? "order-history-tab--active" : ""}
           onClick={() => setActiveTab("all")}
         >
           <OrderStatusIcon type="all" />
@@ -117,7 +117,7 @@ function OrderHistory() {
             type="button"
             key={tab.key}
             className={
-              activeTab === tab.key ? "oh-tab--active" : ""
+              activeTab === tab.key ? "order-history-tab--active" : ""
             }
             onClick={() => setActiveTab(tab.key)}
           >
@@ -128,22 +128,22 @@ function OrderHistory() {
       </div>
 
       {filteredOrders.length === 0 ? (
-        <p className="oh-status">No orders in this category.</p>
+        <p className="order-history-status">No orders in this category.</p>
       ) : (
-        <div className="oh-list">
+        <div className="order-history-list">
           {filteredOrders.map((order) => (
             <Link
               to={`/orders/${order.id}`}
               key={order.id}
-              className="oh-card"
+              className="order-history-card"
             >
-              <div className="oh-card__header">
+              <div className="order-history-card__header">
                 <div>
-                  <p className="oh-card__number">
+                  <p className="order-history-card__number">
                     Order #{order.orderNumber}
                   </p>
 
-                  <p className="oh-card__date">
+                  <p className="order-history-card__date">
                     {new Date(order.placedAt).toLocaleDateString(
                       undefined,
                       {
@@ -156,36 +156,36 @@ function OrderHistory() {
                 </div>
 
                 <span
-                  className={`oh-card__status oh-card__status--${order.status}`}
+                  className={`order-history-card__status order-history-card__status--${order.status}`}
                 >
                   {statusLabels[order.status] || order.status}
                 </span>
               </div>
 
-              <div className="oh-card__items">
+              <div className="order-history-card__items">
                 {order.items.slice(0, 3).map((item) => (
                   <span
                     key={item.id}
-                    className="oh-card__item"
+                    className="order-history-card__item"
                   >
                     {item.productName} × {item.quantity}
                   </span>
                 ))}
 
                 {order.items.length > 3 && (
-                  <span className="oh-card__item">
+                  <span className="order-history-card__item">
                     +{order.items.length - 3} more
                   </span>
                 )}
               </div>
 
-              <div className="oh-card__footer">
+              <div className="order-history-card__footer">
                 <span>
                   {order.items.length} item
                   {order.items.length !== 1 ? "s" : ""}
                 </span>
 
-                <span className="oh-card__total">
+                <span className="order-history-card__total">
                   ₱{order.grandTotal}
                 </span>
               </div>

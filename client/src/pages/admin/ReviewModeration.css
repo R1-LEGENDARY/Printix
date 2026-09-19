@@ -1,4 +1,4 @@
-.rm-filter {
+.review-moderation-filter {
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -7,20 +7,20 @@
   padding-right: 40px;
 }
 
-.rm-list {
+.review-moderation-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.rm-item {
-  background: #fff;
+.review-moderation-item {
+  background: var(--color-paper);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   padding: var(--space-3);
 }
 
-.rm-item__header {
+.review-moderation-item__header {
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -28,18 +28,18 @@
 }
 
 @media (max-width: 560px) {
-  .rm-item__header {
+  .review-moderation-item__header {
     align-items: flex-start;
     flex-wrap: wrap;
   }
 }
 
-.rm-item__product {
+.review-moderation-item__product {
   font-weight: 600;
   font-size: 0.9375rem;
 }
 
-.rm-item__verified {
+.review-moderation-item__verified {
   font-size: 0.75rem;
   color: #1E8E3E;
   background: #E5F7EA;
@@ -47,24 +47,24 @@
   border-radius: 999px;
 }
 
-.rm-item__meta {
+.review-moderation-item__meta {
   font-size: 0.8125rem;
   color: var(--color-ink-soft);
   margin-bottom: var(--space-1);
 }
 
-.rm-item__comment {
+.review-moderation-item__comment {
   font-size: 0.9375rem;
   margin-bottom: var(--space-2);
 }
 
-.rm-item__actions {
+.review-moderation-item__actions {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
 }
 
-.rm-item__actions button {
+.review-moderation-item__actions button {
   background: none;
   border: 1px solid var(--color-border);
   border-radius: 6px;
@@ -74,12 +74,12 @@
   color: var(--color-ink-soft);
 }
 
-.rm-item__actions button:hover {
+.review-moderation-item__actions button:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
-.rm-item__delete:hover {
-  border-color: #C0392B !important;
-  color: #C0392B !important;
+.review-moderation-item__actions button.review-moderation-item__delete:hover {
+  border-color: #C0392B;
+  color: #C0392B;
 }

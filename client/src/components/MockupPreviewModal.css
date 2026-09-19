@@ -10,7 +10,7 @@
 }
 
 .mpm-panel {
-  background: #fff;
+  background: var(--color-paper);
   border-radius: var(--radius);
   max-width: 900px;
   width: 100%;

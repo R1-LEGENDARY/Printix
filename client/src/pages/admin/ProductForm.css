@@ -1,8 +1,8 @@
-.pf h1 {
+.product-form h1 {
   margin-bottom: var(--space-4);
 }
 
-.pf-form {
+.product-form-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -10,11 +10,11 @@
   margin-bottom: var(--space-6);
 }
 
-.pf-form > .btn {
+.product-form-form > .btn {
   align-self: flex-end;
 }
 
-.pf-form label {
+.product-form-form label {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
@@ -22,111 +22,112 @@
   color: var(--color-ink-soft);
 }
 
-.pf-form input,
-.pf-form textarea,
-.pf-form select {
+.product-form-form input,
+.product-form-form textarea,
+.product-form-form select {
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
   font-family: var(--font-body);
   font-size: 0.9375rem;
   color: var(--color-ink);
-  background: #fff;
+  background: var(--color-paper);
 }
 
-.pf-form select {
+.product-form-form select {
   padding-right: 40px;
 }
 
-.pf-form [aria-invalid="true"] {
+.product-form-form [aria-invalid="true"] {
   border-color: #C84B4B;
 }
 
-.pf-field-error {
+.product-form-field-error {
   color: #C84B4B;
   font-size: 0.75rem;
 }
 
-.pf-variants h2,
-.pf-images h2 {
+.product-form-variants h2,
+.product-form-images h2 {
   font-size: 1.125rem;
   margin-bottom: var(--space-3);
 }
 
-.pf-variants + .pf-variants {
+.product-form-variants + .product-form-variants {
   margin-top: var(--space-6);
 }
 
-.pf-hint {
+.product-form-hint {
   font-size: 0.8125rem;
   color: var(--color-ink-soft);
   margin-bottom: var(--space-3);
 }
 
-.pf-stock-control {
+.product-form-stock-control {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.pf-stock-control > span {
+.product-form-stock-control > span {
   display: inline-block;
   width: 24px;
   text-align: center;
 }
 
-.pf-stock-control button {
+.product-form-stock-control button {
   width: 24px;
   height: 24px;
   border: 1px solid var(--color-border);
-  background: #fff;
+  background: var(--color-paper);
+  color: var(--color-ink);
   border-radius: 6px;
   cursor: pointer;
   font-size: 0.875rem;
 }
 
-.pf-stock-control button:disabled {
+.product-form-stock-control button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.pf-stock-restock {
-  width: auto !important;
+.product-form-stock-control .product-form-stock-restock {
+  width: auto;
   padding: 0 var(--space-2);
-  font-size: 0.75rem !important;
+  font-size: 0.75rem;
   color: var(--color-accent);
 }
 
-.pf-images {
+.product-form-images {
   margin-bottom: var(--space-6);
 }
 
-.pf-image-grid {
+.product-form-image-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: var(--space-3);
   margin-bottom: var(--space-3);
 }
 
-.pf-image-item {
+.product-form-image-item {
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   overflow: hidden;
-  background: #fff;
+  background: var(--color-paper);
 }
 
-.pf-image-item--primary {
+.product-form-image-item--primary {
   border-color: var(--color-accent);
 }
 
-.pf-image-item img {
+.product-form-image-item img {
   width: 100%;
   aspect-ratio: 1;
   object-fit: cover;
   display: block;
 }
 
-.pf-image-item__actions {
+.product-form-image-item__actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -134,7 +135,7 @@
   font-size: 0.75rem;
 }
 
-.pf-image-item__actions button {
+.product-form-image-item__actions button {
   background: none;
   border: none;
   color: var(--color-ink-soft);
@@ -143,16 +144,16 @@
   padding: 0;
 }
 
-.pf-image-item__actions button:hover {
+.product-form-image-item__actions button:hover {
   color: var(--color-accent);
 }
 
-.pf-image-item__badge {
+.product-form-image-item__badge {
   color: var(--color-accent);
   font-weight: 600;
 }
 
-.pf-upload-btn {
+.product-form-upload-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -162,17 +163,17 @@
   font-size: 0.875rem;
   cursor: pointer;
   color: var(--color-ink);
-  background: #fff;
+  background: var(--color-paper);
 }
 
-.pf-file-control {
+.product-form-file-control {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   flex-wrap: wrap;
 }
 
-.pf-file-picker {
+.product-form-file-picker {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -181,14 +182,14 @@
   padding: 0 var(--space-2);
   border: 1px solid var(--color-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-ink);
   font-size: 0.8125rem;
   cursor: pointer;
   overflow: hidden;
 }
 
-.pf-upload-input {
+.product-form-upload-input {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -197,33 +198,33 @@
   cursor: pointer;
 }
 
-.pf-file-name {
+.product-form-file-name {
   min-width: 108px;
   font-size: 0.8125rem;
   color: var(--color-ink-soft);
 }
 
-.pf-upload-btn--small {
+.product-form-upload-btn--small {
   padding: 4px 10px;
   font-size: 0.75rem;
   margin-left: var(--space-2);
 }
 
-.pf-area-actions,
-.pf-edit-variant-actions {
+.product-form-area-actions,
+.product-form-edit-variant-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-2);
 }
 
-.pf-area-actions .pf-upload-btn--small {
+.product-form-area-actions .product-form-upload-btn--small {
   margin-left: 0;
 }
 
-.pf-area-actions .pf-file-picker,
-.pf-area-actions .pf-upload-btn--small,
-.pf-area-actions .pf-row-action {
+.product-form-area-actions .product-form-file-picker,
+.product-form-area-actions .product-form-upload-btn--small,
+.product-form-area-actions .product-form-row-action {
   box-sizing: border-box;
   width: 158px;
   min-width: 158px;
@@ -231,51 +232,51 @@
   margin-left: 0;
 }
 
-.pf-row-action {
+.product-form-row-action {
   min-height: 30px;
   padding: 4px 10px;
   border: 1px solid var(--color-border);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-paper);
   color: var(--color-ink-soft);
   cursor: pointer;
   font-size: 0.75rem;
   white-space: nowrap;
 }
 
-.pf-stock-control .pf-row-action {
+.product-form-stock-control .product-form-row-action {
   width: auto;
   min-width: 58px;
   height: 32px;
 }
 
-.pf-row-action:hover {
+.product-form-row-action:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
-.pf-mockup-status {
+.product-form-mockup-status {
   font-size: 0.8125rem;
   color: #1E8E3E;
 }
 
-.pf-mockup-status--missing {
+.product-form-mockup-status--missing {
   color: var(--color-ink-soft);
 }
 
-.pf-upload-btn:hover {
+.product-form-upload-btn:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
 
-.pf-variant-form {
+.product-form-variant-form {
   display: flex;
   gap: var(--space-2);
   margin-top: var(--space-3);
   flex-wrap: wrap;
 }
 
-.pf-variant-form input {
+.product-form-variant-form input {
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -284,16 +285,16 @@
 }
 
 @media (min-width: 721px) {
-  .pf-variant-form .pf-area-name-input {
+  .product-form-variant-form .product-form-area-name-input {
     width: 240px;
   }
 }
 
-.pf-variant-form select {
+.product-form-variant-form select {
   width: 120px;
 }
 
-.pf-variants .dash-table input {
+.product-form-variants .dashboard-table input {
   width: min(100%, 180px);
   min-width: 0;
   min-height: 32px;
@@ -304,162 +305,162 @@
   font-size: 0.8125rem;
 }
 
-.pf-row-actions {
+.product-form-row-actions {
   display: flex;
   align-items: center;
   flex-wrap: nowrap;
   gap: var(--space-2);
 }
 
-.pf-row-actions .pf-row-action {
+.product-form-row-actions .product-form-row-action {
   min-width: 58px;
   height: 32px;
   padding: 4px 9px;
 }
 
-.pf-variant-table td {
+.product-form-variant-table td {
   vertical-align: middle;
 }
 
-.pf-variant-table .pf-stock-control {
+.product-form-variant-table .product-form-stock-control {
   min-height: 32px;
 }
 
-.pf-variant-table th,
-.pf-variant-table td {
+.product-form-variant-table th,
+.product-form-variant-table td {
   white-space: nowrap;
 }
 
-.pf-variant-table th:last-child,
-.pf-variant-table td:last-child {
+.product-form-variant-table th:last-child,
+.product-form-variant-table td:last-child {
   min-width: 136px;
 }
 
-.pf-variant-table .pf-edit-variant-actions {
+.product-form-variant-table .product-form-edit-variant-actions {
   flex-wrap: nowrap;
 }
 
-.pf-variant-table .pf-stock-control {
+.product-form-variant-table .product-form-stock-control {
   flex-wrap: nowrap;
 }
 
-.pf-form button,
-.pf-variant-form button {
+.product-form-form button,
+.product-form-variant-form button {
   align-self: flex-end;
 }
 
 @media (max-width: 720px) {
-  .pf-form {
+  .product-form-form {
     max-width: none;
   }
 
-  .pf-area-actions {
+  .product-form-area-actions {
     display: grid;
     grid-template-columns: 190px 190px 150px 90px;
     gap: var(--space-2);
     min-width: 640px;
   }
 
-  .pf-area-actions .pf-mockup-status {
+  .product-form-area-actions .product-form-mockup-status {
     min-width: 190px;
     overflow: visible;
     white-space: nowrap;
   }
 
-  .pf-area-actions .pf-file-control {
+  .product-form-area-actions .product-form-file-control {
     min-width: 190px;
     flex-wrap: nowrap;
   }
 
-  .pf-area-actions .pf-file-name {
+  .product-form-area-actions .product-form-file-name {
     min-width: 0;
     white-space: nowrap;
   }
 
-  .pf-area-actions .pf-file-picker,
-  .pf-area-actions .pf-upload-btn--small,
-  .pf-area-actions .pf-row-action {
+  .product-form-area-actions .product-form-file-picker,
+  .product-form-area-actions .product-form-upload-btn--small,
+  .product-form-area-actions .product-form-row-action {
     width: 100%;
     min-width: 0;
     padding-right: 4px;
     padding-left: 4px;
   }
 
-  .pf-variant-form input {
+  .product-form-variant-form input {
     flex: 1 1 120px;
     min-width: 0;
   }
 
-  .pf-variant-form select {
+  .product-form-variant-form select {
     flex: 1 1 120px;
     min-width: 0;
   }
 
-  .pf-variant-form button {
+  .product-form-variant-form button {
     width: auto;
     margin-left: auto;
     padding-left: var(--space-3);
     padding-right: var(--space-3);
   }
 
-  .pf-area-actions {
+  .product-form-area-actions {
     align-items: center;
   }
 
-  .pf-row-actions {
+  .product-form-row-actions {
     align-items: stretch;
   }
 
-  .pf-area-actions .pf-upload-btn--small,
-  .pf-area-actions .pf-row-action,
-  .pf-row-actions .pf-row-action {
+  .product-form-area-actions .product-form-upload-btn--small,
+  .product-form-area-actions .product-form-row-action,
+  .product-form-row-actions .product-form-row-action {
     margin-left: 0;
     flex: 0 0 auto;
     white-space: nowrap;
   }
 
-  .pf-area-actions .pf-upload-btn--small,
-  .pf-area-actions .pf-row-action,
-  .pf-stock-restock {
+  .product-form-area-actions .product-form-upload-btn--small,
+  .product-form-area-actions .product-form-row-action,
+  .product-form-stock-restock {
     overflow-wrap: normal;
   }
 
-  .pf-variant-table {
+  .product-form-variant-table {
     min-width: 600px;
     table-layout: auto;
   }
 
-  .pf-variant-table th,
-  .pf-variant-table td {
+  .product-form-variant-table th,
+  .product-form-variant-table td {
     white-space: normal;
   }
 
-  .pf-variant-table th:nth-child(1),
-  .pf-variant-table td:nth-child(1) {
+  .product-form-variant-table th:nth-child(1),
+  .product-form-variant-table td:nth-child(1) {
     min-width: 82px;
   }
 
-  .pf-variant-table th:nth-child(2),
-  .pf-variant-table td:nth-child(2) {
+  .product-form-variant-table th:nth-child(2),
+  .product-form-variant-table td:nth-child(2) {
     min-width: 68px;
   }
 
-  .pf-variant-table th:nth-child(3),
-  .pf-variant-table td:nth-child(3) {
+  .product-form-variant-table th:nth-child(3),
+  .product-form-variant-table td:nth-child(3) {
     min-width: 150px;
   }
 
-  .pf-variant-table th:nth-child(4),
-  .pf-variant-table td:nth-child(4) {
+  .product-form-variant-table th:nth-child(4),
+  .product-form-variant-table td:nth-child(4) {
     min-width: 190px;
   }
 
-  .pf-variant-table .dash-table input {
+  .product-form-variant-table .dashboard-table input {
     width: 100%;
     white-space: nowrap;
   }
 
-  .pf-variant-table .pf-stock-control {
+  .product-form-variant-table .product-form-stock-control {
     flex-wrap: nowrap;
   }
 }

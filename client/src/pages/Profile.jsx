@@ -3,6 +3,7 @@ import { useAuth } from "../context/useAuth";
 import { fetchAddresses, createAddress } from "../api/checkout";
 import { updateProfile, changePassword, updateAddress, deleteAddress, setDefaultAddress } from "../api/profile";
 import Button from "../components/Button";
+import ConfirmModal from "../components/ConfirmModal";
 import "./Profile.css";
 
 const emptyAddressForm = {
@@ -25,6 +26,8 @@ function Profile() {
   const [passwordMessage, setPasswordMessage] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
   const [passwordFieldErrors, setPasswordFieldErrors] = useState({});
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const [addresses, setAddresses] = useState([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
@@ -33,6 +36,7 @@ function Profile() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [addressError, setAddressError] = useState(null);
   const [addressFieldErrors, setAddressFieldErrors] = useState({});
+  const [pendingAddressDelete, setPendingAddressDelete] = useState(null);
 
   function loadAddresses() {
     setLoadingAddresses(true);
@@ -141,13 +145,19 @@ function Profile() {
     }
   }
 
-  async function handleDeleteAddress(id) {
-    if (!window.confirm("Delete this address?")) return;
+  function askDeleteAddress(id) {
+    setPendingAddressDelete(id);
+  }
+
+  async function confirmDeleteAddress() {
+    if (!pendingAddressDelete) return;
     try {
-      await deleteAddress(id);
+      await deleteAddress(pendingAddressDelete);
+      setPendingAddressDelete(null);
       loadAddresses();
     } catch (err) {
       setAddressError(err.response?.data?.message || "Failed to delete address.");
+      setPendingAddressDelete(null);
     }
   }
 
@@ -166,6 +176,16 @@ function Profile() {
           <button className={tab === "addresses" ? "active" : ""} onClick={() => setTab("addresses")}>Addresses</button>
         </div>
       )}
+
+      <ConfirmModal
+        open={Boolean(pendingAddressDelete)}
+        title="Delete address"
+        message="Delete this address?"
+        confirmText="Delete"
+        destructive
+        onConfirm={confirmDeleteAddress}
+        onClose={() => setPendingAddressDelete(null)}
+      />
 
       {tab === "account" && (
         <div className="profile__section">
@@ -192,23 +212,57 @@ function Profile() {
             <h3>Change password</h3>
             <label>
               Current password
-              <input
-                type="password"
-                value={passwordForm.currentPassword}
-                onChange={(e) => { setPasswordForm({ ...passwordForm, currentPassword: e.target.value }); setPasswordFieldErrors({ ...passwordFieldErrors, currentPassword: "" }); }}
-                aria-invalid={Boolean(passwordFieldErrors.currentPassword)}
-              />
+              <div className="password-field">
+                <input
+                  type={showCurrentPassword ? "text" : "password"}
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => { setPasswordForm({ ...passwordForm, currentPassword: e.target.value }); setPasswordFieldErrors({ ...passwordFieldErrors, currentPassword: "" }); }}
+                  aria-invalid={Boolean(passwordFieldErrors.currentPassword)}
+                />
+                <button type="button" className="password-toggle" onClick={() => setShowCurrentPassword((current) => !current)} aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}>
+                  {showCurrentPassword ? (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 3l18 18" />
+                      <path d="M10.6 10.6A2 2 0 0 0 13.4 13.4" />
+                      <path d="M9.1 5.5A11 11 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-4.3 5.5" />
+                      <path d="M6.2 6.2A16.5 16.5 0 0 0 2 12s3.5 7 10 7a11.5 11.5 0 0 0 5.8-1.8" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {passwordFieldErrors.currentPassword && <span className="profile__field-error">{passwordFieldErrors.currentPassword}</span>}
             </label>
             <label>
               New password
-              <input
-                type="password"
-                minLength={8}
-                value={passwordForm.newPassword}
-                onChange={(e) => { setPasswordForm({ ...passwordForm, newPassword: e.target.value }); setPasswordFieldErrors({ ...passwordFieldErrors, newPassword: "" }); }}
-                aria-invalid={Boolean(passwordFieldErrors.newPassword)}
-              />
+              <div className="password-field">
+                <input
+                  type={showNewPassword ? "text" : "password"}
+                  minLength={8}
+                  value={passwordForm.newPassword}
+                  onChange={(e) => { setPasswordForm({ ...passwordForm, newPassword: e.target.value }); setPasswordFieldErrors({ ...passwordFieldErrors, newPassword: "" }); }}
+                  aria-invalid={Boolean(passwordFieldErrors.newPassword)}
+                />
+                <button type="button" className="password-toggle" onClick={() => setShowNewPassword((current) => !current)} aria-label={showNewPassword ? "Hide new password" : "Show new password"}>
+                  {showNewPassword ? (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 3l18 18" />
+                      <path d="M10.6 10.6A2 2 0 0 0 13.4 13.4" />
+                      <path d="M9.1 5.5A11 11 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-4.3 5.5" />
+                      <path d="M6.2 6.2A16.5 16.5 0 0 0 2 12s3.5 7 10 7a11.5 11.5 0 0 0 5.8-1.8" />
+                    </svg>
+                  )}
+                </button>
+              </div>
               {passwordFieldErrors.newPassword && <span className="profile__field-error">{passwordFieldErrors.newPassword}</span>}
             </label>
             {passwordError && <p className="profile__error">{passwordError}</p>}
@@ -239,7 +293,7 @@ function Profile() {
                     <div className="profile__address-actions">
                       {!addr.isDefault && <button type="button" onClick={() => handleSetDefault(addr.id)}>Set default</button>}
                       <button type="button" onClick={() => startEdit(addr)}>Edit</button>
-                      <button type="button" onClick={() => handleDeleteAddress(addr.id)}>Delete</button>
+                      <button type="button" onClick={() => askDeleteAddress(addr.id)}>Delete</button>
                     </div>
                   </div>
                 ))}
