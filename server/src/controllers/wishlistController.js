@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
 /*
  * DOCU: Serializes a wishlist row with its variant/product info for API responses.
@@ -34,7 +33,9 @@ async function listWishlist(req, res) {
       include: {
         variant: {
           include: {
-            product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
+            product: {
+              include: { images: { where: { isPrimary: true }, take: 1 } },
+            },
           },
         },
       },
@@ -42,7 +43,9 @@ async function listWishlist(req, res) {
     });
     res.json(items.map(serialize));
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch wishlist.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch wishlist.", error: error.message });
   }
 }
 
@@ -55,13 +58,20 @@ async function addToWishlist(req, res) {
     }
 
     const item = await prisma.wishlist.upsert({
-      where: { userId_productVariantId: { userId, productVariantId: BigInt(productVariantId) } },
+      where: {
+        userId_productVariantId: {
+          userId,
+          productVariantId: BigInt(productVariantId),
+        },
+      },
       update: {},
       create: { userId, productVariantId: BigInt(productVariantId) },
       include: {
         variant: {
           include: {
-            product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
+            product: {
+              include: { images: { where: { isPrimary: true }, take: 1 } },
+            },
           },
         },
       },
@@ -69,7 +79,9 @@ async function addToWishlist(req, res) {
 
     res.status(201).json(serialize(item));
   } catch (error) {
-    res.status(500).json({ message: "Failed to add to wishlist.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to add to wishlist.", error: error.message });
   }
 }
 
@@ -84,7 +96,12 @@ async function removeFromWishlist(req, res) {
 
     res.status(204).send();
   } catch (error) {
-    res.status(500).json({ message: "Failed to remove from wishlist.", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Failed to remove from wishlist.",
+        error: error.message,
+      });
   }
 }
 

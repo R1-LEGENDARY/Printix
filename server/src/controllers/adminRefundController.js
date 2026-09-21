@@ -1,6 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
 const { createRefund: createPaymongoRefund } = require("../services/paymongo");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 const { createNotification } = require("../services/notifications");
 
 function serialize(r) {
@@ -14,7 +13,9 @@ function serialize(r) {
     status: r.status,
     createdAt: r.createdAt,
     processedAt: r.processedAt,
-    payment: r.payment ? { transactionRef: r.payment.transactionRef, gateway: r.payment.gateway } : null,
+    payment: r.payment
+      ? { transactionRef: r.payment.transactionRef, gateway: r.payment.gateway }
+      : null,
     items: r.items.map((i) => ({
       id: i.id.toString(),
       productName: i.orderItem?.productName,
@@ -41,7 +42,9 @@ async function listRefunds(req, res) {
     });
     res.json(refunds.map(serialize));
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch refunds.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch refunds.", error: error.message });
   }
 }
 
@@ -51,7 +54,9 @@ async function updateRefundStatus(req, res) {
     const { status } = req.body;
 
     if (!["approved", "rejected", "completed"].includes(status)) {
-      return res.status(400).json({ message: "status must be approved, rejected, or completed." });
+      return res
+        .status(400)
+        .json({ message: "status must be approved, rejected, or completed." });
     }
 
     const refund = await prisma.refund.findUnique({ where: { id }, include });
@@ -60,29 +65,50 @@ async function updateRefundStatus(req, res) {
     if (status === "approved") {
       if (!refund.payment.gatewayPaymentId) {
         return res.status(409).json({
-          message: "This payment doesn't have a gateway payment ID on file yet — it may predate the fix, or the webhook hasn't processed it. Refund can't be completed automatically.",
+          message:
+            "This payment doesn't have a gateway payment ID on file yet — it may predate the fix, or the webhook hasn't processed it. Refund can't be completed automatically.",
         });
       }
       try {
-        await createPaymongoRefund(refund.payment.gatewayPaymentId, Math.round(Number(refund.amount) * 100), refund.reason);
+        await createPaymongoRefund(
+          refund.payment.gatewayPaymentId,
+          Math.round(Number(refund.amount) * 100),
+          refund.reason,
+        );
       } catch (gatewayError) {
-        return res.status(502).json({ message: `Gateway refund failed: ${gatewayError.message}` });
+        return res
+          .status(502)
+          .json({ message: `Gateway refund failed: ${gatewayError.message}` });
       }
 
       await prisma.$transaction(async (tx) => {
-        await tx.refund.update({ where: { id }, data: { status: "completed", processedAt: new Date() } });
+        await tx.refund.update({
+          where: { id },
+          data: { status: "completed", processedAt: new Date() },
+        });
 
         if (["paid", "processing", "printing"].includes(refund.order.status)) {
-          await tx.order.update({ where: { id: refund.orderId }, data: { status: "refunded" } });
+          await tx.order.update({
+            where: { id: refund.orderId },
+            data: { status: "refunded" },
+          });
           await tx.orderStatusHistory.create({
-            data: { orderId: refund.orderId, status: "refunded", note: "Refund processed.", changedBy: BigInt(req.user.userId) },
+            data: {
+              orderId: refund.orderId,
+              status: "refunded",
+              note: "Refund processed.",
+              changedBy: BigInt(req.user.userId),
+            },
           });
         }
       });
     } else {
       await prisma.refund.update({
         where: { id },
-        data: { status, processedAt: status === "rejected" ? new Date() : undefined },
+        data: {
+          status,
+          processedAt: status === "rejected" ? new Date() : undefined,
+        },
       });
     }
 
@@ -96,7 +122,9 @@ async function updateRefundStatus(req, res) {
     });
     res.json(serialize(updated));
   } catch (error) {
-    res.status(500).json({ message: "Failed to update refund.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to update refund.", error: error.message });
   }
 }
 

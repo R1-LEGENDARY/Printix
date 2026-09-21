@@ -13,6 +13,7 @@
 }
 
 .product-detail__gallery {
+  position: relative;
   aspect-ratio: 1;
   overflow: hidden;
   background: var(--color-paper);
@@ -21,7 +22,7 @@
 .product-detail__gallery img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .product-detail__category {
@@ -80,7 +81,9 @@
   background: #fff;
   font-size: 0.875rem;
   cursor: pointer;
-  transition: border-color var(--transition), color var(--transition);
+  transition:
+    border-color var(--transition),
+    color var(--transition);
 }
 
 .product-detail__swatch--active {
@@ -96,11 +99,11 @@
 }
 
 .product-detail__availability--in {
-  color: #1E8E3E;
+  color: #1e8e3e;
 }
 
 .product-detail__availability--out {
-  color: #C0392B;
+  color: #c0392b;
 }
 
 .product-detail__actions {
@@ -111,7 +114,7 @@
 
 .product-detail__auth-message {
   margin-top: var(--space-2);
-  color: #C0392B;
+  color: #c0392b;
   font-size: 0.875rem;
 }
 
@@ -201,4 +204,58 @@
   .product-detail-related__header h2 {
     font-size: 1.125rem;
   }
+}
+
+.product-detail__gallery-control {
+  position: absolute;
+  top: 50%;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: rgba(251, 250, 247, 0.92);
+  color: var(--color-ink);
+  cursor: pointer;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.product-detail__gallery-control--previous {
+  left: var(--space-2);
+}
+
+.product-detail__gallery-control--next {
+  right: var(--space-2);
+}
+
+.product-detail__gallery-thumbnails {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  left: var(--space-3);
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding: var(--space-1);
+}
+
+.product-detail__gallery-thumbnail {
+  flex: 0 0 56px;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 2px solid transparent;
+  background: var(--color-paper);
+  cursor: pointer;
+}
+
+.product-detail__gallery-thumbnail--active {
+  border-color: var(--color-accent);
+}
+
+.product-detail__gallery-thumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

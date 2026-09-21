@@ -1,6 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
 const { storeUploadedFile } = require("../services/storage");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
 function serializeMockupTemplate(template) {
   if (!template) return null;
@@ -186,12 +185,10 @@ async function toggleActive(req, res) {
     });
     res.json(serializeProduct(updated));
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to toggle product status.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to toggle product status.",
+      error: error.message,
+    });
   }
 }
 
@@ -273,16 +270,14 @@ async function addProductImage(req, res) {
       where: { id: productId },
       include,
     });
-    res
-      .status(201)
-      .json({
-        image: {
-          id: image.id.toString(),
-          imageUrl: image.imageUrl,
-          isPrimary: image.isPrimary,
-        },
-        product: serializeProduct(product),
-      });
+    res.status(201).json({
+      image: {
+        id: image.id.toString(),
+        imageUrl: image.imageUrl,
+        isPrimary: image.isPrimary,
+      },
+      product: serializeProduct(product),
+    });
   } catch (error) {
     res
       .status(500)
@@ -370,12 +365,10 @@ async function upsertPrintableArea(req, res) {
       where: { productId, name, ...(id ? { NOT: { id: BigInt(id) } } : {}) },
     });
     if (duplicate) {
-      return res
-        .status(409)
-        .json({
-          message:
-            "A printable area with that name already exists for this product.",
-        });
+      return res.status(409).json({
+        message:
+          "A printable area with that name already exists for this product.",
+      });
     }
 
     if (id) {
@@ -395,12 +388,10 @@ async function upsertPrintableArea(req, res) {
     });
     res.status(201).json(serializeProduct(product));
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to save printable area.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to save printable area.",
+      error: error.message,
+    });
   }
 }
 
@@ -498,12 +489,10 @@ async function uploadMockupTemplate(req, res) {
     });
     res.status(201).json(serializeMockupTemplate(saved));
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to upload mockup template.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to upload mockup template.",
+      error: error.message,
+    });
   }
 }
 
@@ -520,11 +509,9 @@ async function savePerspectiveConfig(req, res) {
       points.length >= 3 &&
       points.every((p) => typeof p.x === "number" && typeof p.y === "number");
     if (!valid) {
-      return res
-        .status(400)
-        .json({
-          message: "points must be an array of at least 3 {x, y} coordinates.",
-        });
+      return res.status(400).json({
+        message: "points must be an array of at least 3 {x, y} coordinates.",
+      });
     }
 
     const template = await prisma.productMockupTemplate.findFirst({
@@ -545,12 +532,10 @@ async function savePerspectiveConfig(req, res) {
       perspectiveConfig: updated.perspectiveConfig,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to save print area shape.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to save print area shape.",
+      error: error.message,
+    });
   }
 }
 
@@ -582,19 +567,15 @@ async function uploadDisplacementMap(req, res) {
       },
     });
 
-    res
-      .status(201)
-      .json({
-        id: updated.id.toString(),
-        displacementMapUrl: updated.displacementMapUrl,
-      });
+    res.status(201).json({
+      id: updated.id.toString(),
+      displacementMapUrl: updated.displacementMapUrl,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to upload displacement map.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to upload displacement map.",
+      error: error.message,
+    });
   }
 }
 
@@ -606,12 +587,10 @@ async function deleteProduct(req, res) {
       where: { variant: { productId: id } },
     });
     if (orderItemCount > 0) {
-      return res
-        .status(409)
-        .json({
-          message:
-            "Can't delete a product that has order history — deactivate it instead.",
-        });
+      return res.status(409).json({
+        message:
+          "Can't delete a product that has order history — deactivate it instead.",
+      });
     }
 
     await prisma.$transaction([

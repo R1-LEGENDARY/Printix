@@ -155,7 +155,7 @@ Build command: npm install && npx prisma generate && npx prisma migrate deploy
 Start command: npm start
 ```
 
-Add the variables from `server/.env.example`, setting `CLIENT_URL` to the deployed Vercel URL. The free Render service may sleep after inactivity, so the first request can be slow.
+Add the variables from `server/.env.example`, setting `CLIENT_URL` to the deployed Vercel URL. For Supabase, set `DATABASE_URL` to the transaction-mode pooler URL (port `6543`) with `pgbouncer=true&connection_limit=1`, and set `DIRECT_URL` to the session-mode pooler URL (port `5432`) for Prisma migrations. The free Render service may sleep after inactivity, so the first request can be slow.
 
 ### Vercel client
 

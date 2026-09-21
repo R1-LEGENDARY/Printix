@@ -23,12 +23,17 @@ function ProductDetail() {
   const [adding, setAdding] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [authMessage, setAuthMessage] = useState(null);
+  const [selectedImageId, setSelectedImageId] = useState(null);
 
   useEffect(() => {
     api
       .get(`/products/${slug}`)
       .then((res) => {
         setProduct(res.data);
+        const initialImage =
+          res.data.images?.find((image) => image.isPrimary) ||
+          res.data.images?.[0];
+        setSelectedImageId(initialImage?.id || null);
 
         const firstVariant = res.data.variants?.[0];
 
@@ -93,6 +98,20 @@ function ProductDetail() {
 
   const primaryImage =
     product.images.find((img) => img.isPrimary) || product.images[0];
+  const activeImage =
+    product.images.find((image) => image.id === selectedImageId) ||
+    primaryImage;
+  const imageIndex = Math.max(
+    0,
+    product.images.findIndex((image) => image.id === activeImage?.id),
+  );
+
+  function selectAdjacentImage(direction) {
+    if (product.images.length < 2) return;
+    const nextIndex =
+      (imageIndex + direction + product.images.length) % product.images.length;
+    setSelectedImageId(product.images[nextIndex].id);
+  }
 
   return (
     <div className="product-detail">
@@ -102,12 +121,51 @@ function ProductDetail() {
           product.description ||
           `Customize and order ${product.name} from Printix.`
         }
-        image={mediaUrl(primaryImage?.imageUrl)}
+        image={mediaUrl(activeImage?.imageUrl)}
         path={`/products/${product.slug}`}
       />
       <div className="product-detail__gallery">
-        {primaryImage ? (
-          <img src={mediaUrl(primaryImage.imageUrl)} alt={product.name} />
+        {activeImage ? (
+          <>
+            <img src={mediaUrl(activeImage.imageUrl)} alt={product.name} />
+            {product.images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  className="product-detail__gallery-control product-detail__gallery-control--previous"
+                  onClick={() => selectAdjacentImage(-1)}
+                  aria-label="Previous product image"
+                >
+                  &lt;
+                </button>
+                <button
+                  type="button"
+                  className="product-detail__gallery-control product-detail__gallery-control--next"
+                  onClick={() => selectAdjacentImage(1)}
+                  aria-label="Next product image"
+                >
+                  &gt;
+                </button>
+                <div className="product-detail__gallery-thumbnails">
+                  {product.images.map((image, index) => (
+                    <button
+                      type="button"
+                      className={`product-detail__gallery-thumbnail ${
+                        image.id === activeImage.id
+                          ? "product-detail__gallery-thumbnail--active"
+                          : ""
+                      }`}
+                      key={image.id}
+                      onClick={() => setSelectedImageId(image.id)}
+                      aria-label={`Show product image ${index + 1}`}
+                    >
+                      <img src={mediaUrl(image.imageUrl)} alt="" />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </>
         ) : (
           <div className="product-detail__gallery-empty" />
         )}

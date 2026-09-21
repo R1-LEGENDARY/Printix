@@ -24,9 +24,8 @@ function getNotificationMessage(notification) {
     : `Your order ${statusMessage}.`;
 }
 
-function NotificationBell() {
+function NotificationBell({ open, onToggle, onClose }) {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -61,7 +60,9 @@ function NotificationBell() {
       const token = localStorage.getItem("token");
       if (!token) return;
       try {
-        const response = await api.get("/notifications", { headers: { Authorization: `Bearer ${token}` } });
+        const response = await api.get("/notifications", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         setNotifications(response.data.notifications);
         setUnreadCount(response.data.unreadCount);
       } catch {
@@ -77,49 +78,94 @@ function NotificationBell() {
   async function markRead(notification) {
     if (!notification.readAt) {
       const token = localStorage.getItem("token");
-      await api.patch(`/notifications/${notification.id}/read`, {}, { headers: { Authorization: `Bearer ${token}` } });
-      setNotifications((current) => current.map((item) => item.id === notification.id ? { ...item, readAt: new Date().toISOString() } : item));
+      await api.patch(
+        `/notifications/${notification.id}/read`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setNotifications((current) =>
+        current.map((item) =>
+          item.id === notification.id
+            ? { ...item, readAt: new Date().toISOString() }
+            : item,
+        ),
+      );
       setUnreadCount((count) => Math.max(0, count - 1));
     }
     if (notification.relatedType === "order" && notification.relatedId) {
-      setOpen(false);
+      onClose();
       navigate(`/orders/${notification.relatedId}`);
     }
   }
 
   async function markAllRead() {
     const token = localStorage.getItem("token");
-    await api.patch("/notifications/read-all", {}, { headers: { Authorization: `Bearer ${token}` } });
-    setNotifications((current) => current.map((item) => ({ ...item, readAt: item.readAt || new Date().toISOString() })));
+    await api.patch(
+      "/notifications/read-all",
+      {},
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    setNotifications((current) =>
+      current.map((item) => ({
+        ...item,
+        readAt: item.readAt || new Date().toISOString(),
+      })),
+    );
     setUnreadCount(0);
   }
 
   return (
     <div className="notification-bell">
-      <button type="button" className="notification-bell__button" onClick={() => setOpen((value) => !value)} aria-label="Notifications" aria-expanded={open}>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>
-        {unreadCount > 0 && <span className="notification-bell__count">{unreadCount > 99 ? "99+" : unreadCount}</span>}
+      <button
+        type="button"
+        className="notification-bell__button"
+        onClick={onToggle}
+        aria-label="Notifications"
+        aria-expanded={open}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+        </svg>
+        {unreadCount > 0 && (
+          <span className="notification-bell__count">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
       </button>
       {open && (
         <div className="notification-bell__panel">
           <div className="notification-bell__header">
             <strong>Notifications</strong>
-            {unreadCount > 0 && <button type="button" onClick={markAllRead}>Mark all as read</button>}
+            {unreadCount > 0 && (
+              <button type="button" onClick={markAllRead}>
+                Mark all as read
+              </button>
+            )}
           </div>
           {notifications.length === 0 ? (
             <p className="notification-bell__empty">No notifications yet.</p>
           ) : (
             <div className="notification-bell__list">
               {notifications.map((notification) => (
-                <button type="button" key={notification.id} className={`notification-bell__item ${notification.readAt ? "" : "notification-bell__item--unread"}`} onClick={() => markRead(notification)}>
+                <button
+                  type="button"
+                  key={notification.id}
+                  className={`notification-bell__item ${notification.readAt ? "" : "notification-bell__item--unread"}`}
+                  onClick={() => markRead(notification)}
+                >
                   <span>{getNotificationMessage(notification)}</span>
-                  <small>{new Date(notification.createdAt).toLocaleString(undefined, {
-                    year: "numeric",
-                    month: "numeric",
-                    day: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                  })}</small>
+                  <small>
+                    {new Date(notification.createdAt).toLocaleString(
+                      undefined,
+                      {
+                        year: "numeric",
+                        month: "numeric",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                      },
+                    )}
+                  </small>
                 </button>
               ))}
             </div>

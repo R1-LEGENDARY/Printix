@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
 function serializeMockupTemplate(template) {
   if (!template) return null;
@@ -27,7 +26,10 @@ async function listProducts(req, res) {
 
     const formatted = products.map((p) => {
       const ratingCount = p.reviews.length;
-      const averageRating = ratingCount > 0 ? p.reviews.reduce((s, r) => s + r.rating, 0) / ratingCount : 0;
+      const averageRating =
+        ratingCount > 0
+          ? p.reviews.reduce((s, r) => s + r.rating, 0) / ratingCount
+          : 0;
 
       return {
         id: p.id.toString(),
@@ -47,7 +49,9 @@ async function listProducts(req, res) {
 
     res.json(formatted);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch products.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch products.", error: error.message });
   }
 }
 
@@ -61,7 +65,9 @@ async function getProductBySlug(req, res) {
         category: true,
         images: true,
         variants: true,
-        printableAreas: { include: { mockupTemplates: { include: { variant: true } } } },
+        printableAreas: {
+          include: { mockupTemplates: { include: { variant: true } } },
+        },
       },
     });
 
@@ -101,14 +107,20 @@ async function getProductBySlug(req, res) {
         y: pa.y,
         width: pa.width,
         height: pa.height,
-        mockupTemplate: serializeMockupTemplate(pa.mockupTemplates?.find((template) => !template.variantId)),
-        mockupTemplates: (pa.mockupTemplates || []).filter((template) => template.variantId).map(serializeMockupTemplate),
+        mockupTemplate: serializeMockupTemplate(
+          pa.mockupTemplates?.find((template) => !template.variantId),
+        ),
+        mockupTemplates: (pa.mockupTemplates || [])
+          .filter((template) => template.variantId)
+          .map(serializeMockupTemplate),
       })),
     };
 
     res.json(serialized);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch product.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch product.", error: error.message });
   }
 }
 

@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
 /*
  * DOCU: Serializes a review row (with its images and reviewer name) for API responses.
@@ -17,7 +16,10 @@ function serializeReview(r) {
     createdAt: r.createdAt,
     reviewerName: r.user.name,
     verifiedPurchase: !!r.orderItemId,
-    images: r.images.map((img) => ({ id: img.id.toString(), imageUrl: img.imageUrl })),
+    images: r.images.map((img) => ({
+      id: img.id.toString(),
+      imageUrl: img.imageUrl,
+    })),
   };
 }
 
@@ -52,7 +54,9 @@ async function listProductReviews(req, res) {
       totalCount: aggregate._count,
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch reviews.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch reviews.", error: error.message });
   }
 }
 
@@ -72,7 +76,9 @@ async function createReview(req, res) {
     const { productId, orderItemId, rating, comment } = req.body;
 
     if (!productId || !rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ message: "productId and a rating from 1-5 are required." });
+      return res
+        .status(400)
+        .json({ message: "productId and a rating from 1-5 are required." });
     }
 
     let verifiedOrderItemId = null;
@@ -82,11 +88,17 @@ async function createReview(req, res) {
         include: { order: true },
       });
       if (!orderItem || orderItem.order.userId !== userId) {
-        return res.status(403).json({ message: "That order item doesn't belong to you." });
+        return res
+          .status(403)
+          .json({ message: "That order item doesn't belong to you." });
       }
-      const existing = await prisma.review.findFirst({ where: { orderItemId: orderItem.id } });
+      const existing = await prisma.review.findFirst({
+        where: { orderItemId: orderItem.id },
+      });
       if (existing) {
-        return res.status(409).json({ message: "You've already reviewed this purchase." });
+        return res
+          .status(409)
+          .json({ message: "You've already reviewed this purchase." });
       }
       verifiedOrderItemId = orderItem.id;
     }
@@ -105,7 +117,9 @@ async function createReview(req, res) {
 
     res.status(201).json(serializeReview(review));
   } catch (error) {
-    res.status(500).json({ message: "Failed to create review.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to create review.", error: error.message });
   }
 }
 
@@ -125,16 +139,36 @@ async function getReviewableOrderItems(req, res) {
 
     const items = await prisma.orderItem.findMany({
       where: {
-        order: { userId, status: { in: ["paid", "processing", "printing", "shipped", "delivered"] } },
+        order: {
+          userId,
+          status: {
+            in: ["paid", "processing", "printing", "shipped", "delivered"],
+          },
+        },
         variant: { productId },
         reviews: { none: {} },
       },
-      select: { id: true, variantLabel: true, order: { select: { orderNumber: true } } },
+      select: {
+        id: true,
+        variantLabel: true,
+        order: { select: { orderNumber: true } },
+      },
     });
 
-    res.json(items.map((i) => ({ id: i.id.toString(), variantLabel: i.variantLabel, orderNumber: i.order.orderNumber })));
+    res.json(
+      items.map((i) => ({
+        id: i.id.toString(),
+        variantLabel: i.variantLabel,
+        orderNumber: i.order.orderNumber,
+      })),
+    );
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch reviewable items.", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Failed to fetch reviewable items.",
+        error: error.message,
+      });
   }
 }
 

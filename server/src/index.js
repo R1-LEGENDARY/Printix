@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { PrismaClient } = require("@prisma/client");
+const prisma = require("./db");
 
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
@@ -22,7 +22,6 @@ const designRoutes = require("./routes/designRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));

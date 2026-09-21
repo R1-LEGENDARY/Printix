@@ -39,11 +39,11 @@
 }
 
 .product-form-form [aria-invalid="true"] {
-  border-color: #C84B4B;
+  border-color: #c84b4b;
 }
 
 .product-form-field-error {
-  color: #C84B4B;
+  color: #c84b4b;
   font-size: 0.75rem;
 }
 
@@ -123,7 +123,7 @@
 .product-form-image-item img {
   width: 100%;
   aspect-ratio: 1;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
@@ -257,7 +257,7 @@
 
 .product-form-mockup-status {
   font-size: 0.8125rem;
-  color: #1E8E3E;
+  color: #1e8e3e;
 }
 
 .product-form-mockup-status--missing {
@@ -292,6 +292,16 @@
 
 .product-form-variant-form select {
   width: 120px;
+}
+
+.product-form-variant-size-editor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.product-form-variant-size-editor input {
+  width: 210px;
 }
 
 .product-form-variants .dashboard-table input {
@@ -394,6 +404,17 @@
   .product-form-variant-form select {
     flex: 1 1 120px;
     min-width: 0;
+  }
+
+  .product-form-variant-size-editor {
+    flex-wrap: wrap;
+    min-width: 210px;
+  }
+
+  .product-form-variant-size-editor select,
+  .product-form-variant-size-editor input {
+    min-width: 0;
+    width: 100%;
   }
 
   .product-form-variant-form button {

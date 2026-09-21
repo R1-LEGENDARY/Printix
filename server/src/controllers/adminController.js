@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
 async function getMetrics(req, res) {
   try {
@@ -16,7 +15,11 @@ async function getMetrics(req, res) {
       prisma.order.count({ where: { status: "pending" } }),
       prisma.order.aggregate({
         _sum: { grandTotal: true },
-        where: { status: { in: ["paid", "processing", "printing", "shipped", "delivered"] } },
+        where: {
+          status: {
+            in: ["paid", "processing", "printing", "shipped", "delivered"],
+          },
+        },
       }),
       prisma.product.count({ where: { isActive: true } }),
       prisma.user.count({ where: { role: "customer" } }),
@@ -45,7 +48,9 @@ async function getMetrics(req, res) {
       })),
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to load metrics.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to load metrics.", error: error.message });
   }
 }
 

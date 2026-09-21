@@ -1,5 +1,5 @@
 .auth {
-  max-width: 420px;
+  max-width: 400px;
   margin: var(--space-5) auto 0;
   padding: var(--space-3) var(--space-5);
 }
@@ -121,12 +121,12 @@
 }
 
 .auth-error {
-  color: #C0392B;
+  color: #c0392b;
   font-size: 0.875rem;
 }
 
 .auth-message {
-  color: #1E8E3E;
+  color: #1e8e3e;
   font-size: 0.875rem;
 }
 
@@ -169,12 +169,19 @@
   margin-top: var(--space-2);
 }
 
-.google-auth-button > div:last-child {
+.google-auth-button__control {
+  display: flex;
+  justify-content: center;
+  width: 100%;
   max-width: 100%;
 }
 
+.google-auth-button iframe {
+  display: block;
+}
+
 .google-auth-button .nsm7Bb-HzV7m-LgbsSe {
-  width: 100% !important;
+  max-width: 100%;
 }
 
 .auth-social-divider {
@@ -196,6 +203,6 @@
 }
 
 .field-error {
-  color: #C0392B;
+  color: #c0392b;
   font-size: 0.75rem;
 }

@@ -1,7 +1,12 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
-const PAID_STATUSES = ["paid", "processing", "printing", "shipped", "delivered"];
+const PAID_STATUSES = [
+  "paid",
+  "processing",
+  "printing",
+  "shipped",
+  "delivered",
+];
 
 async function getSalesAnalytics(req, res) {
   try {
@@ -20,20 +25,31 @@ async function getSalesAnalytics(req, res) {
       const key = o.placedAt.toISOString().slice(0, 10);
       revenueByDay[key] = (revenueByDay[key] || 0) + Number(o.grandTotal);
     }
-    const revenueTimeline = Object.entries(revenueByDay).map(([date, revenue]) => ({ date, revenue }));
+    const revenueTimeline = Object.entries(revenueByDay).map(
+      ([date, revenue]) => ({ date, revenue }),
+    );
 
     const items = await prisma.orderItem.findMany({
-      where: { order: { status: { in: PAID_STATUSES }, placedAt: { gte: since } } },
+      where: {
+        order: { status: { in: PAID_STATUSES }, placedAt: { gte: since } },
+      },
       select: { productName: true, quantity: true, lineTotal: true },
     });
 
     const byProduct = {};
     for (const i of items) {
-      if (!byProduct[i.productName]) byProduct[i.productName] = { name: i.productName, quantitySold: 0, revenue: 0 };
+      if (!byProduct[i.productName])
+        byProduct[i.productName] = {
+          name: i.productName,
+          quantitySold: 0,
+          revenue: 0,
+        };
       byProduct[i.productName].quantitySold += i.quantity;
       byProduct[i.productName].revenue += Number(i.lineTotal);
     }
-    const bestSellers = Object.values(byProduct).sort((a, b) => b.quantitySold - a.quantitySold).slice(0, 10);
+    const bestSellers = Object.values(byProduct)
+      .sort((a, b) => b.quantitySold - a.quantitySold)
+      .slice(0, 10);
 
     const lowStock = await prisma.productVariant.findMany({
       where: { stockQuantity: { lte: 5 } },
@@ -57,7 +73,9 @@ async function getSalesAnalytics(req, res) {
       totalOrders: orders.length,
     });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch analytics.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch analytics.", error: error.message });
   }
 }
 

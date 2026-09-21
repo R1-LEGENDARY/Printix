@@ -29,6 +29,7 @@ const emptyProduct = {
 const emptyVariant = {
   color: "",
   size: "",
+  customSize: "",
   sku: "",
   stockQuantity: 0,
   priceOverride: "",
@@ -45,6 +46,7 @@ const sizeOptions = [
   { value: "4XL", label: "4XL" },
   { value: "OS", label: "One size" },
 ];
+const otherSizeValue = "__OTHER__";
 
 function capitalizeFirstLetter(value) {
   return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
@@ -55,6 +57,16 @@ function normalizeVariants(variants) {
     ...variant,
     color: capitalizeFirstLetter(variant.color),
   }));
+}
+
+function getSizeSelection(size) {
+  return sizeOptions.some((option) => option.value === size)
+    ? { size, customSize: "" }
+    : { size: otherSizeValue, customSize: size || "" };
+}
+
+function getVariantSize(form) {
+  return form.size === otherSizeValue ? form.customSize.trim() : form.size;
 }
 
 function ProductForm() {
@@ -74,7 +86,6 @@ function ProductForm() {
   const [editingVariantId, setEditingVariantId] = useState(null);
   const [editingVariantForm, setEditingVariantForm] = useState(emptyVariant);
   const [editingPerspectiveFor, setEditingPerspectiveFor] = useState(null);
-  const [mockupColorByArea, setMockupColorByArea] = useState({});
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -88,20 +99,6 @@ function ProductForm() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (isNew) return;
-    void Promise.resolve().then(() => {
-      try {
-        const savedColors = window.localStorage.getItem(
-          `printix:mockup-colors:${id}`,
-        );
-        setMockupColorByArea(savedColors ? JSON.parse(savedColors) : {});
-      } catch {
-        setMockupColorByArea({});
-      }
-    });
-  }, [id, isNew]);
-
   function loadProduct() {
     if (isNew) return;
     getAdminProduct(id)
@@ -113,7 +110,7 @@ function ProductForm() {
           basePrice: p.basePrice,
         });
         setVariants(normalizeVariants(p.variants));
-        setImages(p.images);
+        setImages(Array.isArray(p.images) ? p.images : []);
         setPrintableAreas(p.printableAreas || []);
       })
       .catch((err) => setError(err.response?.data?.message || err.message))
@@ -129,7 +126,10 @@ function ProductForm() {
     setError(null);
     try {
       const result = await uploadProductImage(id, file);
-      setImages(result.product.images);
+      setImages(
+        Array.isArray(result.product?.images) ? result.product.images : [],
+      );
+      loadProduct();
     } catch (err) {
       setError(err.response?.data?.message || "Failed to upload image.");
     } finally {
@@ -215,24 +215,11 @@ function ProductForm() {
     }
   }
 
-  function getMockupColor(areaId) {
-    return (
-      mockupColorByArea[areaId] ||
-      [...new Set(variants.map((variant) => variant.color))][0] ||
-      null
-    );
-  }
-
-  function getMockupVariantId(areaId, color = getMockupColor(areaId)) {
-    return variants.find((variant) => variant.color === color)?.id || null;
-  }
-
-  async function handleMockupUpload(areaId, e, color) {
+  async function handleMockupUpload(areaId, e, variantId) {
     const file = e.target.files[0];
     if (!file) return;
     setError(null);
     try {
-      const variantId = getMockupVariantId(areaId, color);
       const result = await uploadMockupTemplate(areaId, file, variantId);
       setPrintableAreas((prev) =>
         prev.map((a) => {
@@ -346,9 +333,15 @@ function ProductForm() {
   async function handleAddVariant(e) {
     e.preventDefault();
     setError(null);
+    const size = getVariantSize(variantForm);
+    if (!size) {
+      setError("Choose a size or enter a custom size.");
+      return;
+    }
     try {
       const updated = await upsertVariant(id, {
         ...variantForm,
+        size,
         stockQuantity: Number(variantForm.stockQuantity),
         priceOverride: variantForm.priceOverride
           ? Number(variantForm.priceOverride)
@@ -365,7 +358,7 @@ function ProductForm() {
     setEditingVariantId(variant.id);
     setEditingVariantForm({
       color: capitalizeFirstLetter(variant.color),
-      size: variant.size,
+      ...getSizeSelection(variant.size),
       sku: variant.sku,
       stockQuantity: variant.stockQuantity,
       priceOverride: variant.priceOverride || "",
@@ -374,10 +367,16 @@ function ProductForm() {
 
   async function saveVariant(variant) {
     setError(null);
+    const size = getVariantSize(editingVariantForm);
+    if (!size) {
+      setError("Choose a size or enter a custom size.");
+      return;
+    }
     try {
       const updated = await upsertVariant(id, {
         id: variant.id,
         ...editingVariantForm,
+        size,
         color: capitalizeFirstLetter(editingVariantForm.color),
         stockQuantity: Number(editingVariantForm.stockQuantity),
         priceOverride: editingVariantForm.priceOverride
@@ -390,6 +389,10 @@ function ProductForm() {
       setError(err.response?.data?.message || "Failed to update variant.");
     }
   }
+
+  const usesExactVariantMockups = variants.some(
+    (variant) => !sizeOptions.some((option) => option.value === variant.size),
+  );
 
   if (loading) return <p className="admin-status">Loading product...</p>;
 
@@ -494,6 +497,9 @@ function ProductForm() {
               </div>
             ))}
           </div>
+          {images.length === 0 && (
+            <p className="product-form-image-empty">No images uploaded yet.</p>
+          )}
 
           <label className="product-form-upload-btn">
             {uploadingImage ? "Uploading..." : "Upload image"}
@@ -523,116 +529,131 @@ function ProductForm() {
                 <thead>
                   <tr>
                     <th>Name</th>
-                    <th>Color</th>
+                    <th>Variant</th>
                     <th>Mockup photo</th>
                   </tr>
                 </thead>
                 <tbody>
                   {printableAreas.flatMap((a) => {
-                    const colors = [
-                      ...new Set(variants.map((variant) => variant.color)),
-                    ];
-                    return colors.map((color, colorIndex) => {
-                      const variantId = getMockupVariantId(a.id, color);
-                      const template = a.mockupTemplates?.find(
-                        (item) => item.variantId === variantId,
-                      );
-                      return (
-                        <tr key={`${a.id}-${color}`}>
-                          <td>
-                            {colorIndex === 0 && editingAreaId === a.id ? (
-                              <input
-                                value={editingAreaForm.name}
-                                onChange={(e) =>
-                                  setEditingAreaForm({ name: e.target.value })
-                                }
-                                aria-label="Printable area name"
-                              />
-                            ) : colorIndex === 0 ? (
-                              a.name
-                            ) : (
-                              ""
-                            )}
-                          </td>
-                          <td>{color}</td>
-                          <td>
-                            <div className="product-form-area-actions">
-                              {template ? (
-                                <span className="product-form-mockup-status">
-                                  Uploaded ✓
-                                </span>
+                    const mockupRows = usesExactVariantMockups
+                      ? variants.map((variant) => ({
+                          variant,
+                          label: `${variant.color} / ${variant.size}`,
+                        }))
+                      : [
+                          ...new Set(variants.map((variant) => variant.color)),
+                        ].map((color) => ({
+                          variant: variants.find(
+                            (variant) => variant.color === color,
+                          ),
+                          label: color,
+                        }));
+
+                    return mockupRows.map(
+                      ({ variant, label }, variantIndex) => {
+                        const variantId = variant.id;
+                        const template = a.mockupTemplates?.find(
+                          (item) => item.variantId === variantId,
+                        );
+                        return (
+                          <tr key={`${a.id}-${variantId}`}>
+                            <td>
+                              {variantIndex === 0 && editingAreaId === a.id ? (
+                                <input
+                                  value={editingAreaForm.name}
+                                  onChange={(e) =>
+                                    setEditingAreaForm({ name: e.target.value })
+                                  }
+                                  aria-label="Printable area name"
+                                />
+                              ) : variantIndex === 0 ? (
+                                a.name
                               ) : (
-                                <span className="product-form-mockup-status product-form-mockup-status--missing">
-                                  None — using blank canvas
-                                </span>
+                                ""
                               )}
-                              <div className="product-form-file-control">
-                                <label className="product-form-file-picker">
-                                  <span>{template ? "Replace" : "Upload"}</span>
-                                  <input
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp"
-                                    className="product-form-upload-input"
-                                    onChange={(e) =>
-                                      handleMockupUpload(a.id, e, color)
-                                    }
-                                  />
-                                </label>
-                                {!template && (
-                                  <span className="product-form-file-name">
-                                    No file uploaded
+                            </td>
+                            <td>{label}</td>
+                            <td>
+                              <div className="product-form-area-actions">
+                                {template ? (
+                                  <span className="product-form-mockup-status">
+                                    Uploaded ✓
+                                  </span>
+                                ) : (
+                                  <span className="product-form-mockup-status product-form-mockup-status--missing">
+                                    None — using blank canvas
                                   </span>
                                 )}
-                              </div>
-                              {template && (
-                                <button
-                                  type="button"
-                                  className="product-form-upload-btn product-form-upload-btn--small"
-                                  onClick={() =>
-                                    setEditingPerspectiveFor({
-                                      ...a,
-                                      mockupTemplate: template,
-                                      mockupVariantId: variantId,
-                                    })
-                                  }
-                                >
-                                  {template.perspectiveConfig
-                                    ? "Edit print area"
-                                    : "Set print area"}
-                                </button>
-                              )}
-                              {colorIndex === 0 &&
-                                (editingAreaId === a.id ? (
-                                  <>
-                                    <button
-                                      type="button"
-                                      className="product-form-row-action"
-                                      onClick={() => saveArea(a)}
-                                    >
-                                      Save
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="product-form-row-action"
-                                      onClick={() => setEditingAreaId(null)}
-                                    >
-                                      Cancel
-                                    </button>
-                                  </>
-                                ) : (
+                                <div className="product-form-file-control">
+                                  <label className="product-form-file-picker">
+                                    <span>
+                                      {template ? "Replace" : "Upload"}
+                                    </span>
+                                    <input
+                                      type="file"
+                                      accept="image/jpeg,image/png,image/webp"
+                                      className="product-form-upload-input"
+                                      onChange={(e) =>
+                                        handleMockupUpload(a.id, e, variantId)
+                                      }
+                                    />
+                                  </label>
+                                  {!template && (
+                                    <span className="product-form-file-name">
+                                      No file uploaded
+                                    </span>
+                                  )}
+                                </div>
+                                {template && (
                                   <button
                                     type="button"
-                                    className="product-form-row-action"
-                                    onClick={() => startEditArea(a)}
+                                    className="product-form-upload-btn product-form-upload-btn--small"
+                                    onClick={() =>
+                                      setEditingPerspectiveFor({
+                                        ...a,
+                                        mockupTemplate: template,
+                                        mockupVariantId: variantId,
+                                      })
+                                    }
                                   >
-                                    Edit
+                                    {template.perspectiveConfig
+                                      ? "Edit print area"
+                                      : "Set print area"}
                                   </button>
-                                ))}
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    });
+                                )}
+                                {variantIndex === 0 &&
+                                  (editingAreaId === a.id ? (
+                                    <>
+                                      <button
+                                        type="button"
+                                        className="product-form-row-action"
+                                        onClick={() => saveArea(a)}
+                                      >
+                                        Save
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className="product-form-row-action"
+                                        onClick={() => setEditingAreaId(null)}
+                                      >
+                                        Cancel
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      className="product-form-row-action"
+                                      onClick={() => startEditArea(a)}
+                                    >
+                                      Edit
+                                    </button>
+                                  ))}
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      },
+                    );
                   })}
                 </tbody>
               </table>
@@ -693,30 +714,40 @@ function ProductForm() {
                       </td>
                       <td>
                         {editingVariantId === v.id ? (
-                          <select
-                            value={editingVariantForm.size}
-                            onChange={(e) =>
-                              setEditingVariantForm({
-                                ...editingVariantForm,
-                                size: e.target.value,
-                              })
-                            }
-                            aria-label="Variant size"
-                          >
-                            {!sizeOptions.some(
-                              (option) =>
-                                option.value === editingVariantForm.size,
-                            ) && (
-                              <option value={editingVariantForm.size}>
-                                {editingVariantForm.size}
-                              </option>
+                          <div className="product-form-variant-size-editor">
+                            <select
+                              value={editingVariantForm.size}
+                              onChange={(e) =>
+                                setEditingVariantForm({
+                                  ...editingVariantForm,
+                                  size: e.target.value,
+                                })
+                              }
+                              aria-label="Variant size"
+                            >
+                              <option value="">Size</option>
+                              {sizeOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                              <option value={otherSizeValue}>Other</option>
+                            </select>
+                            {editingVariantForm.size === otherSizeValue && (
+                              <input
+                                value={editingVariantForm.customSize}
+                                onChange={(e) =>
+                                  setEditingVariantForm({
+                                    ...editingVariantForm,
+                                    customSize: e.target.value,
+                                  })
+                                }
+                                placeholder="Custom size (e.g. iPhone 15 Pro Max)"
+                                aria-label="Custom variant size"
+                                required
+                              />
                             )}
-                            {sizeOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
+                          </div>
                         ) : (
                           v.size
                         )}
@@ -843,7 +874,17 @@ function ProductForm() {
                   {option.label}
                 </option>
               ))}
+              <option value={otherSizeValue}>Other</option>
             </select>
+            {variantForm.size === otherSizeValue && (
+              <input
+                name="customSize"
+                placeholder="Custom size (e.g. iPhone 15 Pro Max)"
+                value={variantForm.customSize}
+                onChange={handleVariantChange}
+                required
+              />
+            )}
             <input
               name="sku"
               placeholder="SKU"

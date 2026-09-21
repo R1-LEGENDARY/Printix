@@ -1,6 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
 const { validateAndComputeDiscount } = require("./couponController");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 const { createNotification } = require("../services/notifications");
 
 function generateOrderNumber() {
@@ -49,15 +48,23 @@ async function createOrder(req, res) {
     const { shippingAddressId, billingAddressId, couponCode } = req.body;
 
     if (!shippingAddressId || !billingAddressId) {
-      return res.status(400).json({ message: "Shipping and billing address are required." });
+      return res
+        .status(400)
+        .json({ message: "Shipping and billing address are required." });
     }
 
     const [shippingAddress, billingAddress] = await Promise.all([
-      prisma.address.findFirst({ where: { id: BigInt(shippingAddressId), userId } }),
-      prisma.address.findFirst({ where: { id: BigInt(billingAddressId), userId } }),
+      prisma.address.findFirst({
+        where: { id: BigInt(shippingAddressId), userId },
+      }),
+      prisma.address.findFirst({
+        where: { id: BigInt(billingAddressId), userId },
+      }),
     ]);
     if (!shippingAddress || !billingAddress) {
-      return res.status(404).json({ message: "One or both addresses were not found." });
+      return res
+        .status(404)
+        .json({ message: "One or both addresses were not found." });
     }
 
     const cart = await prisma.cart.findFirst({
@@ -66,7 +73,11 @@ async function createOrder(req, res) {
         items: {
           include: {
             variant: { include: { product: true } },
-            design: { include: { snapshots: { orderBy: { createdAt: "desc" }, take: 1 } } },
+            design: {
+              include: {
+                snapshots: { orderBy: { createdAt: "desc" }, take: 1 },
+              },
+            },
           },
         },
       },
@@ -78,18 +89,29 @@ async function createOrder(req, res) {
 
     for (const item of cart.items) {
       if (item.variant.stockQuantity < item.quantity) {
-        return res.status(409).json({ message: `Not enough stock for ${item.variant.product.name}.` });
+        return res
+          .status(409)
+          .json({
+            message: `Not enough stock for ${item.variant.product.name}.`,
+          });
       }
     }
 
-    const subtotal = cart.items.reduce((sum, item) => sum + Number(item.unitPrice) * item.quantity, 0);
+    const subtotal = cart.items.reduce(
+      (sum, item) => sum + Number(item.unitPrice) * item.quantity,
+      0,
+    );
     const shippingTotal = FLAT_SHIPPING;
     const taxTotal = 0;
 
     let discountTotal = 0;
     let appliedCoupon = null;
     if (couponCode) {
-      const { coupon, discountAmount } = await validateAndComputeDiscount(couponCode, userId, subtotal);
+      const { coupon, discountAmount } = await validateAndComputeDiscount(
+        couponCode,
+        userId,
+        subtotal,
+      );
       discountTotal = discountAmount;
       appliedCoupon = coupon;
     }
@@ -137,7 +159,11 @@ async function createOrder(req, res) {
                   designId: item.design.id,
                   printableAreaId,
                   mockupImageUrl: "",
-                  elementsJson: JSON.parse(JSON.stringify(elements, (k, v) => (typeof v === "bigint" ? v.toString() : v))),
+                  elementsJson: JSON.parse(
+                    JSON.stringify(elements, (k, v) =>
+                      typeof v === "bigint" ? v.toString() : v,
+                    ),
+                  ),
                 },
               });
               designSnapshotId = created2.id;
@@ -176,19 +202,30 @@ async function createOrder(req, res) {
 
       for (const item of cart.items) {
         if (item.design) {
-          await tx.design.update({ where: { id: item.design.id }, data: { status: "ordered" } });
+          await tx.design.update({
+            where: { id: item.design.id },
+            data: { status: "ordered" },
+          });
         }
       }
 
       await tx.orderStatusHistory.create({
-        data: { orderId: created.id, status: "pending", note: "Order placed.", changedBy: userId },
+        data: {
+          orderId: created.id,
+          status: "pending",
+          note: "Order placed.",
+          changedBy: userId,
+        },
       });
 
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
 
       return tx.order.findUnique({
         where: { id: created.id },
-        include: { items: { include: { designSnapshot: true } }, shipments: true },
+        include: {
+          items: { include: { designSnapshot: true } },
+          shipments: true,
+        },
       });
     });
 
@@ -201,7 +238,9 @@ async function createOrder(req, res) {
     });
     res.status(201).json(serializeOrder(order));
   } catch (error) {
-    res.status(500).json({ message: "Failed to create order.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to create order.", error: error.message });
   }
 }
 
@@ -209,12 +248,17 @@ async function listMyOrders(req, res) {
   try {
     const orders = await prisma.order.findMany({
       where: { userId: BigInt(req.user.userId) },
-      include: { items: { include: { designSnapshot: true } }, shipments: true },
+      include: {
+        items: { include: { designSnapshot: true } },
+        shipments: true,
+      },
       orderBy: { createdAt: "desc" },
     });
     res.json(orders.map(serializeOrder));
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch orders.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch orders.", error: error.message });
   }
 }
 

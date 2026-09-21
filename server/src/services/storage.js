@@ -4,7 +4,7 @@ const path = require("path");
 const { createClient } = require("@supabase/supabase-js");
 
 const uploadRoot = path.join(__dirname, "../../uploads");
-const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/rest\/v1\/?$/, "");
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const bucket = process.env.SUPABASE_STORAGE_BUCKET || "uploads";
 const supabase =

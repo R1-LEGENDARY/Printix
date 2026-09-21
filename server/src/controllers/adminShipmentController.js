@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 const { createNotification } = require("../services/notifications");
 
 const shipmentMessages = {
@@ -35,7 +34,9 @@ async function upsertShipment(req, res) {
     const adminId = BigInt(req.user.userId);
 
     if (!carrier || !trackingNumber) {
-      return res.status(400).json({ message: "carrier and trackingNumber are required." });
+      return res
+        .status(400)
+        .json({ message: "carrier and trackingNumber are required." });
     }
 
     const order = await prisma.order.findUnique({ where: { id: orderId } });
@@ -49,20 +50,38 @@ async function upsertShipment(req, res) {
       trackingNumber,
       estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null,
     };
-    if (markAs === "shipped" && !existing?.shippedAt) shipmentData.shippedAt = now;
+    if (markAs === "shipped" && !existing?.shippedAt)
+      shipmentData.shippedAt = now;
     if (markAs === "delivered") shipmentData.deliveredAt = now;
 
     const shipment = existing
-      ? await prisma.shipment.update({ where: { id: existing.id }, data: shipmentData })
-      : await prisma.shipment.create({ data: { orderId, ...shipmentData, shippedAt: markAs === "shipped" ? now : null } });
+      ? await prisma.shipment.update({
+          where: { id: existing.id },
+          data: shipmentData,
+        })
+      : await prisma.shipment.create({
+          data: {
+            orderId,
+            ...shipmentData,
+            shippedAt: markAs === "shipped" ? now : null,
+          },
+        });
 
     if (markAs === "shipped" || markAs === "delivered") {
       const newStatus = markAs;
       if (order.status !== newStatus) {
         await prisma.$transaction([
-          prisma.order.update({ where: { id: orderId }, data: { status: newStatus } }),
+          prisma.order.update({
+            where: { id: orderId },
+            data: { status: newStatus },
+          }),
           prisma.orderStatusHistory.create({
-            data: { orderId, status: newStatus, note: `Marked ${newStatus} with tracking ${trackingNumber}.`, changedBy: adminId },
+            data: {
+              orderId,
+              status: newStatus,
+              note: `Marked ${newStatus} with tracking ${trackingNumber}.`,
+              changedBy: adminId,
+            },
           }),
         ]);
         await createNotification(prisma, {
@@ -77,7 +96,9 @@ async function upsertShipment(req, res) {
 
     res.status(201).json(serialize(shipment));
   } catch (error) {
-    res.status(500).json({ message: "Failed to save shipment.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to save shipment.", error: error.message });
   }
 }
 

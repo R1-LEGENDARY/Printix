@@ -3,13 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/useAuth";
 import "./AccountMenu.css";
 
-function AccountMenu() {
-  const { user, logout, previewingAsCustomer, startPreview, exitPreview } = useAuth();
-  const [open, setOpen] = useState(false);
+function AccountMenu({ open, onToggle, onClose }) {
+  const { user, logout, previewingAsCustomer, startPreview, exitPreview } =
+    useAuth();
   const [darkMode, setDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) return savedTheme === "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    return false;
   });
   const menuRef = useRef();
   const navigate = useNavigate();
@@ -17,22 +17,25 @@ function AccountMenu() {
   useEffect(() => {
     function handleOutsideClick(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
-        setOpen(false);
+        onClose();
       }
     }
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, []);
+  }, [onClose]);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", darkMode ? "dark" : "light");
+    document.documentElement.setAttribute(
+      "data-theme",
+      darkMode ? "dark" : "light",
+    );
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
 
   if (!user) return null;
 
   function handleLogout() {
-    setOpen(false);
+    onClose();
     logout();
     navigate("/");
   }
@@ -41,7 +44,7 @@ function AccountMenu() {
     <div className="account-menu" ref={menuRef}>
       <button
         className="account-menu__trigger"
-        onClick={() => setOpen((o) => !o)}
+        onClick={onToggle}
         aria-label="Account menu"
         aria-expanded={open}
       >
@@ -63,7 +66,7 @@ function AccountMenu() {
               className="account-menu__link"
               onClick={() => {
                 startPreview();
-                setOpen(false);
+                onClose();
                 navigate("/");
               }}
             >
@@ -76,7 +79,7 @@ function AccountMenu() {
               className="account-menu__link account-menu__link--exit"
               onClick={() => {
                 exitPreview();
-                setOpen(false);
+                onClose();
                 navigate("/admin");
               }}
             >
@@ -84,7 +87,7 @@ function AccountMenu() {
             </button>
           )}
 
-          <Link to="/profile" className="account-menu__link" onClick={() => setOpen(false)}>
+          <Link to="/profile" className="account-menu__link" onClick={onClose}>
             Profile / Settings
           </Link>
 
@@ -114,7 +117,10 @@ function AccountMenu() {
             </button>
           </div>
 
-          <button className="account-menu__link account-menu__link--logout" onClick={handleLogout}>
+          <button
+            className="account-menu__link account-menu__link--logout"
+            onClick={handleLogout}
+          >
             Logout
           </button>
         </div>

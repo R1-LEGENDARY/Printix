@@ -1,9 +1,8 @@
 const crypto = require("crypto");
-const { PrismaClient } = require("@prisma/client");
 const { createCheckoutSession } = require("../services/paymongo");
 const { createNotification } = require("../services/notifications");
 
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
 function toCentavos(amount) {
   return Math.round(Number(amount) * 100);
@@ -21,7 +20,9 @@ async function createPaymentSession(req, res) {
 
     if (!order) return res.status(404).json({ message: "Order not found." });
     if (order.status !== "pending") {
-      return res.status(409).json({ message: `Order is already ${order.status}.` });
+      return res
+        .status(409)
+        .json({ message: `Order is already ${order.status}.` });
     }
 
     const lineItems = order.items.map((item) => ({
@@ -35,7 +36,10 @@ async function createPaymentSession(req, res) {
       const discountCentavos = toCentavos(order.discountTotal);
       const lastProductItem = lineItems[lineItems.length - 1];
       if (lastProductItem) {
-        lastProductItem.amount = Math.max(0, lastProductItem.amount - discountCentavos);
+        lastProductItem.amount = Math.max(
+          0,
+          lastProductItem.amount - discountCentavos,
+        );
       }
     }
 
@@ -53,7 +57,10 @@ async function createPaymentSession(req, res) {
       lineItems,
       successUrl: `${process.env.CLIENT_URL}/orders/${order.id}?payment=success`,
       cancelUrl: `${process.env.CLIENT_URL}/orders/${order.id}?payment=cancelled`,
-      metadata: { orderId: order.id.toString(), orderNumber: order.orderNumber },
+      metadata: {
+        orderId: order.id.toString(),
+        orderNumber: order.orderNumber,
+      },
     });
 
     await prisma.payment.create({
@@ -68,7 +75,9 @@ async function createPaymentSession(req, res) {
 
     res.status(201).json({ checkoutUrl: session.attributes.checkout_url });
   } catch (error) {
-    res.status(500).json({ message: "Failed to start payment.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to start payment.", error: error.message });
   }
 }
 
@@ -76,7 +85,7 @@ function verifyWebhookSignature(rawBody, signatureHeader, secret) {
   if (!signatureHeader) return false;
 
   const parts = Object.fromEntries(
-    signatureHeader.split(",").map((p) => p.split("="))
+    signatureHeader.split(",").map((p) => p.split("=")),
   );
   const timestamp = parts.t;
   const testSig = parts.te;
@@ -85,10 +94,16 @@ function verifyWebhookSignature(rawBody, signatureHeader, secret) {
   if (!timestamp || !signature) return false;
 
   const signedPayload = `${timestamp}.${rawBody}`;
-  const expected = crypto.createHmac("sha256", secret).update(signedPayload).digest("hex");
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(signedPayload)
+    .digest("hex");
 
   try {
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature));
+    return crypto.timingSafeEqual(
+      Buffer.from(expected),
+      Buffer.from(signature),
+    );
   } catch {
     return false;
   }
@@ -99,7 +114,11 @@ async function handleWebhook(req, res) {
     const signature = req.headers["paymongo-signature"];
     const rawBody = req.body.toString("utf8");
 
-    const valid = verifyWebhookSignature(rawBody, signature, process.env.PAYMONGO_WEBHOOK_SECRET);
+    const valid = verifyWebhookSignature(
+      rawBody,
+      signature,
+      process.env.PAYMONGO_WEBHOOK_SECRET,
+    );
     if (!valid) {
       return res.status(401).json({ message: "Invalid webhook signature." });
     }
@@ -117,7 +136,9 @@ async function handleWebhook(req, res) {
       if (!orderId) return res.status(200).json({ received: true });
 
       await prisma.$transaction(async (tx) => {
-        const order = await tx.order.findUnique({ where: { id: BigInt(orderId) } });
+        const order = await tx.order.findUnique({
+          where: { id: BigInt(orderId) },
+        });
         const payment = await tx.payment.findFirst({
           where: { orderId: BigInt(orderId), transactionRef: sessionId },
         });
@@ -137,9 +158,16 @@ async function handleWebhook(req, res) {
         }
 
         if (order && order.status === "pending") {
-          await tx.order.update({ where: { id: order.id }, data: { status: "paid" } });
+          await tx.order.update({
+            where: { id: order.id },
+            data: { status: "paid" },
+          });
           await tx.orderStatusHistory.create({
-            data: { orderId: order.id, status: "paid", note: "Payment confirmed via PayMongo webhook." },
+            data: {
+              orderId: order.id,
+              status: "paid",
+              note: "Payment confirmed via PayMongo webhook.",
+            },
           });
         }
       });
@@ -178,7 +206,9 @@ async function getPaymentStatus(req, res) {
 
     res.json({ status: order.status });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch status.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch status.", error: error.message });
   }
 }
 

@@ -92,7 +92,7 @@
 .wishlist-card__image img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .wishlist-card h3 {
@@ -123,7 +123,7 @@
 }
 
 .wishlist-card__remove:hover {
-  color: #C0392B;
+  color: #c0392b;
 }
 
 @media (max-width: 400px) {

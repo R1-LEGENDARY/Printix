@@ -63,7 +63,11 @@
   color: var(--color-ink-soft);
   cursor: pointer;
   font-size: 0.8125rem;
-  transition: border-color var(--transition), background var(--transition), color var(--transition), transform var(--transition);
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    color var(--transition),
+    transform var(--transition);
 }
 
 .designer__area-tab {
@@ -177,18 +181,34 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background-color: #e8e2d8;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.3) 1px, transparent 1px);
   background-size: 24px 24px;
   box-shadow: inset 0 0 0 8px rgba(251, 250, 247, 0.32);
 }
 
 .designer__canvas-wrap canvas {
   display: block;
+}
+
+.designer__stage-frame {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center;
+}
+
+.designer__stage-frame > .konvajs-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.designer__stage-frame canvas {
   width: auto;
   height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
 }
 
 .designer__canvas-label {
@@ -394,7 +414,7 @@
 }
 
 .designer-status--error {
-  color: #C0392B;
+  color: #c0392b;
 }
 
 @media (max-width: 900px) {
@@ -485,7 +505,6 @@
     display: flex;
   }
 }
-
 
 @media (max-width: 560px) {
   .designer {

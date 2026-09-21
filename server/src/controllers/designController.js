@@ -1,6 +1,5 @@
-const { PrismaClient } = require("@prisma/client");
 const { storeBuffer } = require("../services/storage");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
 function serializeDesign(design) {
   return {

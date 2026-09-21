@@ -1,5 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 
 async function resolveCart(req) {
   const userId = req.user?.userId ? BigInt(req.user.userId) : null;
@@ -14,7 +13,9 @@ async function resolveCart(req) {
   }
 
   if (guestCartId) {
-    const cart = await prisma.cart.findUnique({ where: { id: BigInt(guestCartId) } });
+    const cart = await prisma.cart.findUnique({
+      where: { id: BigInt(guestCartId) },
+    });
     if (cart) return cart;
   }
 
@@ -58,7 +59,9 @@ const cartInclude = {
     include: {
       variant: {
         include: {
-          product: { include: { images: { where: { isPrimary: true }, take: 1 } } },
+          product: {
+            include: { images: { where: { isPrimary: true }, take: 1 } },
+          },
         },
       },
       design: {
@@ -71,10 +74,15 @@ const cartInclude = {
 async function getCart(req, res) {
   try {
     const cart = await resolveCart(req);
-    const full = await prisma.cart.findUnique({ where: { id: cart.id }, include: cartInclude });
+    const full = await prisma.cart.findUnique({
+      where: { id: cart.id },
+      include: cartInclude,
+    });
     res.json(serializeCart(full));
   } catch (error) {
-    res.status(500).json({ message: "Failed to load cart.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to load cart.", error: error.message });
   }
 }
 
@@ -85,14 +93,20 @@ async function addItem(req, res) {
       return res.status(400).json({ message: "productVariantId is required." });
     }
 
-    const variant = await prisma.productVariant.findUnique({ where: { id: BigInt(productVariantId) } });
-    if (!variant) return res.status(404).json({ message: "Variant not found." });
+    const variant = await prisma.productVariant.findUnique({
+      where: { id: BigInt(productVariantId) },
+    });
+    if (!variant)
+      return res.status(404).json({ message: "Variant not found." });
     if (variant.stockQuantity < quantity) {
       return res.status(409).json({ message: "Not enough stock available." });
     }
 
     const cart = await resolveCart(req);
-    const unitPrice = variant.priceOverride ?? (await prisma.product.findUnique({ where: { id: variant.productId } })).basePrice;
+    const unitPrice =
+      variant.priceOverride ??
+      (await prisma.product.findUnique({ where: { id: variant.productId } }))
+        .basePrice;
 
     const existing = await prisma.cartItem.findFirst({
       where: {
@@ -119,10 +133,15 @@ async function addItem(req, res) {
       });
     }
 
-    const full = await prisma.cart.findUnique({ where: { id: cart.id }, include: cartInclude });
+    const full = await prisma.cart.findUnique({
+      where: { id: cart.id },
+      include: cartInclude,
+    });
     res.status(201).json(serializeCart(full));
   } catch (error) {
-    res.status(500).json({ message: "Failed to add item.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to add item.", error: error.message });
   }
 }
 
@@ -144,27 +163,42 @@ async function updateItem(req, res) {
       return res.status(409).json({ message: "Not enough stock available." });
     }
 
-    await prisma.cartItem.update({ where: { id: item.id }, data: { quantity } });
+    await prisma.cartItem.update({
+      where: { id: item.id },
+      data: { quantity },
+    });
 
-    const full = await prisma.cart.findUnique({ where: { id: item.cartId }, include: cartInclude });
+    const full = await prisma.cart.findUnique({
+      where: { id: item.cartId },
+      include: cartInclude,
+    });
     res.json(serializeCart(full));
   } catch (error) {
-    res.status(500).json({ message: "Failed to update item.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to update item.", error: error.message });
   }
 }
 
 async function removeItem(req, res) {
   try {
     const { itemId } = req.params;
-    const item = await prisma.cartItem.findUnique({ where: { id: BigInt(itemId) } });
+    const item = await prisma.cartItem.findUnique({
+      where: { id: BigInt(itemId) },
+    });
     if (!item) return res.status(404).json({ message: "Cart item not found." });
 
     await prisma.cartItem.delete({ where: { id: item.id } });
 
-    const full = await prisma.cart.findUnique({ where: { id: item.cartId }, include: cartInclude });
+    const full = await prisma.cart.findUnique({
+      where: { id: item.cartId },
+      include: cartInclude,
+    });
     res.json(serializeCart(full));
   } catch (error) {
-    res.status(500).json({ message: "Failed to remove item.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to remove item.", error: error.message });
   }
 }
 

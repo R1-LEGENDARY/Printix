@@ -1,8 +1,14 @@
-const { PrismaClient } = require("@prisma/client");
-const prisma = new PrismaClient();
+const prisma = require("../db");
 const { createNotification } = require("../services/notifications");
 
-const statusFlow = ["pending", "paid", "processing", "printing", "shipped", "delivered"];
+const statusFlow = [
+  "pending",
+  "paid",
+  "processing",
+  "printing",
+  "shipped",
+  "delivered",
+];
 
 const statusMessages = {
   pending: "is awaiting payment",
@@ -40,7 +46,11 @@ function serializeOrder(o) {
     taxTotal: o.taxTotal,
     grandTotal: o.grandTotal,
     placedAt: o.placedAt,
-    customer: { id: o.user.id.toString(), name: o.user.name, email: o.user.email },
+    customer: {
+      id: o.user.id.toString(),
+      name: o.user.name,
+      email: o.user.email,
+    },
     shippingAddress: serializeAddress(o.shippingAddress),
     billingAddress: serializeAddress(o.billingAddress),
     payments: o.payments.map((p) => ({
@@ -95,17 +105,24 @@ async function listOrders(req, res) {
     });
     res.json(orders.map(serializeOrder));
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch orders.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch orders.", error: error.message });
   }
 }
 
 async function getOrder(req, res) {
   try {
-    const order = await prisma.order.findUnique({ where: { id: BigInt(req.params.id) }, include });
+    const order = await prisma.order.findUnique({
+      where: { id: BigInt(req.params.id) },
+      include,
+    });
     if (!order) return res.status(404).json({ message: "Order not found." });
     res.json(serializeOrder(order));
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch order.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch order.", error: error.message });
   }
 }
 
@@ -131,7 +148,10 @@ async function updateOrderStatus(req, res) {
       return result;
     });
 
-    const full = await prisma.order.findUnique({ where: { id: updated.id }, include });
+    const full = await prisma.order.findUnique({
+      where: { id: updated.id },
+      include,
+    });
     await createNotification(prisma, {
       userId: order.userId,
       type: `order_${status}`,
@@ -141,7 +161,12 @@ async function updateOrderStatus(req, res) {
     });
     res.json(serializeOrder(full));
   } catch (error) {
-    res.status(500).json({ message: "Failed to update order status.", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Failed to update order status.",
+        error: error.message,
+      });
   }
 }
 
