@@ -1,4 +1,5 @@
 const { PrismaClient } = require("@prisma/client");
+const { storeBuffer } = require("../services/storage");
 const prisma = new PrismaClient();
 
 function serializeDesign(design) {
@@ -19,7 +20,10 @@ function serializeDesign(design) {
       height: el.height,
       rotation: el.rotation,
       image: el.image
-        ? { fileUrl: el.image.fileUrl, originalFilename: el.image.originalFilename }
+        ? {
+            fileUrl: el.image.fileUrl,
+            originalFilename: el.image.originalFilename,
+          }
         : null,
       text: el.text
         ? {
@@ -44,7 +48,8 @@ const designInclude = {
 async function createDesign(req, res) {
   try {
     const { productId, fresh } = req.body;
-    if (!productId) return res.status(400).json({ message: "productId is required." });
+    if (!productId)
+      return res.status(400).json({ message: "productId is required." });
 
     const userId = BigInt(req.user.userId);
     const productIdBig = BigInt(productId);
@@ -58,14 +63,21 @@ async function createDesign(req, res) {
 
     if (!design) {
       design = await prisma.design.create({
-        data: { userId, productId: productIdBig, name: "Untitled design", status: "draft" },
+        data: {
+          userId,
+          productId: productIdBig,
+          name: "Untitled design",
+          status: "draft",
+        },
         include: designInclude,
       });
     }
 
     res.status(201).json(serializeDesign(design));
   } catch (error) {
-    res.status(500).json({ message: "Failed to create design.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to create design.", error: error.message });
   }
 }
 
@@ -79,12 +91,16 @@ async function getDesign(req, res) {
 
     if (!design) return res.status(404).json({ message: "Design not found." });
     if (design.userId.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Not authorized to view this design." });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to view this design." });
     }
 
     res.json(serializeDesign(design));
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch design.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch design.", error: error.message });
   }
 }
 
@@ -93,10 +109,14 @@ async function saveDesign(req, res) {
     const { id } = req.params;
     const { name, elements, mockupImageDataUrl, printableAreaId } = req.body;
 
-    const design = await prisma.design.findUnique({ where: { id: BigInt(id) } });
+    const design = await prisma.design.findUnique({
+      where: { id: BigInt(id) },
+    });
     if (!design) return res.status(404).json({ message: "Design not found." });
     if (design.userId.toString() !== req.user.userId) {
-      return res.status(403).json({ message: "Not authorized to edit this design." });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to edit this design." });
     }
 
     await prisma.$transaction(async (tx) => {
@@ -104,13 +124,17 @@ async function saveDesign(req, res) {
         await tx.design.update({ where: { id: design.id }, data: { name } });
       }
 
-      const existing = await tx.designElement.findMany({ where: { designId: design.id } });
+      const existing = await tx.designElement.findMany({
+        where: { designId: design.id },
+      });
       const existingIds = existing.map((e) => e.id.toString());
       const incomingIds = elements.filter((e) => e.id).map((e) => e.id);
 
       const toDelete = existingIds.filter((id) => !incomingIds.includes(id));
       if (toDelete.length > 0) {
-        await tx.designElement.deleteMany({ where: { id: { in: toDelete.map(BigInt) } } });
+        await tx.designElement.deleteMany({
+          where: { id: { in: toDelete.map(BigInt) } },
+        });
       }
 
       for (const el of elements) {
@@ -150,8 +174,21 @@ async function saveDesign(req, res) {
         if (el.type === "image" && el.image) {
           await tx.designElementImage.upsert({
             where: { designElementId: elementId },
-            update: { fileUrl: el.image.fileUrl, originalFilename: el.image.originalFilename || "", mimeType: el.image.mimeType || "image/png", widthPx: el.image.widthPx || 0, heightPx: el.image.heightPx || 0 },
-            create: { designElementId: elementId, fileUrl: el.image.fileUrl, originalFilename: el.image.originalFilename || "", mimeType: el.image.mimeType || "image/png", widthPx: el.image.widthPx || 0, heightPx: el.image.heightPx || 0 },
+            update: {
+              fileUrl: el.image.fileUrl,
+              originalFilename: el.image.originalFilename || "",
+              mimeType: el.image.mimeType || "image/png",
+              widthPx: el.image.widthPx || 0,
+              heightPx: el.image.heightPx || 0,
+            },
+            create: {
+              designElementId: elementId,
+              fileUrl: el.image.fileUrl,
+              originalFilename: el.image.originalFilename || "",
+              mimeType: el.image.mimeType || "image/png",
+              widthPx: el.image.widthPx || 0,
+              heightPx: el.image.heightPx || 0,
+            },
           });
         }
 
@@ -166,31 +203,38 @@ async function saveDesign(req, res) {
     });
 
     if (mockupImageDataUrl && printableAreaId) {
-      const fs = require("fs");
-      const path = require("path");
       const base64 = mockupImageDataUrl.replace(/^data:image\/png;base64,/, "");
       const filename = `design-${design.id}-${Date.now()}.png`;
-      const designDir = path.join(__dirname, "../../uploads/generated-mockups");
-      if (!fs.existsSync(designDir)) fs.mkdirSync(designDir, { recursive: true });
-      const filepath = path.join(designDir, filename);
-      fs.writeFileSync(filepath, Buffer.from(base64, "base64"));
+      const mockupImageUrl = await storeBuffer(
+        Buffer.from(base64, "base64"),
+        "generated-mockups",
+        filename,
+        "image/png",
+      );
 
       await prisma.designSnapshot.create({
         data: {
           designId: design.id,
           printableAreaId: BigInt(printableAreaId),
-          mockupImageUrl: `/uploads/generated-mockups/${filename}`,
+          mockupImageUrl,
           elementsJson: JSON.parse(
-            JSON.stringify(elements, (k, v) => (typeof v === "bigint" ? v.toString() : v))
+            JSON.stringify(elements, (k, v) =>
+              typeof v === "bigint" ? v.toString() : v,
+            ),
           ),
         },
       });
     }
 
-    const updated = await prisma.design.findUnique({ where: { id: design.id }, include: designInclude });
+    const updated = await prisma.design.findUnique({
+      where: { id: design.id },
+      include: designInclude,
+    });
     res.json(serializeDesign(updated));
   } catch (error) {
-    res.status(500).json({ message: "Failed to save design.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to save design.", error: error.message });
   }
 }
 

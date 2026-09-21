@@ -136,6 +136,39 @@ VITE_GOOGLE_CLIENT_ID=
 
 Restart Vite after changing environment variables.
 
+## Free Portfolio Deployment
+
+The recommended deployment is Vercel for the client, Render for the Express API, and Supabase for PostgreSQL and file storage.
+
+### Supabase
+
+1. Create a Supabase project and copy its PostgreSQL connection string into `DATABASE_URL`.
+2. In Storage, create a bucket named `uploads` and make it public.
+3. Copy the project URL and service role key into `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`.
+
+### Render API
+
+Create a Render Web Service with `server` as the root directory:
+
+```text
+Build command: npm install && npx prisma generate && npx prisma migrate deploy
+Start command: npm start
+```
+
+Add the variables from `server/.env.example`, setting `CLIENT_URL` to the deployed Vercel URL. The free Render service may sleep after inactivity, so the first request can be slow.
+
+### Vercel client
+
+Create a Vercel project with `client` as the root directory. Use `npm run build` as the build command and add the variables from `client/.env.example`. The included `client/vercel.json` keeps React Router URLs working after a page refresh.
+
+After deployment, configure Google OAuth with the Vercel URL and set the PayMongo webhook to:
+
+```text
+https://your-api.onrender.com/api/payments/webhook
+```
+
+The API uses Supabase Storage in production for designs, product images, mockups, displacement maps, and generated mockups. Without Supabase Storage variables, local development falls back to `server/uploads`.
+
 ## Admin Access
 
 The application requires a user with the `admin` role to access `/admin` routes.
