@@ -502,15 +502,23 @@ async function savePerspectiveConfig(req, res) {
     const variantId = req.body.variantId ? BigInt(req.body.variantId) : null;
     if (!variantId)
       return res.status(400).json({ message: "Select a product color first." });
-    const { points } = req.body;
+    const { points, holes = [] } = req.body;
 
     const valid =
       Array.isArray(points) &&
       points.length >= 3 &&
       points.every((p) => typeof p.x === "number" && typeof p.y === "number");
-    if (!valid) {
+    const validHoles =
+      Array.isArray(holes) &&
+      holes.every(
+        (hole) =>
+          Array.isArray(hole) &&
+          hole.length >= 3 &&
+          hole.every((p) => typeof p.x === "number" && typeof p.y === "number"),
+      );
+    if (!valid || !validHoles) {
       return res.status(400).json({
-        message: "points must be an array of at least 3 {x, y} coordinates.",
+        message: "points and holes must contain valid {x, y} coordinates.",
       });
     }
 
@@ -524,7 +532,7 @@ async function savePerspectiveConfig(req, res) {
 
     const updated = await prisma.productMockupTemplate.update({
       where: { id: template.id },
-      data: { perspectiveConfig: { points } },
+      data: { perspectiveConfig: { points, holes } },
     });
 
     res.json({

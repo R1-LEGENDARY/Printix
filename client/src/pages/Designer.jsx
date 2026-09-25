@@ -519,6 +519,7 @@ function Designer() {
     const designSource = applyFabricLighting(displacedDesign, mockupImg);
 
     const points = mockup.perspectiveConfig?.points;
+    const holes = mockup.perspectiveConfig?.holes || [];
     if (points && points.length >= 3) {
       finalCtx.save();
       finalCtx.beginPath();
@@ -526,7 +527,15 @@ function Designer() {
       for (let i = 1; i < points.length; i++)
         finalCtx.lineTo(points[i].x, points[i].y);
       finalCtx.closePath();
-      finalCtx.clip();
+      holes.forEach((hole) => {
+        if (hole.length < 3) return;
+        finalCtx.moveTo(hole[0].x, hole[0].y);
+        for (let i = 1; i < hole.length; i++) {
+          finalCtx.lineTo(hole[i].x, hole[i].y);
+        }
+        finalCtx.closePath();
+      });
+      finalCtx.clip("evenodd");
       finalCtx.drawImage(designSource, 0, 0);
       finalCtx.restore();
     } else {

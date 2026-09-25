@@ -240,7 +240,7 @@ function ProductForm() {
     }
   }
 
-  async function handleSavePerspective(points) {
+  async function handleSavePerspective(points, holes) {
     setError(null);
     try {
       const areaId = editingPerspectiveFor.id;
@@ -248,6 +248,7 @@ function ProductForm() {
       const { perspectiveConfig } = await savePerspectiveConfig(
         areaId,
         points,
+        holes,
         variantId,
       );
       setPrintableAreas((prev) =>
@@ -910,6 +911,9 @@ function ProductForm() {
           imageUrl={mediaUrl(editingPerspectiveFor.mockupTemplate.baseImageUrl)}
           initialPoints={
             editingPerspectiveFor.mockupTemplate.perspectiveConfig?.points
+          }
+          initialHoles={
+            editingPerspectiveFor.mockupTemplate.perspectiveConfig?.holes
           }
           onSave={handleSavePerspective}
           onCancel={() => setEditingPerspectiveFor(null)}

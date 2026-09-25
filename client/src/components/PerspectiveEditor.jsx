@@ -5,12 +5,21 @@ import "./PerspectiveEditor.css";
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = Infinity;
 
-function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
+function PerspectiveEditor({
+  imageUrl,
+  initialPoints,
+  initialHoles,
+  onSave,
+  onCancel,
+}) {
   const imgRef = useRef();
   const scrollRef = useRef();
   const panState = useRef(null);
 
   const [points, setPoints] = useState(initialPoints || []);
+  const [holes, setHoles] = useState(initialHoles || []);
+  const [drawingHole, setDrawingHole] = useState(false);
+  const [holePoints, setHolePoints] = useState([]);
   const [finished, setFinished] = useState((initialPoints || []).length >= 3);
   const [zoom, setZoom] = useState(1);
   const [baseScale, setBaseScale] = useState(1);
@@ -42,13 +51,21 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
   }, []);
 
   function handleClick(e) {
-    if (finished || !imgRef.current) return;
+    if ((!drawingHole && finished) || !imgRef.current) return;
 
     const rect = imgRef.current.getBoundingClientRect();
     const scaleX = imgRef.current.naturalWidth / rect.width;
     const scaleY = imgRef.current.naturalHeight / rect.height;
 
-    setPoints([...points, { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY }]);
+    const point = {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
+    };
+    if (drawingHole) {
+      setHolePoints([...holePoints, point]);
+    } else {
+      setPoints([...points, point]);
+    }
   }
 
   function handleContextMenu(e) {
@@ -56,7 +73,7 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
   }
 
   function handleMouseDown(e) {
-    if (e.button !== 2) return; 
+    if (e.button !== 2) return;
     panState.current = {
       startX: e.clientX,
       startY: e.clientY,
@@ -84,12 +101,26 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
 
   function handleReset() {
     setPoints([]);
+    setHoles([]);
+    setHolePoints([]);
+    setDrawingHole(false);
     setFinished(false);
   }
 
   function handleUndo() {
+    if (drawingHole) {
+      setHolePoints(holePoints.slice(0, -1));
+      return;
+    }
     setPoints(points.slice(0, -1));
     setFinished(false);
+  }
+
+  function finishHole() {
+    if (holePoints.length < 3) return;
+    setHoles([...holes, holePoints]);
+    setHolePoints([]);
+    setDrawingHole(false);
   }
 
   function toPercent(p) {
@@ -102,9 +133,11 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
     <div className="pe-overlay">
       <div className="pe-panel">
         <p className="pe-instructions">
-          {finished
-            ? "Shape complete — Save, or Reset to redraw."
-            : `Click points around the printable area (avoid collar, sleeves, seams). ${points.length} point${points.length === 1 ? "" : "s"} placed — need at least 3.`}
+          {drawingHole
+            ? `Click around the non-printable area. ${holePoints.length} point${holePoints.length === 1 ? "" : "s"} placed — need at least 3.`
+            : finished
+              ? "Shape complete — add exclusions, save, or reset."
+              : `Click points around the printable area (avoid collar, sleeves, seams). ${points.length} point${points.length === 1 ? "" : "s"} placed — need at least 3.`}
         </p>
 
         <div
@@ -115,40 +148,126 @@ function PerspectiveEditor({ imageUrl, initialPoints, onSave, onCancel }) {
         >
           <div
             className="pe-image-wrap"
-            style={imageSize ? { width: imageSize.width * baseScale * zoom } : undefined}
+            style={
+              imageSize
+                ? { width: imageSize.width * baseScale * zoom }
+                : undefined
+            }
           >
-            <img ref={imgRef} src={imageUrl} alt="Mockup" onClick={handleClick} onLoad={handleImageLoad} draggable={false} />
-            <svg className="pe-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <img
+              ref={imgRef}
+              src={imageUrl}
+              alt="Mockup"
+              onClick={handleClick}
+              onLoad={handleImageLoad}
+              draggable={false}
+            />
+            <svg
+              className="pe-svg"
+              viewBox="0 0 100 100"
+              preserveAspectRatio="none"
+            >
               {points.length > 1 && (
                 <polyline
                   points={(finished ? [...points, points[0]] : points)
-                    .map((p) => { const pc = toPercent(p); return `${pc.x},${pc.y}`; })
+                    .map((p) => {
+                      const pc = toPercent(p);
+                      return `${pc.x},${pc.y}`;
+                    })
                     .join(" ")}
                   fill={finished ? "rgba(61,63,224,0.15)" : "none"}
                   stroke="#3D3FE0"
                   strokeWidth="0.4"
                 />
               )}
+              {holes.map((hole, index) => (
+                <polyline
+                  key={`hole-${index}`}
+                  points={[...hole, hole[0]]
+                    .map((p) => {
+                      const pc = toPercent(p);
+                      return `${pc.x},${pc.y}`;
+                    })
+                    .join(" ")}
+                  fill="rgba(220,60,60,0.2)"
+                  stroke="#c0392b"
+                  strokeWidth="0.4"
+                />
+              ))}
+              {holePoints.length > 1 && (
+                <polyline
+                  points={holePoints
+                    .map((p) => {
+                      const pc = toPercent(p);
+                      return `${pc.x},${pc.y}`;
+                    })
+                    .join(" ")}
+                  fill="none"
+                  stroke="#c0392b"
+                  strokeWidth="0.4"
+                />
+              )}
             </svg>
-            {points.map((p, i) => {
+            {[...points, ...holes.flat(), ...holePoints].map((p, i) => {
               const pc = toPercent(p);
-              return <div key={i} className="pe-dot" style={{ left: `${pc.x}%`, top: `${pc.y}%` }} />;
+              return (
+                <div
+                  key={i}
+                  className="pe-dot"
+                  style={{ left: `${pc.x}%`, top: `${pc.y}%` }}
+                />
+              );
             })}
           </div>
         </div>
 
-        <div className="pe-hint">Scroll to zoom · Right-click and drag to pan · Left-click to place points</div>
+        <div className="pe-hint">
+          Scroll to zoom · Right-click and drag to pan · Left-click to place
+          points
+        </div>
 
         <div className="pe-actions">
-          <Button variant="secondary" onClick={handleUndo} disabled={points.length === 0}>Undo point</Button>
-          <Button variant="secondary" onClick={handleReset}>Reset</Button>
+          <Button
+            variant="secondary"
+            onClick={handleUndo}
+            disabled={
+              drawingHole ? holePoints.length === 0 : points.length === 0
+            }
+          >
+            Undo point
+          </Button>
+          <Button variant="secondary" onClick={handleReset}>
+            Reset
+          </Button>
           {!finished ? (
-            <Button variant="secondary" disabled={points.length < 3} onClick={() => setFinished(true)}>
+            <Button
+              variant="secondary"
+              disabled={points.length < 3}
+              onClick={() => setFinished(true)}
+            >
               Finish shape
             </Button>
-          ) : null}
-          <Button variant="secondary" onClick={onCancel}>Cancel</Button>
-          <Button variant="primary" disabled={!finished} onClick={() => onSave(points)}>
+          ) : drawingHole ? (
+            <Button
+              variant="secondary"
+              disabled={holePoints.length < 3}
+              onClick={finishHole}
+            >
+              Finish cutout
+            </Button>
+          ) : (
+            <Button variant="secondary" onClick={() => setDrawingHole(true)}>
+              Add exclusion
+            </Button>
+          )}
+          <Button variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!finished || drawingHole}
+            onClick={() => onSave(points, holes)}
+          >
             Save area
           </Button>
         </div>
