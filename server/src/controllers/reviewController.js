@@ -7,6 +7,20 @@ const prisma = require("../db");
  *
  * Author: JC
  */
+function maskReviewerName(name) {
+  return String(name || "Anonymous")
+    .trim()
+    .split(/\s+/)
+    .map((part, index) => {
+      const characters = Array.from(part);
+      if (index === 0) return part;
+      return characters.length > 1
+        ? `${characters[0]}${"*".repeat(Math.max(characters.length - 1, 5))}`
+        : characters[0] || "*";
+    })
+    .join(" ");
+}
+
 function serializeReview(r) {
   return {
     id: r.id.toString(),
@@ -14,7 +28,7 @@ function serializeReview(r) {
     comment: r.comment,
     isApproved: r.isApproved,
     createdAt: r.createdAt,
-    reviewerName: r.user.name,
+    reviewerName: maskReviewerName(r.user.name),
     verifiedPurchase: !!r.orderItemId,
     images: r.images.map((img) => ({
       id: img.id.toString(),
@@ -163,12 +177,10 @@ async function getReviewableOrderItems(req, res) {
       })),
     );
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Failed to fetch reviewable items.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to fetch reviewable items.",
+      error: error.message,
+    });
   }
 }
 

@@ -497,8 +497,8 @@
 
   .designer__sidebar {
     display: flex;
-    width: min(88%, 390px);
-    margin-left: auto;
+    width: 100%;
+    margin-left: 0;
   }
 
   .designer__actions {
@@ -543,7 +543,7 @@
   }
 
   .designer__sidebar {
-    width: min(88%, 360px);
+    width: 100%;
     padding: var(--space-2);
   }
 

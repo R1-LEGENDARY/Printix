@@ -47,7 +47,7 @@ function Home() {
             </div>
           ) : (
             <div className="home__fallback-art">
-              <span>YOUR<br />IDEA<br />HERE</span>
+              <span>MADE TO<br />BE<br />YOURS</span>
             </div>
           )}
           <span className="home__showcase-note">Made for the things you do often.</span>

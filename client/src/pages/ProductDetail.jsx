@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../api/axios";
 import Button from "../components/Button";
@@ -11,6 +11,7 @@ import { useCart } from "../context/useCart";
 import { useAuth } from "../context/useAuth";
 
 function ProductDetail() {
+  const gallerySwipeStart = useRef(null);
   const { slug } = useParams();
   const { add } = useCart();
   const { user } = useAuth();
@@ -113,6 +114,26 @@ function ProductDetail() {
     setSelectedImageId(product.images[nextIndex].id);
   }
 
+  function handleGalleryPointerDown(event) {
+    if (event.pointerType === "mouse" || event.target.closest("button")) return;
+    gallerySwipeStart.current = { x: event.clientX, y: event.clientY };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function handleGalleryPointerUp(event) {
+    const start = gallerySwipeStart.current;
+    gallerySwipeStart.current = null;
+    if (!start) return;
+
+    const deltaX = event.clientX - start.x;
+    const deltaY = event.clientY - start.y;
+    if (Math.abs(deltaX) < 40 || Math.abs(deltaX) < Math.abs(deltaY) * 1.2) {
+      return;
+    }
+
+    selectAdjacentImage(deltaX < 0 ? 1 : -1);
+  }
+
   return (
     <div className="product-detail">
       <Seo
@@ -124,7 +145,14 @@ function ProductDetail() {
         image={mediaUrl(activeImage?.imageUrl)}
         path={`/products/${product.slug}`}
       />
-      <div className="product-detail__gallery">
+      <div
+        className="product-detail__gallery"
+        onPointerDown={handleGalleryPointerDown}
+        onPointerUp={handleGalleryPointerUp}
+        onPointerCancel={() => {
+          gallerySwipeStart.current = null;
+        }}
+      >
         {activeImage ? (
           <>
             <img src={mediaUrl(activeImage.imageUrl)} alt={product.name} />

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import "./NotificationBell.css";
@@ -28,6 +28,8 @@ function NotificationBell({ open, onToggle, onClose }) {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [actionError, setActionError] = useState(null);
+  const pendingReadMutations = useRef(0);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -63,6 +65,7 @@ function NotificationBell({ open, onToggle, onClose }) {
         const response = await api.get("/notifications", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (pendingReadMutations.current > 0) return;
         setNotifications(response.data.notifications);
         setUnreadCount(response.data.unreadCount);
       } catch {
@@ -76,21 +79,35 @@ function NotificationBell({ open, onToggle, onClose }) {
   }, []);
 
   async function markRead(notification) {
+    setActionError(null);
     if (!notification.readAt) {
       const token = localStorage.getItem("token");
-      await api.patch(
-        `/notifications/${notification.id}/read`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const readAt = new Date().toISOString();
       setNotifications((current) =>
         current.map((item) =>
-          item.id === notification.id
-            ? { ...item, readAt: new Date().toISOString() }
-            : item,
+          item.id === notification.id ? { ...item, readAt } : item,
         ),
       );
       setUnreadCount((count) => Math.max(0, count - 1));
+      pendingReadMutations.current += 1;
+      try {
+        await api.patch(
+          `/notifications/${notification.id}/read`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+      } catch {
+        setNotifications((current) =>
+          current.map((item) =>
+            item.id === notification.id ? { ...item, readAt: null } : item,
+          ),
+        );
+        setUnreadCount((count) => count + 1);
+        setActionError("Couldn't mark this notification as read. Try again.");
+        return;
+      } finally {
+        pendingReadMutations.current -= 1;
+      }
     }
     if (notification.relatedType === "order" && notification.relatedId) {
       onClose();
@@ -100,22 +117,38 @@ function NotificationBell({ open, onToggle, onClose }) {
 
   async function markAllRead() {
     const token = localStorage.getItem("token");
-    await api.patch(
-      "/notifications/read-all",
-      {},
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+    const previousNotifications = notifications;
+    const previousUnreadCount = unreadCount;
+    const readAt = new Date().toISOString();
     setNotifications((current) =>
       current.map((item) => ({
         ...item,
-        readAt: item.readAt || new Date().toISOString(),
+        readAt: item.readAt || readAt,
       })),
     );
     setUnreadCount(0);
+    setActionError(null);
+    pendingReadMutations.current += 1;
+    try {
+      await api.patch(
+        "/notifications/read-all",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+    } catch {
+      setNotifications(previousNotifications);
+      setUnreadCount(previousUnreadCount);
+      setActionError("Couldn't mark notifications as read. Try again.");
+    } finally {
+      pendingReadMutations.current -= 1;
+    }
   }
 
   return (
-    <div className="notification-bell">
+    <div
+      className="notification-bell"
+      onMouseDown={(event) => event.stopPropagation()}
+    >
       <button
         type="button"
         className="notification-bell__button"
@@ -142,6 +175,11 @@ function NotificationBell({ open, onToggle, onClose }) {
               </button>
             )}
           </div>
+          {actionError && (
+            <p className="notification-bell__error" role="alert">
+              {actionError}
+            </p>
+          )}
           {notifications.length === 0 ? (
             <p className="notification-bell__empty">No notifications yet.</p>
           ) : (
